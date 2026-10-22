@@ -1,0 +1,2254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>K-Talk Coach 🇰🇷 | Speak Korean with K-Drama & K-Pop</title>
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#e11d48">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="K-Talk">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/323/323324.png">
+
+    <!-- Tailwind CSS & FontAwesome -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Confetti & Web Audio Effects -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        body { -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-rose-500 selection:text-white">
+
+    <!-- Top Sticky Header -->
+    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-white p-3.5 flex justify-between items-center sticky top-0 z-50 shadow-md">
+        <div class="flex items-center space-x-2.5">
+            <span class="text-2xl shadow-xs">🇰🇷</span>
+            <div>
+                <h1 class="text-base font-black tracking-tight leading-none bg-gradient-to-r from-rose-400 via-pink-400 to-amber-300 bg-clip-text text-transparent">
+                    K-Talk Coach
+                </h1>
+                <span class="text-[10px] text-slate-400 font-semibold" id="app-tagline">Speak Korean Like K-Drama</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <!-- Language Switcher: EN / ES -->
+            <button onclick="toggleLanguage()" id="lang-switch-btn" class="bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 text-xs px-2.5 py-1.5 rounded-xl font-black transition flex items-center shadow-xs">
+                <span id="lang-flag" class="mr-1">🇺🇸</span> <span id="lang-label">EN</span>
+            </button>
+
+            <!-- Level Badge -->
+            <button id="level-badge" onclick="changeLevel()" class="bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800/80 px-2.5 py-1.5 rounded-xl text-xs font-black transition shadow-inner">
+                Lv.1 Survival
+            </button>
+
+            <!-- PWA Install / Pro Button -->
+            <button onclick="openProModal()" class="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 active:scale-95 text-slate-950 font-black text-xs px-2.5 py-1.5 rounded-xl transition shadow-xs flex items-center">
+                <i class="fa-solid fa-crown mr-1"></i> <span id="pro-btn-text">PRO</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- EXP Progress & Combo Bar -->
+    <section class="bg-slate-950/70 px-4 py-2 border-b border-slate-800/80 flex items-center justify-between shadow-xs sticky top-14 z-40 backdrop-blur-md">
+        <div class="flex-1 mr-4">
+            <div class="flex justify-between items-center text-[11px] font-bold text-slate-400 mb-1">
+                <span><i class="fa-solid fa-gem text-rose-400 mr-1"></i> <span id="exp-text">0 / 100 EXP</span></span>
+                <span id="combo-display" class="hidden text-amber-400 font-black animate-bounce"><i class="fa-solid fa-fire mr-0.5"></i> <span id="combo-count">0</span> COMBO!</span>
+            </div>
+            <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700">
+                <div id="exp-bar" class="bg-gradient-to-r from-rose-500 via-pink-500 to-amber-400 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+        </div>
+        <button onclick="startLevelTest()" id="quiz-test-btn" class="text-[11px] bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-2.5 py-1 rounded-lg border border-slate-700 shrink-0 active:scale-95 transition">
+            <i class="fa-solid fa-sliders mr-1 text-rose-400"></i><span id="test-btn-text">Level Test</span>
+        </button>
+    </section>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-lg w-full mx-auto p-4 pb-28">
+
+        <!-- ==================== TAB 1: QUIZ (말해보카 K-Coach Mode) ==================== -->
+        <section id="section-quiz" class="space-y-4">
+            <!-- PWA Install Prompt Banner (Shows on mobile) -->
+            <div id="pwa-install-banner" class="bg-gradient-to-r from-rose-950/60 to-purple-950/60 border border-rose-500/30 rounded-2xl p-3 flex justify-between items-center shadow-lg">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-rose-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
+                        <i class="fa-solid fa-mobile-screen"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs font-black text-rose-200 block" id="pwa-banner-title">Install K-Talk on Home Screen</span>
+                        <span class="text-[10px] text-slate-400" id="pwa-banner-desc">Use full screen without browser bar!</span>
+                    </div>
+                </div>
+                <button onclick="triggerPWAInstall()" class="bg-rose-600 hover:bg-rose-500 text-white text-xs font-black px-3 py-1.5 rounded-xl shadow-xs active:scale-95 transition flex items-center">
+                    <i class="fa-solid fa-download mr-1 text-[10px]"></i> <span id="pwa-btn-text">Install</span>
+                </button>
+            </div>
+
+            <!-- Resume Progress Banner (Auto-Resume) -->
+            <div id="resume-banner" class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-3 flex justify-between items-center shadow-xs">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 text-white flex items-center justify-center font-black text-xs shadow-xs">
+                        <i class="fa-solid fa-bookmark"></i>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-slate-400 font-extrabold block" id="resume-banner-label">Auto Progress Resume</span>
+                        <span id="resume-text" class="text-xs font-black text-rose-200">Lv.1 Survival (#1)</span>
+                    </div>
+                </div>
+                <button id="resume-btn" onclick="resumeLastProgress()" class="bg-slate-700 hover:bg-slate-600 active:scale-95 text-white text-xs font-black px-3.5 py-1.5 rounded-xl shadow-xs transition flex items-center">
+                    <span id="resume-btn-text">Resume</span> <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>
+                </button>
+            </div>
+
+            <!-- Problem Header & Navigation -->
+            <div class="flex justify-between items-center bg-slate-800/80 px-4 py-3 rounded-2xl shadow-sm border border-slate-700/80">
+                <span id="quiz-category" class="text-xs bg-rose-950/80 text-rose-300 border border-rose-800/60 px-3 py-1 rounded-full font-extrabold flex items-center">
+                    <i class="fa-solid fa-tag mr-1.5 text-[10px]"></i> K-Survival
+                </span>
+                <div class="flex items-center space-x-2">
+                    <span id="quiz-progress" class="text-xs text-slate-400 font-black">1 / 10</span>
+                    <button onclick="toggleBookmarkCurrent()" id="quiz-star-btn" class="text-slate-500 hover:text-amber-400 text-base active:scale-125 transition">
+                        <i class="fa-solid fa-star"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Main Card -->
+            <div class="bg-slate-800/95 rounded-3xl shadow-xl p-6 border border-slate-700/80 space-y-5 relative overflow-hidden">
+                <!-- Top Card Actions: TTS & STT -->
+                <div class="flex justify-between items-center">
+                    <span class="text-[11px] font-black text-slate-400 uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-microphone-lines mr-1.5 text-rose-400"></i> <span id="card-mode-label">SayVoca Speaking Coach</span>
+                    </span>
+                    <div class="flex items-center space-x-2">
+                        <button id="speaker-btn" onclick="speakCurrentSentence()" class="bg-rose-950/80 hover:bg-rose-900 border border-rose-800/80 active:scale-95 text-rose-300 px-3 py-1.5 rounded-2xl text-xs font-black transition flex items-center shadow-xs">
+                            <i class="fa-solid fa-volume-high mr-1.5 text-sm"></i> <span id="btn-audio-label">Native Audio</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Prompt Question & Romanization -->
+                <div class="space-y-3 py-1">
+                    <!-- Meaning / Question in Current Lang (EN or ES) -->
+                    <p id="quiz-prompt" class="text-xl font-black text-white leading-snug tracking-tight"></p>
+                    
+                    <!-- Korean Sentence with Target Blank -->
+                    <div id="quiz-sentence-box" class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700 font-sans text-lg font-bold text-slate-200 leading-relaxed shadow-inner">
+                        <!-- Filled dynamically -->
+                    </div>
+
+                    <!-- Romanization / Pronunciation Guide -->
+                    <div class="flex items-center justify-between bg-slate-950/60 px-3.5 py-2 rounded-xl border border-slate-800 text-xs">
+                        <span class="text-slate-400 font-bold"><i class="fa-solid fa-headphones mr-1 text-rose-400"></i> <span id="pron-label">Pronunciation:</span></span>
+                        <span id="quiz-pron" class="text-rose-300 font-mono font-bold tracking-wide"></span>
+                    </div>
+
+                    <!-- Syllable Slots Preview: [ 감 ][ 사 ][ 합 ][ 니 ][ 다 ] -->
+                    <div class="flex items-center justify-center flex-wrap gap-1.5 pt-2" id="letter-slots-container">
+                        <!-- Dynamic boxes -->
+                    </div>
+                </div>
+
+                <!-- Input Box & Speech Recognition -->
+                <div class="space-y-3">
+                    <div class="flex space-x-2">
+                        <input type="text" id="user-answer" placeholder="Type Hangul or Romanization..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="onAnswerInput(this.value)" onkeypress="if(event.key==='Enter') checkAnswer()" class="flex-1 bg-slate-900 border border-slate-600 rounded-2xl px-4 py-3.5 text-base font-bold text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                        <button onclick="startVoiceRecognition()" id="mic-btn" class="bg-rose-950/90 hover:bg-rose-900 active:scale-95 text-rose-400 border border-rose-800 px-4 py-3.5 rounded-2xl transition shadow-xs flex items-center justify-center shrink-0" title="Speak in Korean">
+                            <i class="fa-solid fa-microphone text-xl"></i>
+                        </button>
+                    </div>
+
+                    <!-- Action Buttons: Check Answer & Hint -->
+                    <div class="flex space-x-2">
+                        <button onclick="checkAnswer()" id="check-ans-btn" class="flex-1 bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 active:scale-98 text-white font-black py-4 rounded-2xl transition shadow-lg shadow-rose-950 text-sm">
+                            Check Answer
+                        </button>
+                        <button onclick="revealNextHint()" id="hint-btn" class="bg-amber-950/80 hover:bg-amber-900 border border-amber-800 active:scale-95 text-amber-300 px-4 py-4 rounded-2xl font-black text-xs transition flex items-center shrink-0">
+                            <i class="fa-solid fa-lightbulb mr-1.5 text-amber-400"></i> <span id="hint-btn-text">Hint</span> (<span id="hint-step">1</span>/3)
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Result Box -->
+                <div id="result-box" class="hidden p-4 rounded-2xl text-sm font-medium leading-relaxed transition-all"></div>
+            </div>
+
+            <!-- Quiz Prev/Next Controls -->
+            <div class="flex space-x-2">
+                <button onclick="prevQuiz()" class="bg-slate-800 border border-slate-700 hover:bg-slate-700 active:scale-95 text-slate-300 px-5 py-3.5 rounded-2xl font-bold text-sm shadow-xs transition">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button onclick="nextQuiz()" id="next-quiz-btn" class="flex-1 bg-slate-800 hover:bg-slate-700 active:scale-98 text-white py-3.5 rounded-2xl font-black text-sm border border-slate-700 shadow-md transition flex items-center justify-center">
+                    <span id="next-btn-text">Next Question</span> <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- ==================== TAB 2: FLASHCARDS (3D Mode) ==================== -->
+        <section id="section-flashcard" class="hidden space-y-4">
+            <div class="bg-gradient-to-r from-rose-900 to-pink-900 text-white p-4 rounded-2xl shadow-md flex justify-between items-center border border-rose-700/50">
+                <div>
+                    <h3 class="font-black text-base"><i class="fa-solid fa-layer-group mr-2 text-amber-400"></i> <span id="fc-header-title">Smart 3D Flashcards</span></h3>
+                    <p class="text-xs text-rose-200 mt-0.5" id="fc-header-subtitle">Tap card to flip between Korean & Meaning</p>
+                </div>
+                <span id="fc-progress" class="bg-rose-950 text-rose-300 text-xs px-2.5 py-1 rounded-full font-bold border border-rose-800">1 / 10</span>
+            </div>
+
+            <!-- 3D Flippable Card -->
+            <div class="perspective-1000 w-full min-h-[340px] cursor-pointer" onclick="flipFlashCard()">
+                <div id="flashcard-inner" class="relative w-full h-[340px] rounded-3xl transition-transform duration-500 transform-style-3d shadow-xl border border-slate-700 bg-slate-800">
+                    <!-- FRONT: Korean + Audio + Romanization -->
+                    <div class="absolute inset-0 w-full h-full rounded-3xl p-6 flex flex-col justify-between items-center backface-hidden bg-gradient-to-b from-slate-800 to-slate-900">
+                        <div class="w-full flex justify-between items-center">
+                            <span id="fc-category" class="text-xs bg-rose-950 text-rose-300 border border-rose-800 px-3 py-1 rounded-full font-bold">K-Drama</span>
+                            <span class="text-xs text-slate-400 font-bold"><i class="fa-solid fa-hand-pointer mr-1"></i><span id="fc-tap-flip">Tap to flip</span></span>
+                        </div>
+                        <div class="text-center space-y-3">
+                            <p id="fc-hangul" class="text-4xl font-black text-white tracking-tight"></p>
+                            <p id="fc-pron" class="text-sm text-rose-400 font-mono font-bold"></p>
+                        </div>
+                        <button onclick="event.stopPropagation(); speakKorean(document.getElementById('fc-hangul').innerText)" class="bg-rose-600 hover:bg-rose-500 active:scale-95 text-white px-5 py-2.5 rounded-2xl text-xs font-black transition flex items-center shadow-lg shadow-rose-950">
+                            <i class="fa-solid fa-volume-high mr-2 text-base"></i> <span id="fc-audio-btn-text">Listen Audio</span>
+                        </button>
+                    </div>
+
+                    <!-- BACK: Meaning in EN/ES + K-Drama Nuance -->
+                    <div class="absolute inset-0 w-full h-full rounded-3xl p-6 flex flex-col justify-between items-center backface-hidden rotate-y-180 bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-700">
+                        <div class="w-full flex justify-between items-center border-b border-slate-800 pb-2">
+                            <span class="text-xs text-amber-400 font-black"><i class="fa-solid fa-clapperboard mr-1"></i> <span id="fc-back-title">K-Culture & Nuance</span></span>
+                            <span class="text-xs text-slate-400"><i class="fa-solid fa-rotate mr-1"></i><span id="fc-back-flip">Flip back</span></span>
+                        </div>
+                        <div class="text-center space-y-2 py-2">
+                            <p id="fc-meaning" class="text-2xl font-black text-amber-300 leading-snug"></p>
+                            <p id="fc-nuance" class="text-xs text-slate-300 leading-relaxed px-2"></p>
+                            <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 text-xs text-rose-300 font-semibold" id="fc-example"></div>
+                        </div>
+                        <div class="w-full flex space-x-2">
+                            <button onclick="event.stopPropagation(); toggleBookmarkCurrent()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 rounded-xl text-xs font-bold border border-slate-700 transition">
+                                <i class="fa-regular fa-star mr-1"></i> <span id="fc-bookmark-btn">Bookmark</span>
+                            </button>
+                            <button onclick="event.stopPropagation(); speakKorean(document.getElementById('fc-hangul').innerText)" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white py-2.5 rounded-xl text-xs font-bold transition">
+                                <i class="fa-solid fa-volume-high mr-1"></i> Audio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flashcard Prev/Next -->
+            <div class="flex space-x-2">
+                <button onclick="prevFlashCard()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white px-5 py-3.5 rounded-2xl font-bold text-sm shadow-xs transition active:scale-95">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button onclick="nextFlashCard()" class="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white py-3.5 rounded-2xl font-black text-sm shadow-xs transition flex items-center justify-center active:scale-98">
+                    <span id="fc-next-card">Next Card</span> <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                </button>
+            </div>
+        </section>
+
+
+        <!-- ==================== TAB 3: ESSENTIAL VOCA BANK ==================== -->
+        <section id="section-voca" class="hidden space-y-4">
+            <div class="bg-gradient-to-r from-rose-900 to-amber-900 text-white p-4 rounded-2xl shadow-md flex justify-between items-center border border-rose-800/50">
+                <div>
+                    <h3 class="font-black text-base" id="voca-header-title">Essential Korean Word Bank</h3>
+                    <p class="text-xs text-rose-200 mt-0.5" id="voca-header-sub">Daily expressions used by K-Pop idols & K-Dramas</p>
+                </div>
+                <button onclick="filterBookmarkedVoca()" id="voca-fav-filter" class="bg-slate-900 text-amber-400 font-bold px-3 py-1.5 rounded-xl text-xs shadow-xs border border-amber-500/30 transition">
+                    <i class="fa-solid fa-star mr-1"></i> Favorites
+                </button>
+            </div>
+
+            <!-- Category Filter Pills -->
+            <div class="flex space-x-1.5 overflow-x-auto pb-1 text-xs font-bold" id="voca-categories">
+                <button onclick="filterVocaCategory('all')" class="cat-pill active bg-rose-600 text-white px-3 py-1.5 rounded-xl shrink-0 transition" data-cat="all">All</button>
+                <button onclick="filterVocaCategory('kdrama')" class="cat-pill bg-slate-800 text-slate-400 hover:text-white px-3 py-1.5 rounded-xl shrink-0 transition" data-cat="kdrama">K-Drama</button>
+                <button onclick="filterVocaCategory('kpop')" class="cat-pill bg-slate-800 text-slate-400 hover:text-white px-3 py-1.5 rounded-xl shrink-0 transition" data-cat="kpop">K-Pop</button>
+                <button onclick="filterVocaCategory('travel')" class="cat-pill bg-slate-800 text-slate-400 hover:text-white px-3 py-1.5 rounded-xl shrink-0 transition" data-cat="travel">Travel</button>
+                <button onclick="filterVocaCategory('slang')" class="cat-pill bg-slate-800 text-slate-400 hover:text-white px-3 py-1.5 rounded-xl shrink-0 transition" data-cat="slang">Slang</button>
+            </div>
+
+            <!-- Word Cards Container -->
+            <div id="voca-list-container" class="space-y-3"></div>
+        </section>
+
+
+        <!-- ==================== TAB 4: EBBINGHAUS SMART REVIEW ==================== -->
+        <section id="section-review" class="hidden space-y-4">
+            <div class="bg-gradient-to-br from-purple-950 via-slate-900 to-rose-950 text-white p-5 rounded-3xl shadow-xl space-y-3 border border-purple-800/40">
+                <div class="flex justify-between items-center">
+                    <h3 class="font-black text-base flex items-center">
+                        <i class="fa-solid fa-brain mr-2 text-amber-400"></i> <span id="review-header-title">Ebbinghaus Smart Memory</span>
+                    </h3>
+                    <span class="text-[10px] bg-purple-900/80 text-purple-200 border border-purple-700 px-2.5 py-1 rounded-full font-bold" id="review-header-badge">AI Prioritized</span>
+                </div>
+                <p class="text-xs text-purple-200 leading-relaxed" id="review-header-desc">
+                    Words you answered incorrectly are automatically scheduled for review based on memory retention curves. Master a word 3 times in a row to graduate!
+                </p>
+                <div class="pt-1 flex space-x-2">
+                    <button onclick="startReviewQuiz()" class="flex-1 bg-gradient-to-r from-amber-400 to-rose-400 hover:from-amber-300 hover:to-rose-300 text-slate-950 font-black py-3 rounded-2xl text-xs transition shadow-md">
+                        <i class="fa-solid fa-play mr-1"></i> <span id="review-start-btn">Start Review Quiz</span>
+                    </button>
+                    <button onclick="clearReviewList()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-3.5 py-3 rounded-2xl text-xs font-bold transition">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="review-list-container" class="space-y-3"></div>
+        </section>
+
+
+        <!-- ==================== TAB 5: ATTENDANCE CALENDAR & STATS ==================== -->
+        <section id="section-stats" class="hidden space-y-4">
+            <!-- League & Stats Card -->
+            <div class="bg-slate-800 rounded-3xl p-5 shadow-lg border border-slate-700 space-y-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <span class="text-[10px] text-slate-400 font-extrabold uppercase tracking-wider" id="stats-current-league">Current League</span>
+                        <h3 class="text-xl font-black text-amber-400 flex items-center mt-0.5">
+                            <i class="fa-solid fa-trophy mr-2 text-amber-400"></i> <span id="tier-name">K-Star League</span>
+                        </h3>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 font-extrabold block" id="stats-total-exp-label">Total EXP</span>
+                        <span class="text-xl font-black text-rose-400" id="stat-total-exp">0</span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700/80 text-center">
+                        <span class="text-[10px] text-slate-400 font-bold block" id="stats-streak-label">Daily Streak</span>
+                        <span class="text-base font-black text-amber-300" id="stat-streak">1 Day 🔥</span>
+                    </div>
+                    <div class="bg-slate-900 p-3 rounded-2xl border border-slate-700/80 text-center">
+                        <span class="text-[10px] text-slate-400 font-bold block" id="stats-wrong-label">Words in Review</span>
+                        <span class="text-base font-black text-purple-300" id="stat-wrong">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hibiscus Flower Attendance Calendar (🌺 무궁화 출석 캘린더) -->
+            <div class="bg-slate-800 rounded-3xl p-5 shadow-lg border border-slate-700 space-y-4">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="text-sm font-black text-white flex items-center">
+                            <span class="mr-1.5 text-base">🌺</span> <span id="cal-header-title">Hibiscus Attendance Stamp</span>
+                        </h4>
+                        <p class="text-[10px] text-slate-400" id="cal-header-desc">Earn 1 stamp per day by solving at least 1 Korean question!</p>
+                    </div>
+                    <span id="attendance-today-badge" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-amber-950 text-amber-300 border border-amber-800">
+                        Today: Pending
+                    </span>
+                </div>
+
+                <!-- Calendar Header & Navigation -->
+                <div class="flex justify-between items-center bg-slate-900 px-4 py-2.5 rounded-2xl border border-slate-700">
+                    <button onclick="changeCalendarMonth(-1)" class="text-slate-400 hover:text-white text-xs px-2 py-1"><i class="fa-solid fa-chevron-left"></i></button>
+                    <span id="calendar-month-year" class="text-xs font-black text-slate-200">2026 October</span>
+                    <button onclick="changeCalendarMonth(1)" class="text-slate-400 hover:text-white text-xs px-2 py-1"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+
+                <!-- Days of Week -->
+                <div class="grid grid-cols-7 gap-1 text-center text-[10px] font-black text-slate-400">
+                    <span class="text-rose-400">SUN</span><span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span class="text-blue-400">SAT</span>
+                </div>
+
+                <!-- Days Grid -->
+                <div id="calendar-days-grid" class="grid grid-cols-7 gap-1 text-center font-bold"></div>
+
+                <!-- Selected Day Log Detail -->
+                <div id="selected-date-detail" class="bg-slate-900 p-3.5 rounded-2xl border border-slate-700/80 text-xs space-y-2"></div>
+            </div>
+
+            <!-- Monetization & App Upgrade Card -->
+            <div class="bg-gradient-to-r from-amber-500/20 to-rose-500/20 border border-amber-500/30 rounded-3xl p-5 space-y-3 text-center">
+                <i class="fa-solid fa-crown text-3xl text-amber-400"></i>
+                <h4 class="font-black text-base text-white" id="monetize-title">Unlock K-Pass Premium</h4>
+                <p class="text-xs text-slate-300" id="monetize-desc">Get unlimited hearts, offline audio downloads, and all 500+ K-Drama & K-Pop conversation packs for only $4.99/mo!</p>
+                <button onclick="openProModal()" class="w-full bg-gradient-to-r from-amber-400 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black py-3 rounded-2xl text-xs transition shadow-md">
+                    Start 7-Day Free Trial
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="bg-slate-900/95 backdrop-blur-md border-t border-slate-800 fixed bottom-0 left-0 right-0 z-50 flex justify-around py-2 max-w-lg mx-auto shadow-2xl">
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="flex flex-col items-center py-1 px-3 text-rose-500 font-black text-[11px] transition">
+            <i class="fa-solid fa-puzzle-piece text-lg mb-0.5"></i>
+            <span id="nav-label-quiz">Quiz</span>
+        </button>
+        <button onclick="switchTab('flashcard')" id="nav-flashcard" class="flex flex-col items-center py-1 px-3 text-slate-400 font-bold text-[11px] hover:text-rose-400 transition">
+            <i class="fa-solid fa-layer-group text-lg mb-0.5"></i>
+            <span id="nav-label-fc">Cards</span>
+        </button>
+        <button onclick="switchTab('voca')" id="nav-voca" class="flex flex-col items-center py-1 px-3 text-slate-400 font-bold text-[11px] hover:text-rose-400 transition">
+            <i class="fa-solid fa-book-open text-lg mb-0.5"></i>
+            <span id="nav-label-voca">Words</span>
+        </button>
+        <button onclick="switchTab('review')" id="nav-review" class="flex flex-col items-center py-1 px-3 text-slate-400 font-bold text-[11px] hover:text-rose-400 transition relative">
+            <i class="fa-solid fa-rotate-left text-lg mb-0.5"></i>
+            <span id="nav-label-review">Review</span>
+            <span id="review-count-badge" class="hidden absolute top-0 right-1 bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">0</span>
+        </button>
+        <button onclick="switchTab('stats')" id="nav-stats" class="flex flex-col items-center py-1 px-3 text-slate-400 font-bold text-[11px] hover:text-rose-400 transition">
+            <i class="fa-solid fa-calendar-check text-lg mb-0.5"></i>
+            <span id="nav-label-stats">Streak</span>
+        </button>
+    </nav>
+
+    <!-- PRO / MONETIZATION MODAL -->
+    <div id="pro-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 max-w-sm w-full rounded-3xl p-6 shadow-2xl space-y-4 text-center relative animate-in fade-in zoom-in duration-200">
+            <button onclick="closeProModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <div class="w-14 h-14 bg-gradient-to-tr from-amber-400 to-rose-500 rounded-2xl mx-auto flex items-center justify-center text-slate-950 text-2xl shadow-lg">
+                <i class="fa-solid fa-crown"></i>
+            </div>
+            <h3 class="text-xl font-black text-white" id="modal-pro-title">K-Talk Pro Membership</h3>
+            <p class="text-xs text-slate-300 leading-relaxed" id="modal-pro-desc">
+                Learn Korean 3x faster with native speech analysis, all K-Drama phrases, and ad-free experience.
+            </p>
+            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-left space-y-2 text-xs">
+                <div class="flex items-center text-rose-300"><i class="fa-solid fa-circle-check mr-2"></i> All 500+ K-Drama & K-Pop expression packs</div>
+                <div class="flex items-center text-rose-300"><i class="fa-solid fa-circle-check mr-2"></i> Unlimited hearts & speech pronunciation tests</div>
+                <div class="flex items-center text-rose-300"><i class="fa-solid fa-circle-check mr-2"></i> 100% Ad-Free offline learning</div>
+            </div>
+            <div class="pt-2">
+                <button onclick="simulateSubscription()" class="w-full bg-gradient-to-r from-amber-400 to-rose-500 text-slate-950 font-black py-3.5 rounded-2xl text-sm shadow-lg hover:brightness-110 active:scale-98 transition">
+                    Subscribe for $4.99 / month
+                </button>
+                <button onclick="simulateRewardedAd()" class="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-2xl text-xs font-bold border border-slate-700 transition">
+                    🎬 Watch 5s Ad for 3 Free Hints
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA Install Guide Modal (For iOS Safari) -->
+    <div id="pwa-guide-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 max-w-sm w-full rounded-3xl p-6 shadow-2xl space-y-4 text-center relative">
+            <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <div class="w-12 h-12 bg-rose-600 rounded-2xl mx-auto flex items-center justify-center text-white text-xl">
+                <i class="fa-solid fa-arrow-up-from-bracket"></i>
+            </div>
+            <h3 class="text-base font-black text-white" id="pwa-guide-title">Install on iPhone / iPad</h3>
+            <p class="text-xs text-slate-300 leading-relaxed text-left space-y-2 bg-slate-800 p-3.5 rounded-2xl">
+                1. Tap the <b class="text-rose-400">Share button ( <i class="fa-solid fa-arrow-up-from-bracket"></i> )</b> in Safari's bottom toolbar.<br>
+                2. Scroll down and tap <b class="text-rose-400">'Add to Home Screen'</b>.<br>
+                3. Tap <b class="text-rose-400">'Add'</b> to launch K-Talk like a native app!
+            </p>
+            <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">Got it!</button>
+        </div>
+    </div>
+
+    <!-- Floating Toast Notification -->
+    <div id="toast" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-slate-900 border border-slate-700 text-white text-xs px-4 py-2.5 rounded-2xl shadow-2xl pointer-events-none opacity-0 transition-opacity duration-300 z-50 flex items-center space-x-2 max-w-xs text-center">
+        <span id="toast-msg">Notification</span>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- JAVASCRIPT LOGIC                                                          -->
+    <!-- ========================================================================= -->
+    <script>
+        // ==========================================
+        // 1. MULTILINGUAL DICTIONARY (EN & ES)
+        // ==========================================
+        let currentLang = localStorage.getItem('kTalkLang') || 'en'; // 'en' or 'es'
+
+        const i18n = {
+            en: {
+                flag: "🇺🇸",
+                langLabel: "EN",
+                tagline: "Speak Korean Like K-Drama",
+                levelNames: ["Lv.1 Survival", "Lv.2 K-Drama", "Lv.3 Travel", "Lv.4 K-Pop", "Lv.5 Slang"],
+                testBtn: "Level Test",
+                pwaTitle: "Install K-Talk on Home Screen",
+                pwaDesc: "Launch full screen without browser bar!",
+                pwaBtn: "Install",
+                resumeLabel: "Auto Progress Resume",
+                resumeBtn: "Resume",
+                restartBtn: "From #1",
+                cardMode: "SayVoca Speaking Coach",
+                nativeAudio: "Native Audio",
+                pronLabel: "Pronunciation:",
+                checkAns: "Check Answer",
+                hint: "Hint",
+                nextQuiz: "Next Question",
+                inputPlaceholder: "Type Hangul or Romanization...",
+                fcTitle: "Smart 3D Flashcards",
+                fcSub: "Tap card to flip between Korean & Meaning",
+                fcTap: "Tap to flip",
+                fcListen: "Listen Audio",
+                fcCulture: "K-Culture & Nuance",
+                fcBackFlip: "Flip back",
+                fcBookmark: "Bookmark",
+                fcNext: "Next Card",
+                vocaTitle: "Essential Korean Word Bank",
+                vocaSub: "Daily expressions used by K-Pop idols & K-Dramas",
+                vocaFav: "Favorites",
+                reviewTitle: "Ebbinghaus Smart Memory",
+                reviewBadge: "AI Prioritized",
+                reviewDesc: "Words answered incorrectly are scheduled based on retention curves. Master 3 times to graduate!",
+                reviewStart: "Start Review Quiz",
+                leagueName: "K-Star League",
+                totalExp: "Total EXP",
+                streak: "Daily Streak",
+                wordsReview: "Words in Review",
+                calTitle: "Hibiscus Attendance Stamp",
+                calDesc: "Earn 1 stamp per day by solving at least 1 Korean question!",
+                todayDone: "Today: Complete 🌺",
+                todayPending: "Today: Pending (+20 EXP 🎁)",
+                proTitle: "K-Talk Pro Membership",
+                proDesc: "Learn Korean 3x faster with native speech analysis, all K-Drama phrases, and ad-free experience.",
+                navQuiz: "Quiz",
+                navFc: "Cards",
+                navVoca: "Words",
+                navReview: "Review",
+                navStreak: "Streak"
+            },
+            es: {
+                flag: "🇪🇸",
+                langLabel: "ES",
+                tagline: "Habla Coreano como en K-Dramas",
+                levelNames: ["Lv.1 Supervivencia", "Lv.2 K-Drama", "Lv.3 Viajes", "Lv.4 K-Pop", "Lv.5 Modismos"],
+                testBtn: "Test de Nivel",
+                pwaTitle: "Instalar K-Talk en Pantalla de Inicio",
+                pwaDesc: "¡Úsalo en pantalla completa sin barra de navegador!",
+                pwaBtn: "Instalar",
+                resumeLabel: "Progreso Automático Guardado",
+                resumeBtn: "Continuar",
+                restartBtn: "Desde el #1",
+                cardMode: "Coach de Habla SayVoca",
+                nativeAudio: "Audio Nativo",
+                pronLabel: "Pronunciación:",
+                checkAns: "Comprobar Respuesta",
+                hint: "Pista",
+                nextQuiz: "Siguiente Pregunta",
+                inputPlaceholder: "Escribe en Hangul o Romanización...",
+                fcTitle: "Tarjetas 3D Inteligentes",
+                fcSub: "Toca la tarjeta para voltear entre coreano y significado",
+                fcTap: "Toca para voltear",
+                fcListen: "Escuchar Audio",
+                fcCulture: "Cultura K y Matices",
+                fcBackFlip: "Volver",
+                fcBookmark: "Guardar",
+                fcNext: "Siguiente Tarjeta",
+                vocaTitle: "Banco de Palabras Coreanas Esenciales",
+                vocaSub: "Expresiones diarias de idols de K-Pop y K-Dramas",
+                vocaFav: "Favoritos",
+                reviewTitle: "Memoria Inteligente Ebbinghaus",
+                reviewBadge: "Priorizado por IA",
+                reviewDesc: "Las respuestas incorrectas se programan según la curva del olvido. ¡Acierta 3 veces seguidas para graduarte!",
+                reviewStart: "Comenzar Repaso",
+                leagueName: "Liga K-Star",
+                totalExp: "EXP Total",
+                streak: "Racha Diaria",
+                wordsReview: "En Repaso",
+                calTitle: "Sello de Asistencia Flor Hibisco",
+                calDesc: "¡Consigue 1 sello al día resolviendo al menos 1 pregunta en coreano!",
+                todayDone: "Hoy: Completado 🌺",
+                todayPending: "Hoy: Pendiente (+20 EXP 🎁)",
+                proTitle: "Membresía K-Talk Pro",
+                proDesc: "Aprende coreano 3 veces más rápido con análisis de voz nativo y frases de K-Drama sin anuncios.",
+                navQuiz: "Cuestionario",
+                navFc: "Tarjetas",
+                navVoca: "Palabras",
+                navReview: "Repaso",
+                navStreak: "Racha"
+            }
+        };
+
+        // ==========================================
+        // 2. CURRICULUM DATA (5 LEVELS, EN & ES)
+        // ==========================================
+        const allQuizzes = {
+            1: [
+                {
+                    target: "감사합니다",
+                    targetPron: "gam-sa-ham-ni-da",
+                    synonyms: ["고마워요", "gamsahamnida", "kamsahamnida"],
+                    prompt_en: "How do you say 'Thank you' politely in Korean?",
+                    prompt_es: "¿Cómo se dice 'Gracias' de forma formal en coreano?",
+                    sentence: "도와주셔서 정말 [감사합니다].",
+                    cat: "K-Survival",
+                    nuance_en: "Used in restaurants, stores, and with elders. The most respectful way to say thank you!",
+                    nuance_es: "Se usa en restaurantes, tiendas y con mayores. ¡La forma más educada y común de agradecer!"
+                },
+                {
+                    target: "안녕하세요",
+                    targetPron: "an-nyeong-ha-se-yo",
+                    synonyms: ["annyeonghaseyo", "안녕"],
+                    prompt_en: "How do you say 'Hello / Good day' formally?",
+                    prompt_es: "¿Cómo se dice 'Hola / Buenos días' formalmente?",
+                    sentence: "처음 뵙겠습니다, [안녕하세요]!",
+                    cat: "K-Survival",
+                    nuance_en: "Bowing slightly at a 15-30 degree angle while saying this shows great Korean respect!",
+                    nuance_es: "¡Hacer una pequeña reverencia mientras lo dices demuestra un gran respeto en Corea!"
+                },
+                {
+                    target: "네",
+                    targetPron: "ne",
+                    synonyms: ["예", "ne", "de"],
+                    prompt_en: "How do you say 'Yes' politely in Korean?",
+                    prompt_es: "¿Cómo se dice 'Sí' de forma educada?",
+                    sentence: "[네], 알겠습니다.",
+                    cat: "K-Survival",
+                    nuance_en: "Polite yes. In casual speech between close friends, Koreans say '응' (eung).",
+                    nuance_es: "Sí educado. Entre amigos cercanos e informales se dice '응' (eung)."
+                },
+                {
+                    target: "아니요",
+                    targetPron: "a-ni-yo",
+                    synonyms: ["아뇨", "aniyo"],
+                    prompt_en: "How do you say 'No' politely in Korean?",
+                    prompt_es: "¿Cómo se dice 'No' formalmente?",
+                    sentence: "[아니요], 괜찮아요.",
+                    cat: "K-Survival",
+                    nuance_en: "'아니요' is polite. '아니' is casual with friends.",
+                    nuance_es: "'아니요' es educado. '아니' es informal para amigos."
+                },
+                {
+                    target: "죄송합니다",
+                    targetPron: "joe-song-ham-ni-da",
+                    synonyms: ["미안해요", "joesonghamnida", "choesonghamnida"],
+                    prompt_en: "How do you say 'I am sorry' sincerely?",
+                    prompt_es: "¿Cómo se dice 'Lo siento mucho' sinceramente?",
+                    sentence: "늦어서 정말 [죄송합니다].",
+                    cat: "K-Survival",
+                    nuance_en: "'죄송합니다' is deeper and more sincere than '미안해요'.",
+                    nuance_es: "'죄송합니다' es más formal y sincero que '미안해요'."
+                },
+                {
+                    target: "저기요",
+                    targetPron: "jeo-gi-yo",
+                    synonyms: ["jeogiyo", "잠시만요"],
+                    prompt_en: "How do you call a waiter in a restaurant? ('Excuse me!')",
+                    prompt_es: "¿Cómo llamas al mesero en un restaurante? ('¡Disculpe!')",
+                    sentence: "[저기요], 여기 주문할게요!",
+                    cat: "K-Survival",
+                    nuance_en: "Don't be shy! Calling '저기요!' out loud is standard dining etiquette in Korea.",
+                    nuance_es: "¡No tengas pena! Llamar '저기요!' en voz alta es la costumbre normal en restaurantes coreanos."
+                },
+                {
+                    target: "얼마예요",
+                    targetPron: "eol-ma-ye-yo",
+                    synonyms: ["얼마에요", "eolmayeyo"],
+                    prompt_en: "How do you ask 'How much is this?'",
+                    prompt_es: "¿Cómo preguntas '¿Cuánto cuesta esto?'?",
+                    sentence: "사장님, 이거 [얼마예요]?",
+                    cat: "K-Survival",
+                    nuance_en: "Add '사장님' (Boss/Owner) at the beginning when shopping in street markets for a warm vibe!",
+                    nuance_es: "¡Añade '사장님' (Jefe/Dueño) al principio en mercados callejeros para ser más amigable!"
+                },
+                {
+                    target: "맛있어요",
+                    targetPron: "ma-si-sseo-yo",
+                    synonyms: ["masisseoyo", "맛있다"],
+                    prompt_en: "How do you say 'It's delicious!'?",
+                    prompt_es: "¿Cómo dices '¡Está delicioso!'?",
+                    sentence: "한국 음식 진짜 [맛있어요]!",
+                    cat: "K-Survival",
+                    nuance_en: "Say this to Korean chefs or hosts and they will treat you like family!",
+                    nuance_es: "¡Dile esto al cocinero en Corea y te atenderán con una sonrisa enorme!"
+                },
+                {
+                    target: "안녕히가세요",
+                    targetPron: "an-nyeong-hi-ga-se-yo",
+                    synonyms: ["annyeonghigaseyo", "잘가요"],
+                    prompt_en: "How do you say goodbye to someone who is leaving?",
+                    prompt_es: "¿Cómo te despides de alguien que se va? ('Vaya en paz')",
+                    sentence: "오늘 감사했습니다. [안녕히가세요]!",
+                    cat: "K-Survival",
+                    nuance_en: "Means 'Go peacefully'. If YOU are leaving and they are staying, say '안녕히계세요'!",
+                    nuance_es: "Significa 'Vaya en paz'. Si TÚ eres quien se va y ellos se quedan, se dice '안녕히계세요'!"
+                },
+                {
+                    target: "반가워요",
+                    targetPron: "ban-ga-wo-yo",
+                    synonyms: ["반갑습니다", "bangawoyo"],
+                    prompt_en: "How do you say 'Nice to meet you'?",
+                    prompt_es: "¿Cómo se dice 'Mucho gusto'?",
+                    sentence: "만나서 정말 [반가워요]!",
+                    cat: "K-Survival",
+                    nuance_en: "'반갑습니다' is formal; '반가워요' is friendly polite.",
+                    nuance_es: "'반갑습니다' es muy formal; '반가워요' es educado y amistoso."
+                }
+            ],
+            2: [
+                {
+                    target: "진짜요",
+                    targetPron: "jin-jja-yo",
+                    synonyms: ["진짜", "jinjja", "jinjjayo"],
+                    prompt_en: "The #1 K-Drama phrase for 'Really?! / Seriously?'",
+                    prompt_es: "La frase #1 de K-Dramas para '¿De verdad? / ¿En serio?'",
+                    sentence: "어머, 그 소식 [진짜요]?!",
+                    cat: "K-Drama",
+                    nuance_en: "Heard in 99% of K-Drama reaction scenes when someone drops big news!",
+                    nuance_es: "¡Se escucha en el 99% de los K-dramas cuando se revela una sorpresa impactante!"
+                },
+                {
+                    target: "대박",
+                    targetPron: "dae-bak",
+                    synonyms: ["daebak", "tebak"],
+                    prompt_en: "Iconic Korean slang for 'Awesome! / Jackpot! / OMG!'",
+                    prompt_es: "Famoso modismo coreano para '¡Increíble! / ¡Genial! / ¡Qué locura!'",
+                    sentence: "와, 이번 방탄소년단 신곡 진짜 [대박]이다!",
+                    cat: "K-Drama",
+                    nuance_en: "Used universally by youth and celebrities to express huge amazement.",
+                    nuance_es: "Usado por jóvenes y famosos para expresar gran asombro o éxito."
+                },
+                {
+                    target: "헐",
+                    targetPron: "heol",
+                    synonyms: ["heol", "hul"],
+                    prompt_en: "Expression of pure shock or speechlessness ('No way! / What?!')",
+                    prompt_es: "Expresión de shock o incredulidad ('¡No me digas! / ¡Qué barbaridad!')",
+                    sentence: "[헐]... 시험 점수가 이게 뭐야?!",
+                    cat: "K-Drama",
+                    nuance_en: "A short gasp of disbelief used thousands of times daily in Korea.",
+                    nuance_es: "Un suspiro de incredulidad usado a diario cuando algo te deja boquiabierto."
+                },
+                {
+                    target: "밥먹었어",
+                    targetPron: "bap-meo-geo-sseo",
+                    synonyms: ["bapmeogeosseo", "식사하셨어요"],
+                    prompt_en: "Korean affectionate greeting: 'Did you eat?'",
+                    prompt_es: "El saludo afectuoso coreano: '¿Ya comiste?'",
+                    sentence: "안녕! 오늘 점심 [밥먹었어]?",
+                    cat: "K-Drama",
+                    nuance_en: "In Korea, asking if someone ate is the ultimate expression of love and caring.",
+                    nuance_es: "En Corea, preguntar si ya comiste es la mayor muestra de cariño y preocupación."
+                },
+                {
+                    target: "보고싶어",
+                    targetPron: "bo-go-si-peo",
+                    synonyms: ["bogosipeo", "보고싶어요"],
+                    prompt_en: "Romantic line heard in every K-Drama OST: 'I miss you'",
+                    prompt_es: "Frase romántica de todas las bandas sonoras: 'Te extraño'",
+                    sentence: "하루 종일 네가 너무 [보고싶어].",
+                    cat: "K-Drama",
+                    nuance_en: "Literally means 'I want to see you'. Used for romantic partners and loved ones.",
+                    nuance_es: "Literalmente significa 'Quiero verte'. Se usa para parejas y seres queridos."
+                },
+                {
+                    target: "가자",
+                    targetPron: "ga-ja",
+                    synonyms: ["gaja", "갑시다"],
+                    prompt_en: "High-energy word for 'Let's go!'",
+                    prompt_es: "Palabra llena de energía para '¡Vamos!'",
+                    sentence: "준비 다 됐지? 이제 홍대로 [가자]!",
+                    cat: "K-Drama",
+                    nuance_en: "Say this when heading out for adventure, food, or fun with friends!",
+                    nuance_es: "¡Dilo cuando salgas de aventura o a divertirte con amigos!"
+                },
+                {
+                    target: "괜찮아요",
+                    targetPron: "gwaen-cha-na-yo",
+                    synonyms: ["gwaenchanhayo", "gwenchanayo", "괜찮아"],
+                    prompt_en: "Essential phrase for 'I'm okay / Don't worry / No problem'",
+                    prompt_es: "Frase esencial para 'Estoy bien / No te preocupes / Todo bien'",
+                    sentence: "걱정하지 마세요, 저는 [괜찮아요].",
+                    cat: "K-Drama",
+                    nuance_en: "Very versatile: can decline politely, comfort a friend, or reassure an elder.",
+                    nuance_es: "Muy versátil: sirve para rechazar con cortesía o calmar a un amigo."
+                },
+                {
+                    target: "화이팅",
+                    targetPron: "hwa-i-ting",
+                    synonyms: ["파이팅", "hwaiting", "fighting"],
+                    prompt_en: "Universal Korean cheer: 'Cheer up! / You can do it! / Fighting!'",
+                    prompt_es: "Grito de ánimo coreano: '¡Ánimo! / ¡A por ello! / ¡Tú puedes!'",
+                    sentence: "오늘 시험 꼭 잘 봐, [화이팅]!",
+                    cat: "K-Drama",
+                    nuance_en: "Derived from 'Fighting!', but means cheering and wishing someone strength!",
+                    nuance_es: "Deriva de 'Fighting', pero significa desear fuerza y dar apoyo."
+                },
+                {
+                    target: "미쳤어",
+                    targetPron: "mi-chyeo-sseo",
+                    synonyms: ["michyeosseo", "미쳤어요"],
+                    prompt_en: "Classic reaction: 'Are you crazy?!'",
+                    prompt_es: "Reacción típica de drama: '¿Estás loco/a?'",
+                    sentence: "야, 너 지금 [미쳤어]?!",
+                    cat: "K-Drama",
+                    nuance_en: "Used in drama fights or jokingly when a friend does something insane.",
+                    nuance_es: "Usado en peleas dramáticas o en broma cuando un amigo hace una locura."
+                },
+                {
+                    target: "그래요",
+                    targetPron: "geu-rae-yo",
+                    synonyms: ["geuraeyo", "그래"],
+                    prompt_en: "Conversational filler: 'Is that so? / Really?'",
+                    prompt_es: "Frase para mantener la conversación: '¿En verdad? / ¿Ah sí?'",
+                    sentence: "아, [그래요]? 몰랐네요!",
+                    cat: "K-Drama",
+                    nuance_en: "Essential listening response that keeps the other person speaking smoothly.",
+                    nuance_es: "Respuesta clave para demostrar que estás prestando atención."
+                }
+            ],
+            3: [
+                {
+                    target: "물주세요",
+                    targetPron: "mul-ju-se-yo",
+                    synonyms: ["muljuseyo", "물 주세요"],
+                    prompt_en: "How to ask for water politely: 'Water, please.'",
+                    prompt_es: "¿Cómo pides agua amablemente? ('Agua, por favor')",
+                    sentence: "여기 시원한 [물주세요].",
+                    cat: "Travel",
+                    nuance_en: "'물' (water) + '주세요' (please give me). Remember '주세요' for everything you want!",
+                    nuance_es: "'물' (agua) + '주세요' (por favor dame). ¡Recuerda '주세요' para pedir cualquier cosa!"
+                },
+                {
+                    target: "추천해주세요",
+                    targetPron: "chu-cheon-hae-ju-se-yo",
+                    synonyms: ["chucheonhae juseyo", "chucheon"],
+                    prompt_en: "How to ask 'Please recommend a menu item'?",
+                    prompt_es: "¿Cómo preguntas '¿Qué me recomienda de comer?'?",
+                    sentence: "여기 제일 맛있는 걸로 [추천해주세요]!",
+                    cat: "Travel",
+                    nuance_en: "Guarantees you order the chef's best signature specialty in Korea!",
+                    nuance_es: "¡Te asegura ordenar el platillo estrella del restaurante en Corea!"
+                },
+                {
+                    target: "화장실어디예요",
+                    targetPron: "hwa-jang-sil-eo-di-ye-yo",
+                    synonyms: ["hwajangsil", "화장실 어디예요"],
+                    prompt_en: "The ultimate survival question: 'Where is the restroom?'",
+                    prompt_es: "La pregunta indispensable: '¿Dónde está el baño?'",
+                    sentence: "실례지만, [화장실어디예요]?",
+                    cat: "Travel",
+                    nuance_en: "Restrooms in Korean cafes often have passcodes on the receipts!",
+                    nuance_es: "¡En las cafeterías coreanas el código del baño suele estar en el ticket!"
+                },
+                {
+                    target: "사진찍어주세요",
+                    targetPron: "sa-jin-jji-geo-ju-se-yo",
+                    synonyms: ["sajin", "사진 찍어주세요"],
+                    prompt_en: "How to ask someone: 'Could you take a photo for me?'",
+                    prompt_es: "¿Cómo pides: '¿Me toma una foto, por favor?'?",
+                    sentence: "저기, 저희 [사진찍어주세요]!",
+                    cat: "Travel",
+                    nuance_en: "Korean people take photos exceptionally well with flattering angles!",
+                    nuance_es: "¡Los coreanos tienen fama de tomar fotos increíbles con ángulos perfectos!"
+                },
+                {
+                    target: "깎아주세요",
+                    targetPron: "kka-kka-ju-se-yo",
+                    synonyms: ["kkakkajuseyo", "깎아 주세요"],
+                    prompt_en: "Magic bargaining phrase: 'Could you give me a discount?'",
+                    prompt_es: "Frase mágica de regateo: '¿Me hace un descuentito?'",
+                    sentence: "이모님, 조금만 [깎아주세요]~",
+                    cat: "Travel",
+                    nuance_en: "Use with a cute smile in Namdaemun or Dongdaemun traditional markets!",
+                    nuance_es: "¡Úsala con una sonrisa en mercados tradicionales para ahorrar dinero!"
+                },
+                {
+                    target: "와이파이있어요",
+                    targetPron: "wa-i-pa-i-i-sseo-yo",
+                    synonyms: ["와이파이", "wifi"],
+                    prompt_en: "How to ask 'Do you have Wi-Fi here?'",
+                    prompt_es: "¿Cómo preguntas '¿Tienen Wi-Fi aquí?'?",
+                    sentence: "사장님, 여기 [와이파이있어요]?",
+                    cat: "Travel",
+                    nuance_en: "Korea has the world's fastest public Wi-Fi almost everywhere.",
+                    nuance_es: "Corea tiene uno de los Wi-Fi públicos más veloces del mundo."
+                },
+                {
+                    target: "카드돼요",
+                    targetPron: "ka-deu-dwae-yo",
+                    synonyms: ["kadeudwaeyo", "카드 돼요"],
+                    prompt_en: "How to ask 'Can I pay by card?'",
+                    prompt_es: "¿Cómo preguntas '¿Aceptan tarjeta?'?",
+                    sentence: "혹시 [카드돼요]?",
+                    cat: "Travel",
+                    nuance_en: "Korea is almost 100% cashless, so cards and Apple Pay are accepted everywhere.",
+                    nuance_es: "Corea prácticamente no usa efectivo; aceptan tarjeta en casi todos lados."
+                },
+                {
+                    target: "포장해주세요",
+                    targetPron: "po-jang-hae-ju-se-yo",
+                    synonyms: ["pojang", "포장 해주세요"],
+                    prompt_en: "How to ask for takeout: 'Please pack it to go.'",
+                    prompt_es: "¿Cómo pides para llevar: 'Para llevar, por favor'?",
+                    sentence: "남은 음식 [포장해주세요].",
+                    cat: "Travel",
+                    nuance_en: "'포장' means packing. Korean packaging is famous for being neat and secure.",
+                    nuance_es: "'포장' significa empaque. El empaque para llevar en Corea es impecable."
+                },
+                {
+                    target: "길을잃었어요",
+                    targetPron: "gi-reul-i-reo-sseo-yo",
+                    synonyms: ["길 잃었어요", "gil"],
+                    prompt_en: "Emergency phrase: 'I am lost.'",
+                    prompt_es: "Frase de emergencia: 'Me he perdido.'",
+                    sentence: "도와주세요, 제가 [길을잃었어요].",
+                    cat: "Travel",
+                    nuance_en: "Show your Naver Map or KakaoMap app along with this phrase for instant help.",
+                    nuance_es: "Muestra tu app de mapas junto con esta frase y te ayudarán de inmediato."
+                },
+                {
+                    target: "영수증주세요",
+                    targetPron: "yeong-su-jeung-ju-se-yo",
+                    synonyms: ["영수증", "receipt"],
+                    prompt_en: "How to say: 'Receipt, please.'",
+                    prompt_es: "¿Cómo pides: 'El recibo / ticket, por favor'?",
+                    sentence: "결제 후에 [영수증주세요].",
+                    cat: "Travel",
+                    nuance_en: "Koreans often ask '영수증 버려주세요' (Please throw away receipt), but you may need it for tax refunds!",
+                    nuance_es: "¡Consérvalo si eres turista para solicitar el reembolso de impuestos (Tax Free)!"
+                }
+            ],
+            4: [
+                {
+                    target: "사랑해요",
+                    targetPron: "sa-rang-hae-yo",
+                    synonyms: ["saranghaeyo", "사랑해"],
+                    prompt_en: "Every K-Pop idol's favorite word: 'I love you!'",
+                    prompt_es: "La palabra favorita de todo idol de K-Pop: '¡Te amo!'",
+                    sentence: "우리 아미 여러분, 항상 [사랑해요]!",
+                    cat: "K-Pop",
+                    nuance_en: "Combine with finger heart (🫰) gesture for maximum cute impact!",
+                    nuance_es: "¡Combínalo con el gesto del corazón con los dedos (🫰) para ser adorable!"
+                },
+                {
+                    target: "감동이에요",
+                    targetPron: "gam-dong-i-e-yo",
+                    synonyms: ["gamdong", "감동이야"],
+                    prompt_en: "How to say 'I'm so moved / touched to tears!'",
+                    prompt_es: "¿Cómo dices '¡Qué conmovedor! / ¡Estoy muy conmovido/a!'?",
+                    sentence: "팬분들의 깜짝 이벤트 정말 [감동이에요] ㅠㅠ",
+                    cat: "K-Pop",
+                    nuance_en: "Used whenever a sweet gesture gives you happy emotional chills.",
+                    nuance_es: "Usado cuando un lindo gesto te emociona hasta las lágrimas."
+                },
+                {
+                    target: "응원해요",
+                    targetPron: "eung-won-hae-yo",
+                    synonyms: ["eungwonhaeyo", "응원"],
+                    prompt_en: "How to tell your idol: 'I'm cheering for you!'",
+                    prompt_es: "¿Cómo le dices a tu idol: '¡Te apoyo siempre!'?",
+                    sentence: "앞으로도 계속 [응원해요]!",
+                    cat: "K-Pop",
+                    nuance_en: "Written on concert fan banners and Weverse comments all the time.",
+                    nuance_es: "Se escribe en pancartas de conciertos y comentarios de Weverse."
+                },
+                {
+                    target: "라이브켜줘",
+                    targetPron: "la-i-beu-kyeo-jwo",
+                    synonyms: ["live", "라이브 켜줘"],
+                    prompt_en: "Comment on idol streams: 'Please turn on a Live stream!'",
+                    prompt_es: "Comentario en redes: '¡Haz una transmisión en vivo!'",
+                    sentence: "오빠, 오늘 밤에 [라이브켜줘] 제발!",
+                    cat: "K-Pop",
+                    nuance_en: "Used on Instagram Live or Weverse when begging your bias to stream.",
+                    nuance_es: "Usado en Instagram o Weverse cuando pides a tu artista favorito que transmita."
+                },
+                {
+                    target: "컴백",
+                    targetPron: "keom-baek",
+                    synonyms: ["comeback", "comback"],
+                    prompt_en: "K-Pop music term for releasing a new album ('Comeback')",
+                    prompt_es: "Término del K-Pop para lanzar nuevo álbum ('Regreso / Comeback')",
+                    sentence: "다음 달에 드디어 [컴백]한다고 합니다!",
+                    cat: "K-Pop",
+                    nuance_en: "In K-Pop, every album cycle is hailed as a high-concept 'Comeback'.",
+                    nuance_es: "En el K-Pop, cada lanzamiento de álbum se celebra como un 'Comeback'."
+                },
+                {
+                    target: "심쿵",
+                    targetPron: "sim-kung",
+                    synonyms: ["simkung", "simkoong"],
+                    prompt_en: "Korean slang for 'Heart flutter / My heart skipped a beat!'",
+                    prompt_es: "Modismo para '¡Me dio un flechazo / Me dio un vuelco el corazón!'",
+                    sentence: "그 미소 한 방에 완전 [심쿵]했잖아!",
+                    cat: "K-Pop",
+                    nuance_en: "'심장' (heart) + '쿵' (thump). When an idol looks at you and your heart drops!",
+                    nuance_es: "Cuando tu idol favorito te mira y sientes mariposas en el estómago."
+                },
+                {
+                    target: "멋있어요",
+                    targetPron: "meo-si-sseo-yo",
+                    synonyms: ["meosisseoyo", "멋있다"],
+                    prompt_en: "Compliment: 'You are so cool / handsome!'",
+                    prompt_es: "Cumplido: '¡Qué guapo/genial eres!'",
+                    sentence: "무대 위에서 춤출 때 진짜 [멋있어요]!",
+                    cat: "K-Pop",
+                    nuance_en: "The greatest praise for male idols or anyone performing with swagger.",
+                    nuance_es: "El mayor elogio para quien baila o canta con estilo y elegancia."
+                },
+                {
+                    target: "귀여워요",
+                    targetPron: "gwi-yeo-wo-yo",
+                    synonyms: ["gwiyeowoyo", "귀여워"],
+                    prompt_en: "Compliment: 'You're so cute! / Adorable!'",
+                    prompt_es: "Cumplido: '¡Qué tierno/a eres! / ¡Qué lindo!'",
+                    sentence: "볼 꼬집고 싶을 만큼 [귀여워요]!",
+                    cat: "K-Pop",
+                    nuance_en: "The core praise in 'Aegyo' (acting cute) culture in Korea.",
+                    nuance_es: "El elogio principal en la cultura de actuar tierno ('Aegyo')."
+                },
+                {
+                    target: "수고했어요",
+                    targetPron: "su-go-hae-sseo-yo",
+                    synonyms: ["sugohaesseoyo", "수고하셨습니다"],
+                    prompt_en: "Warm comfort: 'You worked so hard today!'",
+                    prompt_es: "Frase de reconocimiento: '¡Hiciste un gran esfuerzo hoy!'",
+                    sentence: "오늘 하루도 정말 [수고했어요].",
+                    cat: "K-Pop",
+                    nuance_en: "Koreans say this after work or practice to validate everyone's efforts.",
+                    nuance_es: "Los coreanos lo dicen al terminar el trabajo para valorar el esfuerzo de todos."
+                },
+                {
+                    target: "영원히함께해요",
+                    targetPron: "yeong-won-hi-ham-kke-hae-yo",
+                    synonyms: ["영원히 함께해요", "together"],
+                    prompt_en: "Fandom pledge: 'Let's be together forever!'",
+                    prompt_es: "Promesa de fandom: '¡Estemos juntos por siempre!'",
+                    sentence: "우리 앞으로도 [영원히함께해요]!",
+                    cat: "K-Pop",
+                    nuance_en: "The emotional promise exchanged at the climax of K-Pop concerts.",
+                    nuance_es: "La emotiva promesa que se dicen los fans y artistas en conciertos."
+                }
+            ],
+            5: [
+                {
+                    target: "멘붕",
+                    targetPron: "men-bung",
+                    synonyms: ["menbung", "mental breakdown"],
+                    prompt_en: "Slang for 'Mental breakdown / Panic / My brain froze!'",
+                    prompt_es: "Modismo para 'Colapso mental / ¡Entré en pánico!'",
+                    sentence: "지갑 잃어버려서 완전 [멘붕] 왔어.",
+                    cat: "Slang",
+                    nuance_en: "Short for '멘탈 붕괴' (Mental Collapse). Expresses funny or real panic.",
+                    nuance_es: "Abreviatura de 'Colapso mental'. Expresa cuando no sabes qué hacer del susto."
+                },
+                {
+                    target: "어쩌라고",
+                    targetPron: "eo-jjeo-ra-go",
+                    synonyms: ["eojjeorago", "so what"],
+                    prompt_en: "Sassy response: 'So what? / What do you want me to do?'",
+                    prompt_es: "Respuesta descarada: '¿Y qué? / ¿Qué quieres que haga?'",
+                    sentence: "네가 화나면 [어쩌라고]? 내 알 바야?",
+                    cat: "Slang",
+                    nuance_en: "Very informal and bold! Use only with close friends as playful banter.",
+                    nuance_es: "¡Muy informal! Úsalo solo en broma con amigos de mucha confianza."
+                },
+                {
+                    target: "귀찮아",
+                    targetPron: "gwi-chan-ha",
+                    synonyms: ["gwichanha", "귀찮아요"],
+                    prompt_en: "Relatable feeling: 'It's such a hassle / I'm feeling so lazy'",
+                    prompt_es: "Sensación común: '¡Qué pereza / Qué flojera / Qué molestia!'",
+                    sentence: "오늘 외출하기 너무 [귀찮아].",
+                    cat: "Slang",
+                    nuance_en: "The word every Korean whispers when lying on the bed on a Sunday.",
+                    nuance_es: "La palabra que todo coreano dice un domingo acostado en el sillón."
+                },
+                {
+                    target: "내스타일이야",
+                    targetPron: "nae-seu-ta-il-i-ya",
+                    synonyms: ["내 스타일", "style"],
+                    prompt_en: "Romance & fashion: 'Totally my type / Exactly my style!'",
+                    prompt_es: "Para romance o moda: '¡Totalmente mi tipo / mi estilo!'",
+                    sentence: "저 사람 코트 입은 거 완전 [내스타일이야]!",
+                    cat: "Slang",
+                    nuance_en: "Used for ideal romantic crushes, clothes, food, or cafes.",
+                    nuance_es: "Se usa para tu tipo ideal de persona, ropa, comida o lugares."
+                },
+                {
+                    target: "소름",
+                    targetPron: "so-reum",
+                    synonyms: ["soreum", "goosebumps"],
+                    prompt_en: "Slang for 'Goosebumps! / Chills!'",
+                    prompt_es: "Modismo para '¡Piel de gallina! / ¡Qué escalofríos!'",
+                    sentence: "노래 고음 듣는데 온몸에 [소름] 돋았어!",
+                    cat: "Slang",
+                    nuance_en: "Can mean goosebumps from mind-blowing talent, or from a ghost story!",
+                    nuance_es: "Puede ser por escuchar una voz impresionante o por una historia de terror."
+                },
+                {
+                    target: "노잼",
+                    targetPron: "no-jaem",
+                    synonyms: ["nojaem", "no jam"],
+                    prompt_en: "Modern slang for 'No fun / So boring / Lame joke'",
+                    prompt_es: "Modismo moderno para 'Cero divertido / Qué aburrido / Mal chiste'",
+                    sentence: "그 영화 진짜 완전 [노잼]이더라.",
+                    cat: "Slang",
+                    nuance_en: "'No' + '재미' (jam/fun). Opposite of 꿀잼 (honey jam / super fun)!",
+                    nuance_es: "'No' + '재미' (diversión). ¡Lo opuesto es 꿀잼 (dulce diversión)!"
+                },
+                {
+                    target: "꿀잼",
+                    targetPron: "kkul-jaem",
+                    synonyms: ["kkuljaem", "honey jam"],
+                    prompt_en: "Opposite of No-Jam: 'Super fun / Hilarious!'",
+                    prompt_es: "Lo opuesto a aburrido: '¡Súper divertido / Buenísimo!'",
+                    sentence: "어제 본 예능 프로그램 진짜 [꿀잼]이었어!",
+                    cat: "Slang",
+                    nuance_en: "'꿀' (honey) + '재미' (fun). Means something is as sweet and delightful as honey!",
+                    nuance_es: "Significa que algo es tan dulce y agradable como la miel."
+                },
+                {
+                    target: "눈치",
+                    targetPron: "nun-chi",
+                    synonyms: ["nunchi", "noonchi"],
+                    prompt_en: "Famous Korean cultural concept: 'Tact / Reading the room'",
+                    prompt_es: "Famoso concepto cultural coreano: 'Tacto / Darse cuenta del ambiente'",
+                    sentence: "사회생활 잘하려면 [눈치]가 빨라야 해.",
+                    cat: "Slang",
+                    nuance_en: "The sixth sense of sensing other people's feelings and unspoken vibes.",
+                    nuance_es: "El sexto sentido de percibir el estado de ánimo y ambiente sin que nadie hable."
+                },
+                {
+                    target: "티엠아이",
+                    targetPron: "ti-em-a-i",
+                    synonyms: ["tmi", "TMI"],
+                    prompt_en: "Konglish term: 'TMI (Too much unnecessary information)'",
+                    prompt_es: "Término adoptado: 'TMI (Demasiada información innecesaria)'",
+                    sentence: "오늘 아침 뭐 먹었는지는 그냥 [티엠아이]야.",
+                    cat: "Slang",
+                    nuance_en: "Koreans love sharing small harmless personal facts labeled as 'TMI'!",
+                    nuance_es: "A los coreanos les encanta compartir datos curiosos diciendo que es 'TMI'."
+                },
+                {
+                    target: "행복해",
+                    targetPron: "haeng-bok-hae",
+                    synonyms: ["행복해요", "haengbokhae"],
+                    prompt_en: "Pure positive feeling: 'I am so happy!'",
+                    prompt_es: "Pura emoción positiva: '¡Soy tan feliz!'",
+                    sentence: "좋아하는 K-드라마 볼 때 제일 [행복해]!",
+                    cat: "Slang",
+                    nuance_en: "Share this happiness whenever you reach a milestone in Korean!",
+                    nuance_es: "¡Comparte esta alegría cada vez que aprendas una nueva frase en coreano!"
+                }
+            ]
+        };
+
+        const dailyVoca = [
+            { hangul: "감사합니다", pron: "gam-sa-ham-ni-da", en: "Thank you (Polite)", es: "Gracias (Formal)", cat: "travel", level: "Lv.1" },
+            { hangul: "진짜요", pron: "jin-jja-yo", en: "Really?! (K-Drama staple)", es: "¿En serio? (Clásico de K-Drama)", cat: "kdrama", level: "Lv.2" },
+            { hangul: "대박", pron: "dae-bak", en: "Awesome! / Jackpot!", es: "¡Increíble! / ¡Genial!", cat: "kdrama", level: "Lv.2" },
+            { hangul: "사랑해요", pron: "sa-rang-hae-yo", en: "I love you (K-Pop)", es: "Te amo (K-Pop)", cat: "kpop", level: "Lv.4" },
+            { hangul: "화이팅", pron: "hwa-i-ting", en: "Cheer up! / You got this!", es: "¡Ánimo! / ¡A por ello!", cat: "kdrama", level: "Lv.2" },
+            { hangul: "멘붕", pron: "men-bung", en: "Mental breakdown / Panic", es: "Colapso mental / Pánico", cat: "slang", level: "Lv.5" },
+            { hangul: "꿀잼", pron: "kkul-jaem", en: "Super fun / Hilarious", es: "Súper divertido / Buenísimo", cat: "slang", level: "Lv.5" },
+            { hangul: "심쿵", pron: "sim-kung", en: "Heart flutter / Butterfly", es: "Flechazo / Vuelco al corazón", cat: "kpop", level: "Lv.4" },
+            { hangul: "얼마예요", pron: "eol-ma-ye-yo", en: "How much is this?", es: "¿Cuánto cuesta esto?", cat: "travel", level: "Lv.1" },
+            { hangul: "맛있어요", pron: "ma-si-sseo-yo", en: "It's delicious!", es: "¡Está delicioso!", cat: "travel", level: "Lv.1" },
+            { hangul: "눈치", pron: "nun-chi", en: "Reading the room / Tact", es: "Tacto / Darse cuenta del ambiente", cat: "slang", level: "Lv.5" },
+            { hangul: "수고했어요", pron: "su-go-hae-sseo-yo", en: "You worked so hard today!", es: "¡Buen trabajo hoy!", cat: "kpop", level: "Lv.4" }
+        ];
+
+        // ==========================================
+        // 3. APP STATE & PERSISTENCE
+        // ==========================================
+        let currentLevel = parseInt(localStorage.getItem('kTalkLevel') || '1');
+        let quizIdx = 0;
+        let reviewList = JSON.parse(localStorage.getItem('kTalkReview') || '[]');
+        let bookmarkedWords = JSON.parse(localStorage.getItem('kTalkBookmarks') || '[]');
+        let isReviewMode = false;
+        let activeVocaCategory = 'all';
+
+        // Gamification States
+        let exp = parseInt(localStorage.getItem('kTalkExp') || '0');
+        let comboCount = 0;
+        let streakDays = parseInt(localStorage.getItem('kTalkStreak') || '1');
+        let hintStep = 0;
+
+        // Attendance & Auto-Resume States
+        let attendanceLog = JSON.parse(localStorage.getItem('kTalkAttendanceLog') || '{}');
+        let lastProgress = JSON.parse(localStorage.getItem('kTalkLastProgress') || 'null');
+        let calendarYear = new Date().getFullYear();
+        let calendarMonth = new Date().getMonth();
+
+        // Audio & TTS
+        let speechRate = 1.0;
+        let koreanVoice = null;
+        let flashcardIdx = 0;
+        let isCardFlipped = false;
+
+        // PWA Install Event deferred prompt
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const pwaBanner = document.getElementById('pwa-install-banner');
+            if (pwaBanner) pwaBanner.classList.remove('hidden');
+        });
+
+        // ==========================================
+        // 4. KOREAN TTS & AUDIO SYNTHESIZER
+        // ==========================================
+        function initTTS() {
+            if (!('speechSynthesis' in window)) return;
+            const loadVoices = () => {
+                const voices = window.speechSynthesis.getVoices();
+                if (!voices || voices.length === 0) return;
+                koreanVoice = voices.find(v => v.lang.startsWith('ko') && (v.name.includes('Yuna') || v.name.includes('Heami') || v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Korean')))
+                           || voices.find(v => v.lang.startsWith('ko'))
+                           || voices[0];
+            };
+            loadVoices();
+            if (window.speechSynthesis.onvoiceschanged !== undefined) {
+                window.speechSynthesis.onvoiceschanged = loadVoices;
+            }
+        }
+
+        function speakKorean(text) {
+            if (!text || !('speechSynthesis' in window)) return;
+            try {
+                window.speechSynthesis.cancel();
+                const u = new SpeechSynthesisUtterance(text);
+                u.lang = 'ko-KR';
+                u.rate = speechRate;
+                u.pitch = 1.0;
+                if (koreanVoice) u.voice = koreanVoice;
+
+                const speakerBtn = document.getElementById('speaker-btn');
+                if (speakerBtn) speakerBtn.classList.add('animate-pulse', 'ring-2', 'ring-rose-400');
+
+                u.onend = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
+                u.onerror = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
+
+                window.speechSynthesis.speak(u);
+            } catch (e) {
+                console.error("TTS error:", e);
+            }
+        }
+
+        function speakCurrentSentence() {
+            const list = getActiveQuizList();
+            if (list && list[quizIdx]) {
+                speakKorean(list[quizIdx].sentence.replace(/[\[\]]/g, ''));
+            }
+        }
+
+        // Web Audio Synthesizer (Ding-Dong / Buzz)
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playCorrectSound() {
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } catch (e) {}
+        }
+
+        function playWrongSound() {
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.linearRampToValueAtTime(146.83, now + 0.2);
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } catch (e) {}
+        }
+
+        // ==========================================
+        // 5. LANGUAGE TOGGLE (EN <-> ES)
+        // ==========================================
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'es' : 'en';
+            localStorage.setItem('kTalkLang', currentLang);
+            applyLanguage();
+            loadQuiz();
+            if (!document.getElementById('section-flashcard').classList.contains('hidden')) loadFlashCard();
+            if (!document.getElementById('section-voca').classList.contains('hidden')) renderVocaList();
+            renderAttendanceCalendar();
+            showToast(currentLang === 'en' ? "Language switched to English 🇺🇸" : "Idioma cambiado a Español 🇪🇸");
+        }
+
+        function applyLanguage() {
+            const t = i18n[currentLang];
+            document.getElementById('lang-flag').innerText = t.flag;
+            document.getElementById('lang-label').innerText = t.langLabel;
+            document.getElementById('app-tagline').innerText = t.tagline;
+            document.getElementById('level-badge').innerText = t.levelNames[currentLevel - 1];
+            document.getElementById('test-btn-text').innerText = t.testBtn;
+            document.getElementById('pwa-banner-title').innerText = t.pwaTitle;
+            document.getElementById('pwa-banner-desc').innerText = t.pwaDesc;
+            document.getElementById('pwa-btn-text').innerText = t.pwaBtn;
+            document.getElementById('resume-banner-label').innerText = t.resumeLabel;
+            document.getElementById('card-mode-label').innerText = t.cardMode;
+            document.getElementById('btn-audio-label').innerText = t.nativeAudio;
+            document.getElementById('pron-label').innerText = t.pronLabel;
+            document.getElementById('check-ans-btn').innerText = t.checkAns;
+            document.getElementById('hint-btn-text').innerText = t.hint;
+            document.getElementById('next-btn-text').innerText = t.nextQuiz;
+            document.getElementById('user-answer').placeholder = t.inputPlaceholder;
+
+            // Flashcards
+            document.getElementById('fc-header-title').innerText = t.fcTitle;
+            document.getElementById('fc-header-subtitle').innerText = t.fcSub;
+            document.getElementById('fc-tap-flip').innerText = t.fcTap;
+            document.getElementById('fc-audio-btn-text').innerText = t.fcListen;
+            document.getElementById('fc-back-title').innerText = t.fcCulture;
+            document.getElementById('fc-back-flip').innerText = t.fcBackFlip;
+            document.getElementById('fc-bookmark-btn').innerText = t.fcBookmark;
+            document.getElementById('fc-next-card').innerText = t.fcNext;
+
+            // Voca
+            document.getElementById('voca-header-title').innerText = t.vocaTitle;
+            document.getElementById('voca-header-sub').innerText = t.vocaSub;
+            document.getElementById('voca-fav-filter').innerHTML = `<i class="fa-solid fa-star mr-1"></i> ${t.vocaFav}`;
+
+            // Review
+            document.getElementById('review-header-title').innerText = t.reviewTitle;
+            document.getElementById('review-header-badge').innerText = t.reviewBadge;
+            document.getElementById('review-header-desc').innerText = t.reviewDesc;
+            document.getElementById('review-start-btn').innerText = t.reviewStart;
+
+            // Stats
+            document.getElementById('tier-name').innerText = t.leagueName;
+            document.getElementById('stats-total-exp-label').innerText = t.totalExp;
+            document.getElementById('stats-streak-label').innerText = t.streak;
+            document.getElementById('stats-wrong-label').innerText = t.wordsReview;
+            document.getElementById('cal-header-title').innerText = t.calTitle;
+            document.getElementById('cal-header-desc').innerText = t.calDesc;
+            document.getElementById('monetize-title').innerText = t.proTitle;
+            document.getElementById('monetize-desc').innerText = t.proDesc;
+
+            // Navigation
+            document.getElementById('nav-label-quiz').innerText = t.navQuiz;
+            document.getElementById('nav-label-fc').innerText = t.navFc;
+            document.getElementById('nav-label-voca').innerText = t.navVoca;
+            document.getElementById('nav-label-review').innerText = t.navReview;
+            document.getElementById('nav-label-stats').innerText = t.navStreak;
+
+            updateResumeBanner();
+        }
+
+        // ==========================================
+        // 6. SAYVOCA K-TALK QUIZ ENGINE
+        // ==========================================
+        function getActiveQuizList() {
+            if (isReviewMode && reviewList.length > 0) return reviewList;
+            return allQuizzes[currentLevel] || allQuizzes[1];
+        }
+
+        function loadQuiz() {
+            const list = getActiveQuizList();
+            if (quizIdx >= list.length) quizIdx = 0;
+            if (quizIdx < 0) quizIdx = list.length - 1;
+            const q = list[quizIdx];
+            hintStep = 0;
+
+            const t = i18n[currentLang];
+            document.getElementById('quiz-prompt').innerText = currentLang === 'es' ? q.prompt_es : q.prompt_en;
+            document.getElementById('quiz-pron').innerText = `[ ${q.targetPron} ]`;
+            document.getElementById('quiz-category').innerHTML = isReviewMode
+                ? `<i class="fa-solid fa-fire mr-1 text-rose-400"></i> ${currentLang === 'es' ? 'Repaso' : 'Review'} (${q.wrongCount || 1})`
+                : `<i class="fa-solid fa-tag mr-1"></i> ${q.cat}`;
+            document.getElementById('quiz-progress').innerText = `${quizIdx + 1} / ${list.length}`;
+
+            // Blank formatting in Korean sentence
+            const blankedSentence = q.sentence.replace(q.target, `<span id="target-blank" class="text-rose-400 font-black border-b-2 border-rose-500 px-2 py-0.5 bg-rose-950/60 rounded">_____</span>`);
+            document.getElementById('quiz-sentence-box').innerHTML = blankedSentence;
+
+            document.getElementById('user-answer').value = '';
+            document.getElementById('result-box').classList.add('hidden');
+            document.getElementById('hint-btn-text').innerText = t.hint;
+            document.getElementById('hint-step').innerText = "1";
+
+            renderLetterSlots(q.target, '');
+            updateBookmarkButton();
+            updateReviewBadge();
+            updateResumeBanner();
+        }
+
+        // SayVoca Letter/Syllable Slots: [ 감 ][ 사 ][ 합 ][ 니 ][ 다 ]
+        function renderLetterSlots(targetWord, typed) {
+            const container = document.getElementById('letter-slots-container');
+            const cleanWord = targetWord.replace(/\s+/g, '');
+            const cleanTyped = (typed || '').replace(/\s+/g, '');
+
+            let html = '';
+            for (let i = 0; i < cleanWord.length; i++) {
+                let charToShow = '_';
+                let isFilled = false;
+                let isHint = false;
+
+                if (i < cleanTyped.length) {
+                    charToShow = cleanTyped[i];
+                    isFilled = true;
+                } else if (hintStep >= 1 && i === 0) {
+                    charToShow = cleanWord[0];
+                    isHint = true;
+                } else if (hintStep >= 2 && i === 1) {
+                    charToShow = cleanWord[1];
+                    isHint = true;
+                }
+
+                const styleClass = isFilled
+                    ? "border-rose-500 bg-rose-950/80 text-rose-300 scale-105"
+                    : (isHint
+                        ? "border-amber-400 bg-amber-950 text-amber-300 animate-pulse"
+                        : "border-slate-700 bg-slate-900 text-slate-500");
+
+                html += `<div class="w-9 h-11 rounded-xl border-2 flex items-center justify-center font-bold text-base shadow-inner transition-all ${styleClass}">${charToShow}</div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function onAnswerInput(val) {
+            const list = getActiveQuizList();
+            const q = list[quizIdx];
+            renderLetterSlots(q.target, val.trim());
+        }
+
+        function revealNextHint() {
+            const list = getActiveQuizList();
+            const q = list[quizIdx];
+            hintStep = Math.min(3, hintStep + 1);
+
+            renderLetterSlots(q.target, document.getElementById('user-answer').value.trim());
+            document.getElementById('hint-step').innerText = Math.min(3, hintStep + 1);
+
+            if (hintStep === 1) {
+                showToast(`💡 1st Syllable: '${q.target[0]}'`);
+            } else if (hintStep === 2) {
+                showToast(`💡 2nd Syllable: '${q.target[1] || ''}'`);
+            } else {
+                const nuance = currentLang === 'es' ? q.nuance_es : q.nuance_en;
+                showToast(`💡 Tip: ${nuance}`);
+            }
+        }
+
+        function checkAnswer() {
+            const list = getActiveQuizList();
+            const q = list[quizIdx];
+            const raw = document.getElementById('user-answer').value.trim().toLowerCase().replace(/[.,!?\s]/g, '');
+            const targetClean = q.target.toLowerCase().replace(/[.,!?\s]/g, '');
+            const targetPronClean = q.targetPron.toLowerCase().replace(/[-.,!?\s]/g, '');
+            const box = document.getElementById('result-box');
+            box.classList.remove('hidden');
+
+            const isEn = currentLang === 'en';
+            const nuance = isEn ? q.nuance_en : q.nuance_es;
+
+            // 1. Exact Hangul or Exact Romanization match
+            if (raw && (raw === targetClean || raw === targetPronClean || raw === q.sentence.replace(/[.,!?\s]/g, '').toLowerCase())) {
+                comboCount++;
+                const bonusPoints = comboCount >= 3 ? 15 : 10;
+                addExp(bonusPoints);
+                playCorrectSound();
+
+                if (comboCount % 3 === 0) {
+                    confetti({ particleCount: 70, spread: 60, origin: { y: 0.6 } });
+                }
+
+                box.className = "p-4 rounded-2xl text-sm font-medium bg-emerald-950/80 text-emerald-200 border border-emerald-700/80 space-y-2";
+                box.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-black text-emerald-300 text-base"><i class="fa-solid fa-circle-check mr-1.5"></i> ${isEn ? 'Correct!' : '¡Correcto!'} (+${bonusPoints} EXP)</span>
+                        <span class="text-xs bg-emerald-900 text-emerald-300 px-2 py-0.5 rounded-full font-bold">${comboCount} COMBO! 🔥</span>
+                    </div>
+                    <div class="text-base text-white font-bold bg-slate-900/80 p-2.5 rounded-xl border border-emerald-800/50">${q.sentence.replace(/[\[\]]/g, '')}</div>
+                    <div class="text-xs text-emerald-300 pt-1 leading-relaxed"><i class="fa-solid fa-lightbulb mr-1"></i> ${nuance}</div>
+                `;
+
+                const targetBlank = document.getElementById('target-blank');
+                if (targetBlank) {
+                    targetBlank.innerText = q.target;
+                    targetBlank.className = "text-emerald-400 font-black px-2 py-0.5 bg-emerald-950 rounded border-b-2 border-emerald-500";
+                }
+
+                speakKorean(q.sentence.replace(/[\[\]]/g, ''));
+                recordDailyProgress(true, bonusPoints);
+
+                if (isReviewMode) {
+                    q.streak = (q.streak || 0) + 1;
+                    if (q.streak >= 3) {
+                        reviewList = reviewList.filter(item => item.target !== q.target);
+                        confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
+                        showToast(isEn ? "🎉 3 Streak! Mastered and graduated from review!" : "🎉 ¡3 racha! ¡Completado y graduado del repaso!");
+                        if (reviewList.length === 0) isReviewMode = false;
+                    }
+                    saveReview();
+                }
+            }
+            // 2. Intelligent Synonym Recognition
+            else if (raw && q.synonyms && q.synonyms.some(s => s.toLowerCase().replace(/[-.,!?\s]/g, '') === raw)) {
+                playCorrectSound();
+                box.className = "p-4 rounded-2xl text-sm font-medium bg-amber-950/80 text-amber-200 border border-amber-700 space-y-2";
+                box.innerHTML = `
+                    <div class="font-black text-amber-300 text-sm">
+                        <i class="fa-solid fa-star-half-stroke mr-1.5"></i> ${isEn ? 'Great Synonym / Match!' : '¡Excelente sinónimo / respuesta!'}
+                    </div>
+                    <p class="text-xs text-amber-200 leading-relaxed">
+                        ${isEn ? `You typed a natural phrase, but here let's master the standard expression: <b>'${q.target}' [${q.targetPron}]</b>!` : `Escribiste una frase natural, pero aquí practiquemos la forma clave: <b>'${q.target}' [${q.targetPron}]</b>!`}
+                    </p>
+                    <div class="text-xs text-slate-300 bg-slate-900 p-2 rounded-lg border border-amber-800">${q.sentence.replace(/[\[\]]/g, '')}</div>
+                `;
+                speakKorean(q.sentence.replace(/[\[\]]/g, ''));
+                recordDailyProgress(true, 5);
+            }
+            // 3. Incorrect Answer
+            else {
+                comboCount = 0;
+                updateExpUI();
+                playWrongSound();
+
+                box.className = "p-4 rounded-2xl text-sm font-medium bg-rose-950/80 text-rose-200 border border-rose-800 space-y-2";
+                box.innerHTML = `
+                    <div class="font-black text-rose-400 text-sm"><i class="fa-solid fa-circle-xmark mr-1.5"></i> ${isEn ? 'Not quite! The correct answer is' : '¡Casi! La respuesta correcta es'}: <span class="underline font-black text-white">${q.target}</span> [${q.targetPron}]</div>
+                    <div class="text-sm text-slate-200 font-bold bg-slate-900 p-2.5 rounded-xl border border-rose-900">${q.sentence.replace(/[\[\]]/g, '')}</div>
+                    <div class="text-xs text-rose-300 pt-1 leading-relaxed"><i class="fa-solid fa-info-circle mr-1"></i> ${nuance} (${isEn ? 'Saved to Ebbinghaus Review' : 'Guardado en Repaso Inteligente'})</div>
+                `;
+
+                speakKorean(q.sentence.replace(/[\[\]]/g, ''));
+                addToReview(q);
+                recordDailyProgress(false, 0);
+            }
+        }
+
+        function addToReview(q) {
+            const existing = reviewList.find(item => item.target === q.target);
+            if (existing) {
+                existing.wrongCount = (existing.wrongCount || 1) + 1;
+                existing.streak = 0;
+                existing.lastWrong = Date.now();
+            } else {
+                reviewList.push({ ...q, wrongCount: 1, streak: 0, lastWrong: Date.now() });
+            }
+            reviewList.sort((a, b) => (b.wrongCount - a.wrongCount) || (a.streak - b.streak) || (b.lastWrong - a.lastWrong));
+            saveReview();
+        }
+
+        function saveReview() {
+            localStorage.setItem('kTalkReview', JSON.stringify(reviewList));
+            updateReviewBadge();
+        }
+
+        function updateReviewBadge() {
+            const badge = document.getElementById('review-count-badge');
+            if (reviewList.length > 0) {
+                badge.innerText = reviewList.length;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function nextQuiz() {
+            const list = getActiveQuizList();
+            if (!isReviewMode && quizIdx + 1 >= list.length) {
+                if (currentLevel < 5) {
+                    currentLevel++;
+                    quizIdx = 0;
+                    localStorage.setItem('kTalkLevel', currentLevel);
+                    document.getElementById('level-badge').innerText = i18n[currentLang].levelNames[currentLevel - 1];
+                    confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
+                    showToast(`🎉 Level Up! ${i18n[currentLang].levelNames[currentLevel - 1]} unlocked!`);
+                } else {
+                    quizIdx = 0;
+                    showToast("🏆 You completed all levels! Reviewing from #1.");
+                }
+            } else {
+                quizIdx++;
+            }
+            saveCurrentPosition();
+            loadQuiz();
+        }
+
+        function prevQuiz() {
+            quizIdx--;
+            saveCurrentPosition();
+            loadQuiz();
+        }
+
+        function saveCurrentPosition() {
+            if (isReviewMode) return;
+            const q = getActiveQuizList()[quizIdx];
+            if (!q) return;
+            lastProgress = {
+                level: currentLevel,
+                index: quizIdx,
+                levelName: i18n[currentLang].levelNames[currentLevel - 1],
+                word: q.target,
+                pron: q.targetPron,
+                prompt: currentLang === 'es' ? q.prompt_es : q.prompt_en,
+                date: getTodayString(),
+                time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+            };
+            localStorage.setItem('kTalkLastProgress', JSON.stringify(lastProgress));
+            updateResumeBanner();
+        }
+
+        function restartCurrentLevel() {
+            quizIdx = 0;
+            saveCurrentPosition();
+            loadQuiz();
+            showToast(`🔄 Starting ${i18n[currentLang].levelNames[currentLevel - 1]} from #1.`);
+        }
+
+        function changeLevel() {
+            isReviewMode = false;
+            currentLevel = currentLevel >= 5 ? 1 : currentLevel + 1;
+            localStorage.setItem('kTalkLevel', currentLevel);
+            document.getElementById('level-badge').innerText = i18n[currentLang].levelNames[currentLevel - 1];
+            quizIdx = 0;
+            loadQuiz();
+            showToast(`Level set to [${i18n[currentLang].levelNames[currentLevel - 1]}]`);
+        }
+
+        function startLevelTest() {
+            const isEn = currentLang === 'en';
+            const qText = isEn
+                ? "Korean Quick Diagnostic Quiz!\nWhat is the famous K-Drama word for 'Awesome / Jackpot'?\n(Type in Hangul or Latin: e.g. daebak)\n(Press Cancel to skip)"
+                : "¡Test Rápido de Diagnóstico!\n¿Cuál es la palabra famosa para '¡Increíble / Genial!'?\n(Escribe en Hangul o letras: ej. daebak)\n(Pulsa Cancelar para omitir)";
+            const ans = prompt(qText);
+            if (ans && (ans.trim().toLowerCase().includes('대박') || ans.trim().toLowerCase().includes('daebak'))) {
+                currentLevel = 2;
+                showToast(isEn ? "Passed! Set to Lv.2 K-Drama level." : "¡Aprobado! Nivel Lv.2 K-Drama activado.");
+            } else {
+                currentLevel = 1;
+                showToast(isEn ? "Starting from solid foundation: Lv.1 Survival." : "Comenzando desde las bases: Lv.1 Supervivencia.");
+            }
+            localStorage.setItem('kTalkLevel', currentLevel);
+            document.getElementById('level-badge').innerText = i18n[currentLang].levelNames[currentLevel - 1];
+            isReviewMode = false;
+            quizIdx = 0;
+            loadQuiz();
+        }
+
+        // Voice Recognition (Speech-to-Text: ko-KR)
+        function startVoiceRecognition() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                showToast(currentLang === 'en' ? "Voice recognition not supported in this browser. Use Chrome or Safari." : "Reconocimiento de voz no soportado. Usa Chrome o Safari.");
+                return;
+            }
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'ko-KR';
+            const btn = document.getElementById('mic-btn');
+            btn.classList.add('animate-pulse', 'bg-rose-600', 'text-white');
+            showToast(currentLang === 'en' ? "🎙️ Speak aloud in Korean!" : "🎙️ ¡Habla en voz alta en coreano!");
+
+            recognition.onresult = function(event) {
+                const transcript = event.results[0][0].transcript.replace(/[.,!?]/g, '').trim();
+                document.getElementById('user-answer').value = transcript;
+                onAnswerInput(transcript);
+                checkAnswer();
+            };
+            recognition.onend = function() {
+                btn.classList.remove('animate-pulse', 'bg-rose-600', 'text-white');
+            };
+            recognition.start();
+        }
+
+        // ==========================================
+        // 7. FLASHCARDS (3D FLIP MODE)
+        // ==========================================
+        function loadFlashCard() {
+            const list = getActiveQuizList();
+            if (flashcardIdx >= list.length) flashcardIdx = 0;
+            if (flashcardIdx < 0) flashcardIdx = list.length - 1;
+            const q = list[flashcardIdx];
+
+            document.getElementById('fc-progress').innerText = `${flashcardIdx + 1} / ${list.length}`;
+            document.getElementById('fc-category').innerText = q.cat;
+            document.getElementById('fc-hangul').innerText = q.target;
+            document.getElementById('fc-pron').innerText = `[ ${q.targetPron} ]`;
+            document.getElementById('fc-meaning').innerText = currentLang === 'es' ? q.prompt_es : q.prompt_en;
+            document.getElementById('fc-nuance').innerText = currentLang === 'es' ? q.nuance_es : q.nuance_en;
+            document.getElementById('fc-example').innerText = `"${q.sentence.replace(/[\[\]]/g, '')}"`;
+
+            isCardFlipped = false;
+            document.getElementById('flashcard-inner').classList.remove('rotate-y-180');
+        }
+
+        function flipFlashCard() {
+            isCardFlipped = !isCardFlipped;
+            const inner = document.getElementById('flashcard-inner');
+            if (isCardFlipped) {
+                inner.classList.add('rotate-y-180');
+            } else {
+                inner.classList.remove('rotate-y-180');
+            }
+        }
+
+        function nextFlashCard() { flashcardIdx++; loadFlashCard(); }
+        function prevFlashCard() { flashcardIdx--; loadFlashCard(); }
+
+        // ==========================================
+        // 8. VOCABULARY BANK
+        // ==========================================
+        function renderVocaList() {
+            const container = document.getElementById('voca-list-container');
+            let list = dailyVoca;
+            if (activeVocaCategory !== 'all') {
+                list = list.filter(v => v.cat === activeVocaCategory);
+            }
+
+            let html = '';
+            list.forEach(item => {
+                const isBookmarked = bookmarkedWords.includes(item.hangul);
+                html += `
+                    <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex justify-between items-center shadow-xs">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs bg-rose-950 text-rose-300 border border-rose-800/80 px-2 py-0.5 rounded-md font-bold">${item.level}</span>
+                                <span class="text-lg font-black text-white">${item.hangul}</span>
+                                <span class="text-xs text-rose-400 font-mono">[${item.pron}]</span>
+                            </div>
+                            <p class="text-xs text-slate-300">${currentLang === 'es' ? item.es : item.en}</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button onclick="speakKorean('${item.hangul}')" class="w-8 h-8 rounded-xl bg-slate-700 hover:bg-slate-600 active:scale-95 text-rose-300 flex items-center justify-center transition">
+                                <i class="fa-solid fa-volume-high text-xs"></i>
+                            </button>
+                            <button onclick="toggleBookmarkWord('${item.hangul}')" class="w-8 h-8 rounded-xl bg-slate-700 hover:bg-slate-600 active:scale-95 text-amber-400 flex items-center justify-center transition">
+                                <i class="${isBookmarked ? 'fa-solid' : 'fa-regular'} fa-star text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function filterVocaCategory(cat) {
+            activeVocaCategory = cat;
+            document.querySelectorAll('#voca-categories .cat-pill').forEach(btn => {
+                if (btn.dataset.cat === cat) {
+                    btn.className = "cat-pill active bg-rose-600 text-white px-3 py-1.5 rounded-xl shrink-0 transition font-bold";
+                } else {
+                    btn.className = "cat-pill bg-slate-800 text-slate-400 hover:text-white px-3 py-1.5 rounded-xl shrink-0 transition font-bold";
+                }
+            });
+            renderVocaList();
+        }
+
+        function toggleBookmarkWord(hangul) {
+            if (bookmarkedWords.includes(hangul)) {
+                bookmarkedWords = bookmarkedWords.filter(w => w !== hangul);
+                showToast(`Removed from favorites: ${hangul}`);
+            } else {
+                bookmarkedWords.push(hangul);
+                showToast(`Saved to favorites: ${hangul}`);
+            }
+            localStorage.setItem('kTalkBookmarks', JSON.stringify(bookmarkedWords));
+            renderVocaList();
+            updateBookmarkButton();
+        }
+
+        function toggleBookmarkCurrent() {
+            const list = getActiveQuizList();
+            const q = list[quizIdx];
+            if (q) toggleBookmarkWord(q.target);
+        }
+
+        function updateBookmarkButton() {
+            const list = getActiveQuizList();
+            const q = list[quizIdx];
+            const star = document.getElementById('quiz-star-btn');
+            if (!q || !star) return;
+            const isFav = bookmarkedWords.includes(q.target);
+            star.className = isFav ? "text-amber-400 text-base active:scale-125 transition" : "text-slate-500 hover:text-amber-400 text-base active:scale-125 transition";
+        }
+
+        function filterBookmarkedVoca() {
+            if (bookmarkedWords.length === 0) {
+                showToast(currentLang === 'en' ? "No favorites yet. Tap the star to bookmark words!" : "No tienes favoritos aún. ¡Toca la estrella para guardar!");
+                return;
+            }
+            const container = document.getElementById('voca-list-container');
+            const list = dailyVoca.filter(v => bookmarkedWords.includes(v.hangul));
+            let html = '';
+            list.forEach(item => {
+                html += `
+                    <div class="bg-slate-800 p-4 rounded-2xl border border-amber-500/30 flex justify-between items-center shadow-xs">
+                        <div class="space-y-1">
+                            <span class="text-lg font-black text-amber-300">${item.hangul}</span>
+                            <span class="text-xs text-rose-400 font-mono ml-2">[${item.pron}]</span>
+                            <p class="text-xs text-slate-300">${currentLang === 'es' ? item.es : item.en}</p>
+                        </div>
+                        <button onclick="speakKorean('${item.hangul}')" class="w-8 h-8 rounded-xl bg-slate-700 text-rose-300 flex items-center justify-center">
+                            <i class="fa-solid fa-volume-high text-xs"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // ==========================================
+        // 9. EBBINGHAUS SMART REVIEW
+        // ==========================================
+        function renderReviewList() {
+            const container = document.getElementById('review-list-container');
+            if (reviewList.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-slate-800 p-6 rounded-3xl border border-slate-700 text-center space-y-2 text-slate-400">
+                        <i class="fa-solid fa-circle-check text-3xl text-emerald-400"></i>
+                        <p class="font-bold text-white">${currentLang === 'en' ? 'No words to review!' : '¡No hay palabras para repasar!'}</p>
+                        <p class="text-xs">${currentLang === 'en' ? 'Mistakes in the quiz will automatically appear here.' : 'Los errores del cuestionario aparecerán automáticamente aquí.'}</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            reviewList.forEach((q, idx) => {
+                html += `
+                    <div class="bg-slate-800 p-4 rounded-2xl border border-purple-800/50 flex justify-between items-center shadow-xs">
+                        <div class="space-y-1">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-[10px] bg-rose-950 text-rose-300 px-2 py-0.5 rounded font-black">${q.wrongCount || 1} Wrong</span>
+                                <span class="font-black text-white text-base">${q.target}</span>
+                                <span class="text-xs text-rose-400 font-mono">[${q.targetPron}]</span>
+                            </div>
+                            <p class="text-xs text-slate-300">${currentLang === 'es' ? q.prompt_es : q.prompt_en}</p>
+                        </div>
+                        <button onclick="speakKorean('${q.target}')" class="w-8 h-8 rounded-xl bg-slate-700 text-rose-300 flex items-center justify-center">
+                            <i class="fa-solid fa-volume-high text-xs"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function startReviewQuiz() {
+            if (reviewList.length === 0) {
+                showToast(currentLang === 'en' ? "No review words! Solve some quizzes first." : "¡No hay palabras de repaso! Resuelve cuestionarios primero.");
+                return;
+            }
+            isReviewMode = true;
+            quizIdx = 0;
+            switchTab('quiz');
+            loadQuiz();
+            showToast(currentLang === 'en' ? "🔥 Starting Smart Review Mode!" : "🔥 ¡Modo Repaso Inteligente iniciado!");
+        }
+
+        function clearReviewList() {
+            if (confirm(currentLang === 'en' ? "Clear all review items?" : "¿Borrar todas las palabras de repaso?")) {
+                reviewList = [];
+                isReviewMode = false;
+                saveReview();
+                renderReviewList();
+                showToast(currentLang === 'en' ? "Review note cleared." : "Lista de repaso vaciada.");
+            }
+        }
+
+        // ==========================================
+        // 10. ATTENDANCE & AUTO-RESUME ENGINE
+        // ==========================================
+        function getTodayString() {
+            const d = new Date();
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function getYesterdayString() {
+            const d = new Date();
+            d.setDate(d.getDate() - 1);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function recordDailyProgress(isCorrect, pointsGained) {
+            const today = getTodayString();
+            const list = getActiveQuizList();
+            const q = list[quizIdx];
+            const isFirstToday = !attendanceLog[today];
+
+            if (isFirstToday) {
+                attendanceLog[today] = {
+                    date: today,
+                    solvedCount: 0,
+                    correctCount: 0,
+                    expGained: 0,
+                    lastLevel: currentLevel,
+                    lastIndex: quizIdx + 1,
+                    lastWord: q ? q.target : '',
+                    lastTime: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+                };
+
+                const yesterday = getYesterdayString();
+                if (attendanceLog[yesterday]) {
+                    streakDays = (parseInt(localStorage.getItem('kTalkStreak') || '1')) + 1;
+                } else {
+                    streakDays = 1;
+                }
+                localStorage.setItem('kTalkStreak', streakDays);
+
+                addExp(20);
+                confetti({ particleCount: 90, spread: 70, origin: { y: 0.5 } });
+                showToast(currentLang === 'en' ? `🌺 Today's attendance complete! (+20 EXP, ${streakDays} Day Streak 🔥)` : `🌺 ¡Asistencia completada! (+20 EXP, Racha de ${streakDays} días 🔥)`);
+            }
+
+            attendanceLog[today].solvedCount++;
+            if (isCorrect) attendanceLog[today].correctCount++;
+            attendanceLog[today].expGained += pointsGained;
+            attendanceLog[today].lastLevel = currentLevel;
+            attendanceLog[today].lastIndex = quizIdx + 1;
+            attendanceLog[today].lastWord = q ? q.target : '';
+            attendanceLog[today].lastTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
+            localStorage.setItem('kTalkAttendanceLog', JSON.stringify(attendanceLog));
+
+            // Auto-Resume: calculate and save next question index
+            let nextIdx = quizIdx + 1;
+            let nextLevel = currentLevel;
+            if (nextIdx >= list.length) {
+                if (currentLevel < 5) {
+                    nextLevel = currentLevel + 1;
+                    nextIdx = 0;
+                } else {
+                    nextIdx = 0;
+                }
+            }
+
+            lastProgress = {
+                level: nextLevel,
+                index: nextIdx,
+                solvedLevel: currentLevel,
+                solvedIndex: quizIdx,
+                levelName: i18n[currentLang].levelNames[nextLevel - 1],
+                word: q ? q.target : '',
+                pron: q ? q.targetPron : '',
+                date: today,
+                time: attendanceLog[today].lastTime
+            };
+            localStorage.setItem('kTalkLastProgress', JSON.stringify(lastProgress));
+
+            updateResumeBanner();
+            renderAttendanceCalendar();
+        }
+
+        function updateResumeBanner() {
+            const resumeEl = document.getElementById('resume-text');
+            const resumeBtn = document.getElementById('resume-btn');
+            if (!resumeEl) return;
+            const t = i18n[currentLang];
+
+            if (lastProgress) {
+                const isResumePoint = (currentLevel === lastProgress.level && quizIdx === lastProgress.index);
+                if (isResumePoint) {
+                    resumeEl.innerHTML = `<span class="text-rose-400 font-extrabold">${currentLang === 'es' ? 'En curso' : 'Active'}:</span> ${t.levelNames[lastProgress.level - 1]} (#${lastProgress.index + 1})`;
+                    if (resumeBtn) {
+                        resumeBtn.className = "bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center";
+                        resumeBtn.innerHTML = `<i class="fa-solid fa-rotate-left mr-1 text-[10px]"></i> ${t.restartBtn}`;
+                        resumeBtn.onclick = restartCurrentLevel;
+                    }
+                } else {
+                    resumeEl.innerHTML = `<span class="text-slate-400 font-bold">${currentLang === 'es' ? 'Siguiente' : 'Next up'}:</span> ${t.levelNames[lastProgress.level - 1]} (#${lastProgress.index + 1})`;
+                    if (resumeBtn) {
+                        resumeBtn.className = "bg-rose-600 hover:bg-rose-500 active:scale-95 text-white text-xs font-black px-3.5 py-1.5 rounded-xl shadow-xs transition flex items-center";
+                        resumeBtn.innerHTML = `${t.resumeBtn} <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>`;
+                        resumeBtn.onclick = resumeLastProgress;
+                    }
+                }
+            } else {
+                const q = getActiveQuizList()[quizIdx];
+                resumeEl.innerText = `${t.levelNames[currentLevel - 1]} (#${quizIdx + 1})`;
+                if (resumeBtn) {
+                    resumeBtn.className = "bg-rose-600 hover:bg-rose-500 active:scale-95 text-white text-xs font-black px-3.5 py-1.5 rounded-xl shadow-xs transition flex items-center";
+                    resumeBtn.innerHTML = `Start <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>`;
+                    resumeBtn.onclick = () => loadQuiz();
+                }
+            }
+        }
+
+        function resumeLastProgress() {
+            if (!lastProgress) return;
+            isReviewMode = false;
+            currentLevel = lastProgress.level;
+            quizIdx = lastProgress.index;
+            localStorage.setItem('kTalkLevel', currentLevel);
+            document.getElementById('level-badge').innerText = i18n[currentLang].levelNames[currentLevel - 1];
+            switchTab('quiz');
+            loadQuiz();
+            showToast(`📌 [${i18n[currentLang].levelNames[currentLevel - 1]} #${quizIdx + 1}]`);
+        }
+
+        function renderAttendanceCalendar() {
+            const monthNamesEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const monthNamesEs = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+            const monthNames = currentLang === 'es' ? monthNamesEs : monthNamesEn;
+
+            const monthEl = document.getElementById('calendar-month-year');
+            if (monthEl) monthEl.innerText = `${monthNames[calendarMonth]} ${calendarYear}`;
+
+            const todayStr = getTodayString();
+            const todayBadge = document.getElementById('attendance-today-badge');
+            if (todayBadge) {
+                if (attendanceLog[todayStr]) {
+                    todayBadge.className = "text-[10px] px-2.5 py-1 rounded-full font-black bg-emerald-950 text-emerald-300 border border-emerald-800 flex items-center";
+                    todayBadge.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-emerald-400"></i> ${i18n[currentLang].todayDone}`;
+                } else {
+                    todayBadge.className = "text-[10px] px-2.5 py-1 rounded-full font-black bg-amber-950 text-amber-300 border border-amber-800";
+                    todayBadge.innerHTML = i18n[currentLang].todayPending;
+                }
+            }
+
+            const grid = document.getElementById('calendar-days-grid');
+            if (!grid) return;
+
+            const firstDayIndex = new Date(calendarYear, calendarMonth, 1).getDay();
+            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+
+            let html = '';
+            for (let i = 0; i < firstDayIndex; i++) {
+                html += `<div class="p-1 text-slate-700"></div>`;
+            }
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const hasAttended = !!attendanceLog[dayStr];
+                const isToday = dayStr === todayStr;
+
+                let cellClass = "p-1.5 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition relative ";
+                if (hasAttended) {
+                    cellClass += "bg-rose-600 text-white shadow-xs hover:bg-rose-500 active:scale-95";
+                } else if (isToday) {
+                    cellClass += "bg-rose-950 text-rose-300 border-2 border-rose-500 font-black hover:bg-rose-900";
+                } else {
+                    cellClass += "bg-slate-900 text-slate-400 hover:bg-slate-800";
+                }
+
+                const stamp = hasAttended ? `<span class="text-[9px] block leading-none mt-0.5">🌺</span>` : `<span class="text-[9px] block leading-none mt-0.5 opacity-0">-</span>`;
+
+                html += `
+                    <div onclick="selectCalendarDate('${dayStr}')" class="${cellClass}" title="${dayStr}">
+                        <span class="text-xs leading-none">${d}</span>
+                        ${stamp}
+                    </div>
+                `;
+            }
+            grid.innerHTML = html;
+            selectCalendarDate(todayStr);
+        }
+
+        function selectCalendarDate(dateStr) {
+            const detailBox = document.getElementById('selected-date-detail');
+            if (!detailBox) return;
+
+            const record = attendanceLog[dateStr];
+            if (record) {
+                const rate = record.solvedCount > 0 ? Math.round((record.correctCount / record.solvedCount) * 100) : 0;
+                detailBox.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-slate-700 pb-1.5">
+                        <span class="font-black text-white text-xs"><i class="fa-solid fa-calendar-day mr-1 text-rose-400"></i> ${dateStr}</span>
+                        <span class="text-[10px] bg-rose-950 text-rose-300 border border-rose-800 px-2 py-0.5 rounded-full font-bold">Attended 🌺</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-1.5 py-1 text-center">
+                        <div class="bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                            <span class="text-[10px] text-slate-400 block">${currentLang === 'es' ? 'Resueltos' : 'Solved'}</span>
+                            <span class="font-black text-rose-400 text-sm">${record.solvedCount}</span>
+                        </div>
+                        <div class="bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                            <span class="text-[10px] text-slate-400 block">${currentLang === 'es' ? 'Precisión' : 'Accuracy'}</span>
+                            <span class="font-black text-emerald-400 text-sm">${rate}%</span>
+                        </div>
+                        <div class="bg-slate-950 p-1.5 rounded-xl border border-slate-800">
+                            <span class="text-[10px] text-slate-400 block">EXP</span>
+                            <span class="font-black text-amber-400 text-sm">+${record.expGained}</span>
+                        </div>
+                    </div>
+                    <div class="pt-1 flex items-center justify-between text-xs text-slate-300">
+                        <span>🚀 <b>Last:</b> ${record.lastWord}</span>
+                        <span class="text-[10px] text-slate-500 font-mono">${record.lastTime || ''}</span>
+                    </div>
+                `;
+            } else {
+                detailBox.innerHTML = `
+                    <div class="flex justify-between items-center text-slate-400">
+                        <span class="font-bold"><i class="fa-solid fa-calendar-day mr-1"></i> ${dateStr}</span>
+                        <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">${currentLang === 'es' ? 'Sin registro' : 'No activity'}</span>
+                    </div>
+                    <p class="text-[11px] text-slate-500 pt-1">${currentLang === 'es' ? 'Resuelve al menos 1 pregunta para obtener tu flor hibisco diaria.' : 'Solve at least 1 Korean question to collect your daily hibiscus flower.'}</p>
+                `;
+            }
+        }
+
+        function changeCalendarMonth(delta) {
+            calendarMonth += delta;
+            if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+            if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
+            renderAttendanceCalendar();
+        }
+
+        // ==========================================
+        // 11. GAMIFICATION & EXP
+        // ==========================================
+        function addExp(pts) {
+            exp += pts;
+            localStorage.setItem('kTalkExp', exp);
+            updateExpUI();
+        }
+
+        function updateExpUI() {
+            document.getElementById('stat-total-exp').innerText = exp;
+            document.getElementById('stat-streak').innerText = `${streakDays} ${currentLang === 'es' ? 'Días' : 'Days'} 🔥`;
+            document.getElementById('stat-wrong').innerText = reviewList.length;
+
+            const progress = exp % 100;
+            document.getElementById('exp-text').innerText = `${exp} EXP`;
+            document.getElementById('exp-bar').style.width = `${Math.min(100, progress)}%`;
+
+            const comboEl = document.getElementById('combo-display');
+            if (comboCount >= 2) {
+                comboEl.classList.remove('hidden');
+                document.getElementById('combo-count').innerText = comboCount;
+            } else {
+                comboEl.classList.add('hidden');
+            }
+        }
+
+        // ==========================================
+        // 12. MONETIZATION & PRO MODAL
+        // ==========================================
+        function openProModal() { document.getElementById('pro-modal').classList.remove('hidden'); }
+        function closeProModal() { document.getElementById('pro-modal').classList.add('hidden'); }
+
+        function simulateSubscription() {
+            alert(currentLang === 'en'
+                ? "🌟 Stripe / Apple In-App Purchase integration connects here!\nUsers subscribe at $4.99/mo for passive recurring revenue."
+                : "🌟 ¡Aquí se conecta la pasarela de pago (Stripe / Google In-App Purchase)!\nLos usuarios pagan $4.99/mes generando ingresos pasivos recurrentes.");
+            closeProModal();
+        }
+
+        function simulateRewardedAd() {
+            showToast(currentLang === 'en' ? "🎬 Simulating 5s Google AdMob rewarded video..." : "🎬 Simulando video con recompensa de Google AdMob...");
+            setTimeout(() => {
+                addExp(30);
+                confetti({ particleCount: 80, spread: 60 });
+                showToast(currentLang === 'en' ? "🎉 Ad complete! You earned 3 Free Hints and +30 EXP!" : "🎉 ¡Anuncio terminado! Ganaste 3 pistas gratis y +30 EXP!");
+                closeProModal();
+            }, 1800);
+        }
+
+        // ==========================================
+        // 13. PWA INSTALLATION TRIGGER
+        // ==========================================
+        function triggerPWAInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choice) => {
+                    if (choice.outcome === 'accepted') {
+                        showToast("🎉 K-Talk installed on your device!");
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                // If on iOS Safari
+                document.getElementById('pwa-guide-modal').classList.remove('hidden');
+            }
+        }
+
+        // ==========================================
+        // 14. NAVIGATION & INITIALIZATION
+        // ==========================================
+        function switchTab(tab) {
+            ['quiz', 'flashcard', 'voca', 'review', 'stats'].forEach(t => {
+                const sec = document.getElementById(`section-${t}`);
+                if (sec) sec.classList.add('hidden');
+                const nav = document.getElementById(`nav-${t}`);
+                if (nav) nav.className = "flex flex-col items-center py-1 px-3 text-slate-400 font-bold text-[11px] hover:text-rose-400 transition";
+            });
+
+            const activeSec = document.getElementById(`section-${tab}`);
+            if (activeSec) activeSec.classList.remove('hidden');
+
+            const activeNav = document.getElementById(`nav-${tab}`);
+            if (activeNav) activeNav.className = "flex flex-col items-center py-1 px-3 text-rose-500 font-black text-[11px] transition";
+
+            if (tab === 'quiz') loadQuiz();
+            if (tab === 'flashcard') loadFlashCard();
+            if (tab === 'voca') renderVocaList();
+            if (tab === 'review') renderReviewList();
+            if (tab === 'stats') {
+                updateExpUI();
+                renderAttendanceCalendar();
+            }
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 2500);
+        }
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW error:', err));
+        }
+
+        window.onload = () => {
+            initTTS();
+            applyLanguage();
+
+            // Auto-Resume from last progress
+            if (lastProgress && lastProgress.level) {
+                currentLevel = lastProgress.level;
+                quizIdx = lastProgress.index !== undefined ? lastProgress.index : 0;
+                localStorage.setItem('kTalkLevel', currentLevel);
+            }
+
+            updateExpUI();
+            updateResumeBanner();
+            renderAttendanceCalendar();
+            document.getElementById('level-badge').innerText = i18n[currentLang].levelNames[currentLevel - 1];
+            loadQuiz();
+            renderVocaList();
+
+            if (lastProgress) {
+                setTimeout(() => {
+                    showToast(currentLang === 'en'
+                        ? `👋 Welcome back! Resuming from [${i18n[currentLang].levelNames[currentLevel - 1]} #${quizIdx + 1}]`
+                        : `👋 ¡Bienvenido de nuevo! Continuando desde [${i18n[currentLang].levelNames[currentLevel - 1]} #${quizIdx + 1}]`);
+                }, 400);
+            }
+        };
+    </script>
+</body>
+</html>
