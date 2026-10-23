@@ -41,9 +41,9 @@
         </div>
 
         <div class="flex items-center space-x-2">
-            <!-- Language Switcher: EN / ES -->
-            <button onclick="toggleLanguage()" id="lang-switch-btn" class="bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 text-xs px-2.5 py-1.5 rounded-xl font-black transition flex items-center shadow-xs">
-                <span id="lang-flag" class="mr-1">🇺🇸</span> <span id="lang-label">EN</span>
+            <!-- Language Switcher: 5 Global Languages (Modal Trigger) -->
+            <button onclick="openLangModal()" id="lang-switch-btn" class="bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 text-xs px-2.5 py-1.5 rounded-xl font-black transition flex items-center shadow-xs">
+                <span id="lang-flag" class="mr-1">🇺🇸</span> <span id="lang-label">EN</span> <i class="fa-solid fa-chevron-down ml-1 text-[9px] text-slate-400"></i>
             </button>
 
             <!-- Level Badge -->
@@ -140,7 +140,7 @@
 
                 <!-- Prompt Question & Romanization -->
                 <div class="space-y-3 py-1">
-                    <!-- Meaning / Question in Current Lang (EN or ES) -->
+                    <!-- Meaning / Question in Current Lang (EN, ES, JA, ZH, TH) -->
                     <p id="quiz-prompt" class="text-xl font-black text-white leading-snug tracking-tight"></p>
                     
                     <!-- Korean Sentence with Target Blank -->
@@ -224,7 +224,7 @@
                         </button>
                     </div>
 
-                    <!-- BACK: Meaning in EN/ES + K-Drama Nuance -->
+                    <!-- BACK: Meaning in EN/ES/JA/ZH/TH + K-Drama Nuance -->
                     <div class="absolute inset-0 w-full h-full rounded-3xl p-6 flex flex-col justify-between items-center backface-hidden rotate-y-180 bg-gradient-to-b from-slate-900 to-slate-950 border border-slate-700">
                         <div class="w-full flex justify-between items-center border-b border-slate-800 pb-2">
                             <span class="text-xs text-amber-400 font-black"><i class="fa-solid fa-clapperboard mr-1"></i> <span id="fc-back-title">K-Culture & Nuance</span></span>
@@ -410,6 +410,22 @@
         </button>
     </nav>
 
+    <!-- LANGUAGE SELECTION MODAL (5 LANGUAGES) -->
+    <div id="lang-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 max-w-xs w-full rounded-3xl p-5 shadow-2xl space-y-3 relative animate-in fade-in zoom-in duration-200">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                <h3 class="text-sm font-black text-white flex items-center">
+                    <i class="fa-solid fa-globe mr-2 text-rose-400"></i> <span id="lang-modal-title">Select Language</span>
+                </h3>
+                <button onclick="closeLangModal()" class="text-slate-400 hover:text-white text-base"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <p class="text-[11px] text-slate-400" id="lang-modal-desc">Learn Korean with explanations in your native language:</p>
+            <div class="space-y-2 pt-1" id="lang-options-container">
+                <!-- Dynamically populated buttons for EN, ES, JA, ZH, TH -->
+            </div>
+        </div>
+    </div>
+
     <!-- PRO / MONETIZATION MODAL -->
     <div id="pro-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 max-w-sm w-full rounded-3xl p-6 shadow-2xl space-y-4 text-center relative animate-in fade-in zoom-in duration-200">
@@ -464,9 +480,17 @@
     <!-- ========================================================================= -->
     <script>
         // ==========================================
-        // 1. MULTILINGUAL DICTIONARY (EN & ES)
+        // 1. MULTILINGUAL DICTIONARY (EN, ES, JA, ZH, TH)
         // ==========================================
-        let currentLang = localStorage.getItem('kTalkLang') || 'en'; // 'en' or 'es'
+        let currentLang = localStorage.getItem('kTalkLang') || 'en'; // 'en', 'es', 'ja', 'zh', 'th'
+
+        const langMeta = {
+            en: { flag: "🇺🇸", label: "EN", name: "English" },
+            es: { flag: "🇪🇸", label: "ES", name: "Español" },
+            ja: { flag: "🇯🇵", label: "JA", name: "日本語" },
+            zh: { flag: "🇨🇳", label: "ZH", name: "中文" },
+            th: { flag: "🇹🇭", label: "TH", name: "ไทย" }
+        };
 
         const i18n = {
             en: {
@@ -517,7 +541,9 @@
                 navFc: "Cards",
                 navVoca: "Words",
                 navReview: "Review",
-                navStreak: "Streak"
+                navStreak: "Streak",
+                langModalTitle: "Select Language",
+                langModalDesc: "Learn Korean with explanations in your native language:"
             },
             es: {
                 flag: "🇪🇸",
@@ -567,12 +593,170 @@
                 navFc: "Tarjetas",
                 navVoca: "Palabras",
                 navReview: "Repaso",
-                navStreak: "Racha"
+                navStreak: "Racha",
+                langModalTitle: "Seleccionar Idioma",
+                langModalDesc: "Aprende coreano con explicaciones en tu idioma nativo:"
+            },
+            ja: {
+                flag: "🇯🇵",
+                langLabel: "JA",
+                tagline: "ドラマみたいに話す韓国語",
+                levelNames: ["Lv.1 サバイバル", "Lv.2 韓ドラ必須表現", "Lv.3 旅行・食堂", "Lv.4 K-POPファン", "Lv.5 リアルスラング"],
+                testBtn: "レベル診断",
+                pwaTitle: "K-Talkをホーム画面に追加",
+                pwaDesc: "全画面でアプリのように快適学習！",
+                pwaBtn: "インストール",
+                resumeLabel: "学習進度を自動再開",
+                resumeBtn: "続きから",
+                restartBtn: "1番から",
+                cardMode: "SayVoca スピーキングコーチ",
+                nativeAudio: "ネイティブ音声",
+                pronLabel: "発音:",
+                checkAns: "正解を確認",
+                hint: "ヒント",
+                nextQuiz: "次の問題",
+                inputPlaceholder: "ハングルまたは発音を入力...",
+                fcTitle: "3Dスマート単語カード",
+                fcSub: "タップして韓国語と意味を反転",
+                fcTap: "タップして裏返す",
+                fcListen: "音声を聞く",
+                fcCulture: "Kカルチャー＆ニュアンス",
+                fcBackFlip: "表に戻す",
+                fcBookmark: "保存",
+                fcNext: "次のカード",
+                vocaTitle: "韓国語 必須単語帳",
+                vocaSub: "K-POPアイドルやドラマで毎日使われる表現",
+                vocaFav: "お気に入り",
+                reviewTitle: "エビングハウス復習ノート",
+                reviewBadge: "AI最適化",
+                reviewDesc: "間違えた単語を記憶定着曲線に合わせて出題。3回連続正解で卒業！",
+                reviewStart: "復習クイズを開始",
+                leagueName: "K-Star リーグ",
+                totalExp: "総獲得 EXP",
+                streak: "連続出席日数",
+                wordsReview: "復習対象",
+                calTitle: "ムグンファ(ムクゲ)出席スタンプ",
+                calDesc: "毎日1問以上解いてスタンプを集めよう！",
+                todayDone: "本日出席完了 🌺",
+                todayPending: "本日未出席 (+20 EXP 🎁)",
+                proTitle: "K-Talk Pro メンバーシップ",
+                proDesc: "ドラマの全表現500個解禁、無制限ハート、広告なしで3倍速学習。",
+                navQuiz: "クイズ",
+                navFc: "カード",
+                navVoca: "単語",
+                navReview: "復習",
+                navStreak: "出席",
+                langModalTitle: "言語を選択",
+                langModalDesc: "母国語の分かりやすい解説で韓国語を学習:"
+            },
+            zh: {
+                flag: "🇨🇳",
+                langLabel: "ZH",
+                tagline: "像韩剧主角一样说地道韩语",
+                levelNames: ["Lv.1 生存基础", "Lv.2 韩剧热词", "Lv.3 旅游餐饮", "Lv.4 K-POP追星", "Lv.5 地道俚语"],
+                testBtn: "水平测试",
+                pwaTitle: "添加 K-Talk 到主屏幕",
+                pwaDesc: "全屏沉浸体验，像原生App一样使用！",
+                pwaBtn: "立即安装",
+                resumeLabel: "学习进度自动恢复",
+                resumeBtn: "继续学习",
+                restartBtn: "从第1题",
+                cardMode: "SayVoca 口语跟读教练",
+                nativeAudio: "真人发音",
+                pronLabel: "发音读音:",
+                checkAns: "确认答案",
+                hint: "提示",
+                nextQuiz: "下一题",
+                inputPlaceholder: "输入韩文或罗马拼音...",
+                fcTitle: "3D智能翻转卡片",
+                fcSub: "点击卡片翻转查看韩文与释义",
+                fcTap: "点击翻转",
+                fcListen: "听原声",
+                fcCulture: "韩流文化与语境解析",
+                fcBackFlip: "翻回正面",
+                fcBookmark: "收藏",
+                fcNext: "下一张",
+                vocaTitle: "韩语核心必备词库",
+                vocaSub: "爱豆直播与韩剧高频口语合集",
+                vocaFav: "生词收藏",
+                reviewTitle: "艾宾浩斯智能复习",
+                reviewBadge: "AI智能排序",
+                reviewDesc: "错题根据遗忘曲线自动排列，连续答对3次即成功毕业！",
+                reviewStart: "开始智能复习",
+                leagueName: "K-Star 段位联赛",
+                totalExp: "总经验值",
+                streak: "连续打卡天数",
+                wordsReview: "待复习词汇",
+                calTitle: "木槿花每日打卡日历",
+                calDesc: "每天完成1题，收集专属木槿花印章！",
+                todayDone: "今日打卡完成 🌺",
+                todayPending: "今日待打卡 (+20 EXP 🎁)",
+                proTitle: "K-Talk Pro 尊享会员",
+                proDesc: "解锁500+韩剧独家口语包，无限红心练习，无广告加速学习。",
+                navQuiz: "实战",
+                navFc: "闪卡",
+                navVoca: "词库",
+                navReview: "复习",
+                navStreak: "打卡",
+                langModalTitle: "选择语言",
+                langModalDesc: "用最熟悉的母语释义轻松攻克韩语:"
+            },
+            th: {
+                flag: "🇹🇭",
+                langLabel: "TH",
+                tagline: "พูดภาษาเกาหลีเป๊ะเหมือนในซีรีส์",
+                levelNames: ["Lv.1 เอาตัวรอด", "Lv.2 วลีเด็ดซีรีส์", "Lv.3 เที่ยวและสั่งอาหาร", "Lv.4 สายติ่ง K-POP", "Lv.5 แสลงเกาหลี"],
+                testBtn: "ทดสอบระดับ",
+                pwaTitle: "ติดตั้ง K-Talk บนหน้าจอหลัก",
+                pwaDesc: "ใช้งานแบบเต็มหน้าจอเหมือนแอปจริง!",
+                pwaBtn: "ติดตั้ง",
+                resumeLabel: "จดจำความคืบหน้าอัตโนมัติ",
+                resumeBtn: "เรียนต่อ",
+                restartBtn: "เริ่มข้อ 1",
+                cardMode: "SayVoca โค้ชฝึกพูดเกาหลี",
+                nativeAudio: "เสียงเจ้าของภาษา",
+                pronLabel: "คำอ่าน:",
+                checkAns: "ตรวจคำตอบ",
+                hint: "คำใบ้",
+                nextQuiz: "ข้อถัดไป",
+                inputPlaceholder: "พิมพ์อักษรฮันกึลหรือคำอ่าน...",
+                fcTitle: "การ์ดคำศัพท์ 3 มิติ",
+                fcSub: "แตะที่การ์ดเพื่อพลิกดูความหมาย",
+                fcTap: "แตะเพื่อพลิก",
+                fcListen: "ฟังเสียง",
+                fcCulture: "เกร็ดวัฒนธรรมและบริบท",
+                fcBackFlip: "พลิกกลับ",
+                fcBookmark: "บันทึก",
+                fcNext: "การ์ดถัดไป",
+                vocaTitle: "คลังคำศัพท์เกาหลีจำเป็น",
+                vocaSub: "วลีฮิตที่ไอดอลและในซีรีส์ใช้พูดทุกวัน",
+                vocaFav: "คำที่ชอบ",
+                reviewTitle: "ระบบทบทวนเอ็บบิงเฮาส์",
+                reviewBadge: "จัดลำดับด้วย AI",
+                reviewDesc: "ทบทวนคำที่ตอบผิดตามเส้นโค้งการลืม ตอบถูก 3 ครั้งติดเพื่อผ่าน!",
+                reviewStart: "เริ่มแบบฝึกทบทวน",
+                leagueName: "ลีก K-Star",
+                totalExp: "EXP สะสม",
+                streak: "สถิติเช็คอินต่อเนื่อง",
+                wordsReview: "คำที่ต้องทบทวน",
+                calTitle: "ปฏิทินเช็คอินดอกมูกุงฮวา",
+                calDesc: "แก้โจทย์อย่างน้อย 1 ข้อต่อวันเพื่อรับตราประทับดอกไม้!",
+                todayDone: "เช็คอินวันนี้แล้ว 🌺",
+                todayPending: "ยังไม่เช็คอิน (+20 EXP 🎁)",
+                proTitle: "สมาชิก K-Talk Pro",
+                proDesc: "ปลดล็อกคำศัพท์ซีรีส์กว่า 500 คำ หัวใจไม่จำกัด ไร้โฆษณา",
+                navQuiz: "ควิซ",
+                navFc: "การ์ด",
+                navVoca: "คำศัพท์",
+                navReview: "ทบทวน",
+                navStreak: "เช็คอิน",
+                langModalTitle: "เลือกภาษา",
+                langModalDesc: "เรียนภาษาเกาหลีพร้อมคำอธิบายภาษาของคุณเอง:"
             }
         };
 
         // ==========================================
-        // 2. CURRICULUM DATA (5 LEVELS, EN & ES)
+        // 2. CURRICULUM DATA (50 AUTHENTIC QUESTIONS)
         // ==========================================
         const allQuizzes = {
             1: [
@@ -582,10 +766,16 @@
                     synonyms: ["고마워요", "gamsahamnida", "kamsahamnida"],
                     prompt_en: "How do you say 'Thank you' politely in Korean?",
                     prompt_es: "¿Cómo se dice 'Gracias' de forma formal en coreano?",
+                    prompt_ja: "韓国語で丁寧に「ありがとうございます」は何と言いますか？",
+                    prompt_zh: "韩语中礼貌地表示“谢谢”怎么说？",
+                    prompt_th: "ภาษาเกาหลีที่พูดว่า 'ขอบคุณครับ/ค่ะ' แบบสุภาพคือคำไหน?",
                     sentence: "도와주셔서 정말 [감사합니다].",
                     cat: "K-Survival",
                     nuance_en: "Used in restaurants, stores, and with elders. The most respectful way to say thank you!",
-                    nuance_es: "Se usa en restaurantes, tiendas y con mayores. ¡La forma más educada y común de agradecer!"
+                    nuance_es: "Se usa en restaurantes, tiendas y con mayores. ¡La forma más educada de agradecer!",
+                    nuance_ja: "食堂やお店、目上の人に使う最も信頼できる丁寧な感謝表現！",
+                    nuance_zh: "在餐厅、商店或对长辈使用，最得体规范的感谢表达！",
+                    nuance_th: "ใช้ในร้านอาหาร ร้านค้า หรือพูดกับผู้ใหญ่ สุภาพและใช้บ่อยที่สุด!"
                 },
                 {
                     target: "안녕하세요",
@@ -593,10 +783,16 @@
                     synonyms: ["annyeonghaseyo", "안녕"],
                     prompt_en: "How do you say 'Hello / Good day' formally?",
                     prompt_es: "¿Cómo se dice 'Hola / Buenos días' formalmente?",
+                    prompt_ja: "韓国語で丁寧に「こんにちは」は何と言いますか？",
+                    prompt_zh: "韩语中正式的“你好 / 您好”怎么说？",
+                    prompt_th: "คำทักทายสุภาพว่า 'สวัสดีครับ/ค่ะ' คือคำไหน?",
                     sentence: "처음 뵙겠습니다, [안녕하세요]!",
                     cat: "K-Survival",
                     nuance_en: "Bowing slightly at a 15-30 degree angle while saying this shows great Korean respect!",
-                    nuance_es: "¡Hacer una pequeña reverencia mientras lo dices demuestra un gran respeto en Corea!"
+                    nuance_es: "¡Hacer una pequeña reverencia mientras lo dices demuestra un gran respeto en Corea!",
+                    nuance_ja: "軽く15〜30度お辞儀しながら言うと好印象！",
+                    nuance_zh: "微微鞠躬15~30度打招呼，非常符合韩国礼仪！",
+                    nuance_th: "ก้มศีรษะเล็กน้อยขณะพูดแสดงถึงความเคารพตามธรรมเนียมเกาหลี!"
                 },
                 {
                     target: "네",
@@ -604,10 +800,16 @@
                     synonyms: ["예", "ne", "de"],
                     prompt_en: "How do you say 'Yes' politely in Korean?",
                     prompt_es: "¿Cómo se dice 'Sí' de forma educada?",
+                    prompt_ja: "丁寧に「はい」は何と言いますか？",
+                    prompt_zh: "礼貌的“是 / 好的”怎么说？",
+                    prompt_th: "คำตอบรับสุภาพว่า 'ใช่ครับ/ค่ะ' คือคำไหน?",
                     sentence: "[네], 알겠습니다.",
                     cat: "K-Survival",
                     nuance_en: "Polite yes. In casual speech between close friends, Koreans say '응' (eung).",
-                    nuance_es: "Sí educado. Entre amigos cercanos e informales se dice '응' (eung)."
+                    nuance_es: "Sí educado. Entre amigos cercanos e informales se dice '응' (eung).",
+                    nuance_ja: "丁寧な返事。親しい友達同士では「응 (ウン)」と言います。",
+                    nuance_zh: "平辈或朋友之间可以用更随意的“응 (嗯)”。",
+                    nuance_th: "เป็นคำสุภาพ ถ้าพูดกับเพื่อนสนิทจะพูดว่า '응' (อึง)"
                 },
                 {
                     target: "아니요",
@@ -615,10 +817,16 @@
                     synonyms: ["아뇨", "aniyo"],
                     prompt_en: "How do you say 'No' politely in Korean?",
                     prompt_es: "¿Cómo se dice 'No' formalmente?",
+                    prompt_ja: "丁寧に「いいえ」は何と言いますか？",
+                    prompt_zh: "礼貌的“不是 / 不”怎么说？",
+                    prompt_th: "คำปฏิเสธสุภาพว่า 'ไม่ใช่ / ไม่ครับ/ค่ะ' คือคำไหน?",
                     sentence: "[아니요], 괜찮아요.",
                     cat: "K-Survival",
                     nuance_en: "'아니요' is polite. '아니' is casual with friends.",
-                    nuance_es: "'아니요' es educado. '아니' es informal para amigos."
+                    nuance_es: "'아니요' es educado. '아니' es informal para amigos.",
+                    nuance_ja: "「아니요」は丁寧、「아니」はタメ口です。",
+                    nuance_zh: "“아니요”是敬语，“아니”用于亲密朋友之间。",
+                    nuance_th: "'아니요' เป็นคำสุภาพ ส่วน '아니' ใช้กับเพื่อนสนิท"
                 },
                 {
                     target: "죄송합니다",
@@ -626,10 +834,16 @@
                     synonyms: ["미안해요", "joesonghamnida", "choesonghamnida"],
                     prompt_en: "How do you say 'I am sorry' sincerely?",
                     prompt_es: "¿Cómo se dice 'Lo siento mucho' sinceramente?",
+                    prompt_ja: "心から「申し訳ございません」と謝る時は？",
+                    prompt_zh: "真诚地表示“对不起 / 抱歉”怎么说？",
+                    prompt_th: "คำขอโทษอย่างจริงใจว่า 'ขอโทษจริงๆ ครับ/ค่ะ' คือคำไหน?",
                     sentence: "늦어서 정말 [죄송합니다].",
                     cat: "K-Survival",
                     nuance_en: "'죄송합니다' is deeper and more sincere than '미안해요'.",
-                    nuance_es: "'죄송합니다' es más formal y sincero que '미안해요'."
+                    nuance_es: "'죄송합니다' es más formal y sincero que '미안해요'.",
+                    nuance_ja: "「미안해요」よりもさらに改まった誠実な謝罪表現です。",
+                    nuance_zh: "比“미안해요”更庄重、更显真诚的道歉表达。",
+                    nuance_th: "สุภาพและเป็นทางการมากกว่าคำว่า '미안해요'"
                 },
                 {
                     target: "저기요",
@@ -637,10 +851,16 @@
                     synonyms: ["jeogiyo", "잠시만요"],
                     prompt_en: "How do you call a waiter in a restaurant? ('Excuse me!')",
                     prompt_es: "¿Cómo llamas al mesero en un restaurante? ('¡Disculpe!')",
+                    prompt_ja: "食堂で店員を呼ぶ時「すみません！」は何と言う？",
+                    prompt_zh: "在餐厅呼叫服务员时说“不好意思 / 请问”？",
+                    prompt_th: "เรียกพนักงานในร้านอาหารว่า 'ขอโทษนะคะ/ครับ (ตรงนี้หน่อยครับ)' พูดว่า?",
                     sentence: "[저기요], 여기 주문할게요!",
                     cat: "K-Survival",
                     nuance_en: "Don't be shy! Calling '저기요!' out loud is standard dining etiquette in Korea.",
-                    nuance_es: "¡No tengas pena! Llamar '저기요!' en voz alta es la costumbre normal en restaurantes coreanos."
+                    nuance_es: "¡No tengas pena! Llamar '저기요!' en voz alta es la costumbre normal en restaurantes coreanos.",
+                    nuance_ja: "恥ずかしがらずに「チョギヨ！」と大きな声で呼ぶのが韓国の食事マナー！",
+                    nuance_zh: "大声喊“저기요!”在韩国餐厅非常普遍且符合规矩！",
+                    nuance_th: "ตะโกนเรียกเสียงดังฟังชัดได้เลย เป็นธรรมเนียมปกติของร้านอาหารเกาหลี!"
                 },
                 {
                     target: "얼마예요",
@@ -648,10 +868,16 @@
                     synonyms: ["얼마에요", "eolmayeyo"],
                     prompt_en: "How do you ask 'How much is this?'",
                     prompt_es: "¿Cómo preguntas '¿Cuánto cuesta esto?'?",
+                    prompt_ja: "「これいくらですか？」は何と言いますか？",
+                    prompt_zh: "如何询问“这个多少钱？”",
+                    prompt_th: "ถามว่า 'อันนี้ราคาเท่าไหร่ครับ/ค่ะ' พูดว่า?",
                     sentence: "사장님, 이거 [얼마예요]?",
                     cat: "K-Survival",
                     nuance_en: "Add '사장님' (Boss/Owner) at the beginning when shopping in street markets for a warm vibe!",
-                    nuance_es: "¡Añade '사장님' (Jefe/Dueño) al principio en mercados callejeros para ser más amigable!"
+                    nuance_es: "¡Añade '사장님' (Jefe/Dueño) al principio en mercados tradicionales para ser más amigable!",
+                    nuance_ja: "市場では前に「サジャンニム(社長さん)」を付けると親切にしてもらえます！",
+                    nuance_zh: "在传统市场前面加上“사장님 (老板)”，服务态度会更亲切！",
+                    nuance_th: "ใส่คำว่า '사장님' (เถ้าแก่) ข้างหน้าเวลาซื้อของในตลาดจะดูเป็นกันเองมาก!"
                 },
                 {
                     target: "맛있어요",
@@ -659,10 +885,16 @@
                     synonyms: ["masisseoyo", "맛있다"],
                     prompt_en: "How do you say 'It's delicious!'?",
                     prompt_es: "¿Cómo dices '¡Está delicioso!'?",
+                    prompt_ja: "「美味しいです！」は何と言いますか？",
+                    prompt_zh: "表示“很好吃 / 很美味！”怎么说？",
+                    prompt_th: "ชมว่า 'อร่อยมากเลยครับ/ค่ะ' พูดว่า?",
                     sentence: "한국 음식 진짜 [맛있어요]!",
                     cat: "K-Survival",
                     nuance_en: "Say this to Korean chefs or hosts and they will treat you like family!",
-                    nuance_es: "¡Dile esto al cocinero en Corea y te atenderán con una sonrisa enorme!"
+                    nuance_es: "¡Dile esto al cocinero en Corea y te atenderán con una sonrisa enorme!",
+                    nuance_ja: "お店の料理長に伝えると家族のように喜ばれます！",
+                    nuance_zh: "对厨师或房东说这句，他们会非常热情地招待你！",
+                    nuance_th: "พูดคำนี้กับเจ้าของร้าน คนเกาหลีจะยิ้มแก้มปริและบริการอย่างดีเลย!"
                 },
                 {
                     target: "안녕히가세요",
@@ -670,10 +902,16 @@
                     synonyms: ["annyeonghigaseyo", "잘가요"],
                     prompt_en: "How do you say goodbye to someone who is leaving?",
                     prompt_es: "¿Cómo te despides de alguien que se va? ('Vaya en paz')",
+                    prompt_ja: "去っていく人に「さようなら(お気をつけて)」は何と言う？",
+                    prompt_zh: "对离开的人说“慢走 / 再见”怎么说？",
+                    prompt_th: "บอกลาคนที่กำลังจะเดินจากไปว่า 'ลาก่อน (เดินทางปลอดภัย)' พูดว่า?",
                     sentence: "오늘 감사했습니다. [안녕히가세요]!",
                     cat: "K-Survival",
                     nuance_en: "Means 'Go peacefully'. If YOU are leaving and they are staying, say '안녕히계세요'!",
-                    nuance_es: "Significa 'Vaya en paz'. Si TÚ eres quien se va y ellos se quedan, se dice '안녕히계세요'!"
+                    nuance_es: "Significa 'Vaya en paz'. Si TÚ eres quien se va y ellos se quedan, se dice '안녕히계세요'!",
+                    nuance_ja: "「安らかにお行きください」の意味。自分が去る側なら「안녕히계세요」！",
+                    nuance_zh: "字面意思是“平平安安地走”。如果你走对方留，则说“안녕히계세요”！",
+                    nuance_th: "แปลว่า 'ขอให้ไปอย่างสงบสุข' แต่ถ้าเราเป็นคนเดินออกมาให้พูดว่า '안녕히계세요'!"
                 },
                 {
                     target: "반가워요",
@@ -681,10 +919,16 @@
                     synonyms: ["반갑습니다", "bangawoyo"],
                     prompt_en: "How do you say 'Nice to meet you'?",
                     prompt_es: "¿Cómo se dice 'Mucho gusto'?",
+                    prompt_ja: "「お会いできて嬉しいです / 初めまして」は何と言う？",
+                    prompt_zh: "表示“很高兴认识你 / 见到你很高兴”怎么说？",
+                    prompt_th: "พูดว่า 'ยินดีที่ได้รู้จักครับ/ค่ะ' คือคำไหน?",
                     sentence: "만나서 정말 [반가워요]!",
                     cat: "K-Survival",
                     nuance_en: "'반갑습니다' is formal; '반가워요' is friendly polite.",
-                    nuance_es: "'반갑습니다' es muy formal; '반가워요' es educado y amistoso."
+                    nuance_es: "'반갑습니다' es muy formal; '반가워요' es educado y amistoso.",
+                    nuance_ja: "「반갑습니다」はフォーマル、「반가워요」は親しみのある丁寧語です。",
+                    nuance_zh: "“반갑습니다”更正式；“반가워요”亲切随和。",
+                    nuance_th: "'반갑습니다' จะเป็นทางการมาก ส่วน '반가워요' จะเป็นกันเองและสุภาพ"
                 }
             ],
             2: [
@@ -694,10 +938,16 @@
                     synonyms: ["진짜", "jinjja", "jinjjayo"],
                     prompt_en: "The #1 K-Drama phrase for 'Really?! / Seriously?'",
                     prompt_es: "La frase #1 de K-Dramas para '¿De verdad? / ¿En serio?'",
+                    prompt_ja: "韓ドラでリアクション第1位「本当に？ / マジで？」",
+                    prompt_zh: "韩剧第一口头禅“真的吗？ / 真的假的？”",
+                    prompt_th: "วลีฮิตอันดับ 1 ในซีรีส์ 'จริงเหรอครับ/คะ?!'",
                     sentence: "어머, 그 소식 [진짜요]?!",
                     cat: "K-Drama",
                     nuance_en: "Heard in 99% of K-Drama reaction scenes when someone drops big news!",
-                    nuance_es: "¡Se escucha en el 99% de los K-dramas cuando se revela una sorpresa impactante!"
+                    nuance_es: "¡Se escucha en el 99% de los K-dramas cuando se revela una sorpresa impactante!",
+                    nuance_ja: "衝撃的な展開の時に登場人物が99%口にする定番フレーズ！",
+                    nuance_zh: "在韩剧吃惊反转名场面中，99%的角色都会脱口而出！",
+                    nuance_th: "ได้ยินในซีรีส์เกาหลีแทบทุกเรื่องเวลาตัวละครตกใจหรือสงสัย!"
                 },
                 {
                     target: "대박",
@@ -705,10 +955,16 @@
                     synonyms: ["daebak", "tebak"],
                     prompt_en: "Iconic Korean slang for 'Awesome! / Jackpot! / OMG!'",
                     prompt_es: "Famoso modismo coreano para '¡Increíble! / ¡Genial! / ¡Qué locura!'",
+                    prompt_ja: "「ヤバい！ / 最高！ / スゴい！」を表す超有名スラング",
+                    prompt_zh: "韩流代表流行语“绝了！ / 大发！ / 太棒了！”",
+                    prompt_th: "คำสแลงเกาหลียอดฮิต 'แทบัก! (สุดยอด / เจ๋งเป้ง)'",
                     sentence: "와, 이번 방탄소년단 신곡 진짜 [대박]이다!",
                     cat: "K-Drama",
                     nuance_en: "Used universally by youth and celebrities to express huge amazement.",
-                    nuance_es: "Usado por jóvenes y famosos para expresar gran asombro o éxito."
+                    nuance_es: "Usado por jóvenes y famosos para expresar gran asombro o éxito.",
+                    nuance_ja: "アイドルや若者が日常的に使う大当たりの感嘆表現！",
+                    nuance_zh: "爱豆和年轻人天天挂在嘴边的超级赞叹词！",
+                    nuance_th: "ใช้แสดงความทึ่ง ตะลึง หรือดีใจสุดขีด ไอดอลใช้บ่อยมาก!"
                 },
                 {
                     target: "헐",
@@ -716,10 +972,16 @@
                     synonyms: ["heol", "hul"],
                     prompt_en: "Expression of pure shock or speechlessness ('No way! / What?!')",
                     prompt_es: "Expresión de shock o incredulidad ('¡No me digas! / ¡Qué barbaridad!')",
+                    prompt_ja: "ショックで言葉が出ない時の「えっ… / うそでしょ…」",
+                    prompt_zh: "极度无语或震惊时的语气词“晕 / 天哪”",
+                    prompt_th: "เสียงอุทานเวลาช็อกหรือพูดไม่ออก 'เหรอะ... / บ้าจริง'",
                     sentence: "[헐]... 시험 점수가 이게 뭐야?!",
                     cat: "K-Drama",
                     nuance_en: "A short gasp of disbelief used thousands of times daily in Korea.",
-                    nuance_es: "Un suspiro de incredulidad usado a diario cuando algo te deja boquiabierto."
+                    nuance_es: "Un suspiro de incredulidad usado a diario cuando algo te deja boquiabierto.",
+                    nuance_ja: "あきれたり衝撃を受けた時に若者が思わず漏らす声。",
+                    nuance_zh: "让人目瞪口呆时下意识发出的简短感叹声。",
+                    nuance_th: "คำอุทานสั้นๆ ที่คนเกาหลีพูดเวลาเจอเรื่องไม่คาดฝันหรืออึ้งกิมกี่!"
                 },
                 {
                     target: "밥먹었어",
@@ -727,10 +989,16 @@
                     synonyms: ["bapmeogeosseo", "식사하셨어요"],
                     prompt_en: "Korean affectionate greeting: 'Did you eat?'",
                     prompt_es: "El saludo afectuoso coreano: '¿Ya comiste?'",
+                    prompt_ja: "愛情たっぷりの挨拶「ご飯食べた？」",
+                    prompt_zh: "充满关爱的韩式问候“吃过饭了吗？”",
+                    prompt_th: "คำถามทักทายแสดงความห่วงใย 'กินข้าวหรือยัง?'",
                     sentence: "안녕! 오늘 점심 [밥먹었어]?",
                     cat: "K-Drama",
                     nuance_en: "In Korea, asking if someone ate is the ultimate expression of love and caring.",
-                    nuance_es: "En Corea, preguntar si ya comiste es la mayor muestra de cariño y preocupación."
+                    nuance_es: "En Corea, preguntar si ya comiste es la mayor muestra de cariño y preocupación.",
+                    nuance_ja: "韓国ではご飯を食べたか聞くことが最高の気遣いと愛情表現です。",
+                    nuance_zh: "在韩国，关心对方有没有吃饭是表达爱意和挂念的最高体现。",
+                    nuance_th: "ในเกาหลี การถามว่ากินข้าวหรือยังคือการแสดงความรักและความใส่ใจขั้นสุด!"
                 },
                 {
                     target: "보고싶어",
@@ -738,10 +1006,16 @@
                     synonyms: ["bogosipeo", "보고싶어요"],
                     prompt_en: "Romantic line heard in every K-Drama OST: 'I miss you'",
                     prompt_es: "Frase romántica de todas las bandas sonoras: 'Te extraño'",
+                    prompt_ja: "韓ドラOSTの定番フレーズ「会いたい」",
+                    prompt_zh: "经典韩剧OST必现深情台词“好想你”",
+                    prompt_th: "ประโยคบอกรักสุดคลาสสิกในซีรีส์ 'คิดถึงนะ'",
                     sentence: "하루 종일 네가 너무 [보고싶어].",
                     cat: "K-Drama",
                     nuance_en: "Literally means 'I want to see you'. Used for romantic partners and loved ones.",
-                    nuance_es: "Literalmente significa 'Quiero verte'. Se usa para parejas y seres queridos."
+                    nuance_es: "Literalmente significa 'Quiero verte'. Se usa para parejas y seres queridos.",
+                    nuance_ja: "文字通り「見たい＝会いたい」の意味。恋人や家族に使います。",
+                    nuance_zh: "字面意思是“想看你”，用于表达对恋人、家人或挚友的思念。",
+                    nuance_th: "แปลตรงตัวว่า 'อยากเห็นหน้า' ใช้บอกกับคนรัก เพื่อน หรือคนสำคัญ"
                 },
                 {
                     target: "가자",
@@ -749,10 +1023,16 @@
                     synonyms: ["gaja", "갑시다"],
                     prompt_en: "High-energy word for 'Let's go!'",
                     prompt_es: "Palabra llena de energía para '¡Vamos!'",
+                    prompt_ja: "元気よく「行こう！」は何と言う？",
+                    prompt_zh: "元气满满的“走吧！ / 出发！”怎么说？",
+                    prompt_th: "พูดชวนอย่างมีพลังว่า 'ไปกันเถอะ!'",
                     sentence: "준비 다 됐지? 이제 홍대로 [가자]!",
                     cat: "K-Drama",
                     nuance_en: "Say this when heading out for adventure, food, or fun with friends!",
-                    nuance_es: "¡Dilo cuando salgas de aventura o a divertirte con amigos!"
+                    nuance_es: "¡Dilo cuando salgas de aventura o a divertirte con amigos!",
+                    nuance_ja: "友達と一緒に出発したり行動を起こす時の合図！",
+                    nuance_zh: "和朋友一起出发冒险、去吃美食或开启旅程时的常用号召！",
+                    nuance_th: "ใช้นัดแนะหรือชวนเพื่อนลุยไปด้วยกัน!"
                 },
                 {
                     target: "괜찮아요",
@@ -760,10 +1040,16 @@
                     synonyms: ["gwaenchanhayo", "gwenchanayo", "괜찮아"],
                     prompt_en: "Essential phrase for 'I'm okay / Don't worry / No problem'",
                     prompt_es: "Frase esencial para 'Estoy bien / No te preocupes / Todo bien'",
+                    prompt_ja: "「大丈夫です / お気になさらず」は何と言う？",
+                    prompt_zh: "万能句式“没关系 / 挺好的 / 没事”",
+                    prompt_th: "ประโยคสารพัดประโยชน์ 'ไม่เป็นไรครับ/ค่ะ'",
                     sentence: "걱정하지 마세요, 저는 [괜찮아요].",
                     cat: "K-Drama",
                     nuance_en: "Very versatile: can decline politely, comfort a friend, or reassure an elder.",
-                    nuance_es: "Muy versátil: sirve para rechazar con cortesía o calmar a un amigo."
+                    nuance_es: "Muy versátil: sirve para rechazar con cortesía o calmar a un amigo.",
+                    nuance_ja: "断る時、励ます時、気遣う時など使い勝手抜群の表現。",
+                    nuance_zh: "既可委婉拒绝，也可安慰朋友或让长辈放心，非常多功能。",
+                    nuance_th: "ใช้ได้ทั้งการปฏิเสธอย่างสุภาพ ปลอบใจเพื่อน หรือบอกว่าเราโอเคดี"
                 },
                 {
                     target: "화이팅",
@@ -771,10 +1057,16 @@
                     synonyms: ["파이팅", "hwaiting", "fighting"],
                     prompt_en: "Universal Korean cheer: 'Cheer up! / You can do it! / Fighting!'",
                     prompt_es: "Grito de ánimo coreano: '¡Ánimo! / ¡A por ello! / ¡Tú puedes!'",
+                    prompt_ja: "韓国特有の応援コール「ファイティン！ / 頑張れ！」",
+                    prompt_zh: "国民级应援口号“加油！ / 怀挺！”",
+                    prompt_th: "คำให้กำลังใจยอดฮิต 'สู้ๆ นะ! (ฮวาอีทิง)'",
                     sentence: "오늘 시험 꼭 잘 봐, [화이팅]!",
                     cat: "K-Drama",
                     nuance_en: "Derived from 'Fighting!', but means cheering and wishing someone strength!",
-                    nuance_es: "Deriva de 'Fighting', pero significa desear fuerza y dar apoyo."
+                    nuance_es: "Deriva de 'Fighting', pero significa desear fuerza y dar apoyo.",
+                    nuance_ja: "英語のFightingが語源ですが、韓国では「応援・元気出して」の意味！",
+                    nuance_zh: "源自英文Fighting，在韩国专指给考试、工作或比赛的人加油打气！",
+                    nuance_th: "เพี้ยนมาจากคำว่า Fighting แต่คนเกาหลีใช้เพื่อส่งพลังใจและให้กำลังใจ!"
                 },
                 {
                     target: "미쳤어",
@@ -782,10 +1074,16 @@
                     synonyms: ["michyeosseo", "미쳤어요"],
                     prompt_en: "Classic reaction: 'Are you crazy?!'",
                     prompt_es: "Reacción típica de drama: '¿Estás loco/a?'",
+                    prompt_ja: "ドラマでおなじみのセリフ「頭おかしいの？！ / 狂ったの？」",
+                    prompt_zh: "韩剧经典吐槽“疯了吗？！ / 你疯了吧？”",
+                    prompt_th: "คำอุทานในซีรีส์ 'บ้าไปแล้วเหรอ?!'",
                     sentence: "야, 너 지금 [미쳤어]?!",
                     cat: "K-Drama",
                     nuance_en: "Used in drama fights or jokingly when a friend does something insane.",
-                    nuance_es: "Usado en peleas dramáticas o en broma cuando un amigo hace una locura."
+                    nuance_es: "Usado en peleas dramáticas o en broma cuando un amigo hace una locura.",
+                    nuance_ja: "ドラマの修羅場や、友達がとんでもないバカなことをした時のツッコミ！",
+                    nuance_zh: "剧情发生戏剧性冲突，或朋友做了啼笑皆非的蠢事时经常用到！",
+                    nuance_th: "ได้ยินบ่อยเวลาตัวละครทะเลาะกัน หรือแซวเพื่อนเวลาทำอะไรแผลงๆ!"
                 },
                 {
                     target: "그래요",
@@ -793,10 +1091,16 @@
                     synonyms: ["geuraeyo", "그래"],
                     prompt_en: "Conversational filler: 'Is that so? / Really?'",
                     prompt_es: "Frase para mantener la conversación: '¿En verdad? / ¿Ah sí?'",
+                    prompt_ja: "相槌の定番「そうなんですか？」",
+                    prompt_zh: "附和倾听必备“是吗？ / 这样啊？”",
+                    prompt_th: "คำพูดรับฟังเพื่อต่อบทสนทนา 'อย่างนั้นเหรอครับ/คะ?'",
                     sentence: "아, [그래요]? 몰랐네요!",
                     cat: "K-Drama",
                     nuance_en: "Essential listening response that keeps the other person speaking smoothly.",
-                    nuance_es: "Respuesta clave para demostrar que estás prestando atención."
+                    nuance_es: "Respuesta clave para demostrar que estás prestando atención.",
+                    nuance_ja: "相手の話をしっかり聞いていることを伝える重要なリアクション。",
+                    nuance_zh: "让对话自然流畅进行下去的核心倾听词汇。",
+                    nuance_th: "คำตอบรับสำคัญที่แสดงว่าเรากำลังตั้งใจฟังคู่สนทนาอย่างต่อเนื่อง"
                 }
             ],
             3: [
@@ -806,10 +1110,16 @@
                     synonyms: ["muljuseyo", "물 주세요"],
                     prompt_en: "How to ask for water politely: 'Water, please.'",
                     prompt_es: "¿Cómo pides agua amablemente? ('Agua, por favor')",
+                    prompt_ja: "「お水をください」と注文する時は？",
+                    prompt_zh: "如何礼貌点水“请给我水”？",
+                    prompt_th: "ขอน้ำดื่มสุภาพว่า 'ขอน้ำหน่อยครับ/ค่ะ'",
                     sentence: "여기 시원한 [물주세요].",
                     cat: "Travel",
                     nuance_en: "'물' (water) + '주세요' (please give me). Remember '주세요' for everything you want!",
-                    nuance_es: "'물' (agua) + '주세요' (por favor dame). ¡Recuerda '주세요' para pedir cualquier cosa!"
+                    nuance_es: "'물' (agua) + '주세요' (por favor dame). ¡Recuerda '주세요' para pedir cualquier cosa!",
+                    nuance_ja: "「물 (水)」＋「주세요 (ください)」。주세요は何にでも使えます！",
+                    nuance_zh: "“물 (水)”＋“주세요 (请给)”。想要什么都可以加“주세요”！",
+                    nuance_th: "'물' (น้ำ) + '주세요' (ขอ...) อยากได้อะไรจำคำว่า '주세요' ไว้เลย!"
                 },
                 {
                     target: "추천해주세요",
@@ -817,10 +1127,16 @@
                     synonyms: ["chucheonhae juseyo", "chucheon"],
                     prompt_en: "How to ask 'Please recommend a menu item'?",
                     prompt_es: "¿Cómo preguntas '¿Qué me recomienda de comer?'?",
+                    prompt_ja: "「おすすめを教えてください」と聞く時は？",
+                    prompt_zh: "如何请店员“推荐一下招牌菜”？",
+                    prompt_th: "ถามหาเมนูแนะนำ 'ช่วยแนะนำหน่อยครับ/ค่ะ'",
                     sentence: "여기 제일 맛있는 걸로 [추천해주세요]!",
                     cat: "Travel",
                     nuance_en: "Guarantees you order the chef's best signature specialty in Korea!",
-                    nuance_es: "¡Te asegura ordenar el platillo estrella del restaurante en Corea!"
+                    nuance_es: "¡Te asegura ordenar el platillo estrella del restaurante en Corea!",
+                    nuance_ja: "食堂でシェフ一番の看板メニューを頼みたい時にピッタリ！",
+                    nuance_zh: "让你在韩国餐厅轻松点到大厨最拿手的招牌美味！",
+                    nuance_th: "ช่วยให้ได้สั่งเมนูเด็ดที่เป็นซิกเนเจอร์ของร้านในเกาหลี!"
                 },
                 {
                     target: "화장실어디예요",
@@ -828,10 +1144,16 @@
                     synonyms: ["hwajangsil", "화장실 어디예요"],
                     prompt_en: "The ultimate survival question: 'Where is the restroom?'",
                     prompt_es: "La pregunta indispensable: '¿Dónde está el baño?'",
+                    prompt_ja: "旅の最重要質問「トイレはどこですか？」",
+                    prompt_zh: "旅行头号生存问题“请问洗手间在哪里？”",
+                    prompt_th: "คำถามจำเป็นยามฉุกเฉิน 'ห้องน้ำอยู่ที่ไหนครับ/คะ'",
                     sentence: "실례지만, [화장실어디예요]?",
                     cat: "Travel",
                     nuance_en: "Restrooms in Korean cafes often have passcodes on the receipts!",
-                    nuance_es: "¡En las cafeterías coreanas el código del baño suele estar en el ticket!"
+                    nuance_es: "¡En las cafeterías coreanas el código del baño suele estar en el ticket!",
+                    nuance_ja: "韓国のカフェではレシートに暗証番号が書いてあることが多いです！",
+                    nuance_zh: "韩国咖啡店的洗手间密码经常打印在小票收据底部哦！",
+                    nuance_th: "ห้องน้ำตามคาเฟ่ในเกาหลี มักจะมีรหัสผ่านพิมพ์อยู่ท้ายใบเสร็จ!"
                 },
                 {
                     target: "사진찍어주세요",
@@ -839,10 +1161,16 @@
                     synonyms: ["sajin", "사진 찍어주세요"],
                     prompt_en: "How to ask someone: 'Could you take a photo for me?'",
                     prompt_es: "¿Cómo pides: '¿Me toma una foto, por favor?'?",
+                    prompt_ja: "「写真を撮っていただけますか？」と頼む時は？",
+                    prompt_zh: "如何请求路人“能帮我拍张照片吗？”",
+                    prompt_th: "ขอให้คนอื่นช่วยถ่ายรูป 'ช่วยถ่ายรูปให้หน่อยได้ไหมครับ/คะ'",
                     sentence: "저기, 저희 [사진찍어주세요]!",
                     cat: "Travel",
                     nuance_en: "Korean people take photos exceptionally well with flattering angles!",
-                    nuance_es: "¡Los coreanos tienen fama de tomar fotos increíbles con ángulos perfectos!"
+                    nuance_es: "¡Los coreanos tienen fama de tomar fotos increíbles con ángulos perfectos!",
+                    nuance_ja: "韓国の人は映えるアングルで写真を撮るのがとても上手です！",
+                    nuance_zh: "韩国路人拍照找角度的水平通常非常专业惊艳！",
+                    nuance_th: "คนเกาหลีมีชื่อเสียงเรื่องถ่ายรูปเก่งและจัดมุมเป๊ะมาก!"
                 },
                 {
                     target: "깎아주세요",
@@ -850,10 +1178,16 @@
                     synonyms: ["kkakkajuseyo", "깎아 주세요"],
                     prompt_en: "Magic bargaining phrase: 'Could you give me a discount?'",
                     prompt_es: "Frase mágica de regateo: '¿Me hace un descuentito?'",
+                    prompt_ja: "市場での値切り魔法の言葉「安くしてください〜」",
+                    prompt_zh: "传统市场砍价秘籍“能便宜点吗〜”",
+                    prompt_th: "ประโยคต่อราคาในตลาด 'ลดราคาให้หน่อยได้ไหมครับ/คะ'",
                     sentence: "이모님, 조금만 [깎아주세요]~",
                     cat: "Travel",
                     nuance_en: "Use with a cute smile in Namdaemun or Dongdaemun traditional markets!",
-                    nuance_es: "¡Úsala con una sonrisa en mercados tradicionales para ahorrar dinero!"
+                    nuance_es: "¡Úsala con una sonrisa en mercados tradicionales para ahorrar dinero!",
+                    nuance_ja: "南大門や東大門の伝統市場で笑顔で使うとおまけしてくれるかも！",
+                    nuance_zh: "在南大门或东大门市场带着微笑撒娇说，老板可能会给折扣！",
+                    nuance_th: "ยิ้มหวานๆ แล้วพูดคำนี้ในตลาดนัมแดมุนหรือทงแดมุน รับรองได้ส่วนลด!"
                 },
                 {
                     target: "와이파이있어요",
@@ -861,10 +1195,16 @@
                     synonyms: ["와이파이", "wifi"],
                     prompt_en: "How to ask 'Do you have Wi-Fi here?'",
                     prompt_es: "¿Cómo preguntas '¿Tienen Wi-Fi aquí?'?",
+                    prompt_ja: "「Wi-Fiはありますか？」と聞く時は？",
+                    prompt_zh: "如何询问“这里有Wi-Fi吗？”",
+                    prompt_th: "ถามว่า 'มีไวไฟไหมครับ/ค่ะ'",
                     sentence: "사장님, 여기 [와이파이있어요]?",
                     cat: "Travel",
                     nuance_en: "Korea has the world's fastest public Wi-Fi almost everywhere.",
-                    nuance_es: "Corea tiene uno de los Wi-Fi públicos más veloces del mundo."
+                    nuance_es: "Corea tiene uno de los Wi-Fi públicos más veloces del mundo.",
+                    nuance_ja: "韓国は世界有数の超高速公衆Wi-Fi大国です。",
+                    nuance_zh: "韩国拥有全球覆盖极广且速度极快的公共无线网络。",
+                    nuance_th: "เกาหลีมีไวไฟสาธารณะที่เร็วและครอบคลุมที่สุดแห่งหนึ่งในโลก"
                 },
                 {
                     target: "카드돼요",
@@ -872,10 +1212,16 @@
                     synonyms: ["kadeudwaeyo", "카드 돼요"],
                     prompt_en: "How to ask 'Can I pay by card?'",
                     prompt_es: "¿Cómo preguntas '¿Aceptan tarjeta?'?",
+                    prompt_ja: "「カードは使えますか？」と確認する時は？",
+                    prompt_zh: "如何询问“可以刷卡支付吗？”",
+                    prompt_th: "ถามว่า 'จ่ายด้วยบัตรได้ไหมครับ/ค่ะ'",
                     sentence: "혹시 [카드돼요]?",
                     cat: "Travel",
                     nuance_en: "Korea is almost 100% cashless, so cards and Apple Pay are accepted everywhere.",
-                    nuance_es: "Corea prácticamente no usa efectivo; aceptan tarjeta en casi todos lados."
+                    nuance_es: "Corea prácticamente no usa efectivo; aceptan tarjeta en casi todos lados.",
+                    nuance_ja: "韓国は完全なキャッシュレス社会なのでほぼ100%カードOKです。",
+                    nuance_zh: "韩国几乎是百分百无现金社会，信用卡或移动支付极其普及。",
+                    nuance_th: "เกาหลีเป็นสังคมไร้เงินสด แทบทุกร้านรับบัตรเครดิตและ Apple Pay"
                 },
                 {
                     target: "포장해주세요",
@@ -883,10 +1229,16 @@
                     synonyms: ["pojang", "포장 해주세요"],
                     prompt_en: "How to ask for takeout: 'Please pack it to go.'",
                     prompt_es: "¿Cómo pides para llevar: 'Para llevar, por favor'?",
+                    prompt_ja: "テイクアウトしたい時「持ち帰りで包んでください」は？",
+                    prompt_zh: "打包带走时说“请帮我打包”？",
+                    prompt_th: "ขอห่อกลับบ้านว่า 'ช่วยห่อกลับบ้านให้หน่อยครับ/ค่ะ'",
                     sentence: "남은 음식 [포장해주세요].",
                     cat: "Travel",
                     nuance_en: "'포장' means packing. Korean packaging is famous for being neat and secure.",
-                    nuance_es: "'포장' significa empaque. El empaque para llevar en Corea es impecable."
+                    nuance_es: "'포장' significa empaque. El empaque para llevar en Corea es impecable.",
+                    nuance_ja: "「포장(包装)」は持ち帰りのこと。韓国の梱包はとても丁寧です。",
+                    nuance_zh: "“포장”指打包。韩国外带打包非常精致牢固、防洒漏。",
+                    nuance_th: "'포장' แปลว่าห่อกลับ แพ็กเกจจิ้งของเกาหลีขึ้นชื่อเรื่องความประณีตมาก"
                 },
                 {
                     target: "길을잃었어요",
@@ -894,10 +1246,16 @@
                     synonyms: ["길 잃었어요", "gil"],
                     prompt_en: "Emergency phrase: 'I am lost.'",
                     prompt_es: "Frase de emergencia: 'Me he perdido.'",
+                    prompt_ja: "緊急フレーズ「道に迷ってしまいました」",
+                    prompt_zh: "求助急救用语“我迷路了”怎么说？",
+                    prompt_th: "ประโยคฉุกเฉิน 'ฉันหลงทางครับ/ค่ะ'",
                     sentence: "도와주세요, 제가 [길을잃었어요].",
                     cat: "Travel",
                     nuance_en: "Show your Naver Map or KakaoMap app along with this phrase for instant help.",
-                    nuance_es: "Muestra tu app de mapas junto con esta frase y te ayudarán de inmediato."
+                    nuance_es: "Muestra tu app de mapas junto con esta frase y te ayudarán de inmediato.",
+                    nuance_ja: "Naver MapやKakaoMapの画面を見せながら言うとすぐ助けてくれます！",
+                    nuance_zh: "配合出示手机上的Naver地图或KakaoMap，路人会非常热心带路！",
+                    nuance_th: "เปิดแอปแผนที่ในมือถือแล้วพูดประโยคนี้ คนเกาหลีจะช่วยชี้ทางให้อย่างใจดี!"
                 },
                 {
                     target: "영수증주세요",
@@ -905,10 +1263,16 @@
                     synonyms: ["영수증", "receipt"],
                     prompt_en: "How to say: 'Receipt, please.'",
                     prompt_es: "¿Cómo pides: 'El recibo / ticket, por favor'?",
+                    prompt_ja: "「レシートをください」は何と言う？",
+                    prompt_zh: "结账时要求“请给我小票收据”？",
+                    prompt_th: "ขอใบเสร็จว่า 'ขอใบเสร็จด้วยครับ/ค่ะ'",
                     sentence: "결제 후에 [영수증주세요].",
                     cat: "Travel",
                     nuance_en: "Koreans often ask '영수증 버려주세요' (Please throw away receipt), but you may need it for tax refunds!",
-                    nuance_es: "¡Consérvalo si eres turista para solicitar el reembolso de impuestos (Tax Free)!"
+                    nuance_es: "¡Consérvalo si eres turista para solicitar el reembolso de impuestos (Tax Free)!",
+                    nuance_ja: "空港での免税払い戻し(Tax Refund)にレシートが必要になります！",
+                    nuance_zh: "外国游客申请市内或机场退税 (Tax Refund) 必须要保留小票！",
+                    nuance_th: "ถ้าเป็นนักท่องเที่ยวต้องเก็บใบเสร็จไว้เพื่อขอคืนภาษี (Tax Refund)!"
                 }
             ],
             4: [
@@ -918,10 +1282,16 @@
                     synonyms: ["saranghaeyo", "사랑해"],
                     prompt_en: "Every K-Pop idol's favorite word: 'I love you!'",
                     prompt_es: "La palabra favorita de todo idol de K-Pop: '¡Te amo!'",
+                    prompt_ja: "K-POPアイドルの愛の言葉「愛してます！」",
+                    prompt_zh: "爱豆最常对粉丝说的告白“我爱你！”",
+                    prompt_th: "คำบอกรักที่ไอดอลเกาหลีพูดบ่อยที่สุด 'รักนะครับ/ค่ะ'",
                     sentence: "우리 아미 여러분, 항상 [사랑해요]!",
                     cat: "K-Pop",
                     nuance_en: "Combine with finger heart (🫰) gesture for maximum cute impact!",
-                    nuance_es: "¡Combínalo con el gesto del corazón con los dedos (🫰) para ser adorable!"
+                    nuance_es: "¡Combínalo con el gesto del corazón con los dedos (🫰) para ser adorable!",
+                    nuance_ja: "指ハート(🫰)と一緒に言うと可愛さ100倍！",
+                    nuance_zh: "配合手指爱心 (🫰) 动作，瞬间可爱度拉满！",
+                    nuance_th: "ทำท่ามินิฮาร์ท (🫰) ไปด้วยเพื่อเพิ่มความน่ารักแบบทวีคูณ!"
                 },
                 {
                     target: "감동이에요",
@@ -929,10 +1299,16 @@
                     synonyms: ["gamdong", "감동이야"],
                     prompt_en: "How to say 'I'm so moved / touched to tears!'",
                     prompt_es: "¿Cómo dices '¡Qué conmovedor! / ¡Estoy muy conmovido/a!'?",
+                    prompt_ja: "「本当に感動しました！」は何と言う？",
+                    prompt_zh: "表达“太让人感动了 / 泪目”怎么说？",
+                    prompt_th: "พูดว่า 'ซึ้งใจ / ประทับใจมากเลยครับ/ค่ะ'",
                     sentence: "팬분들의 깜짝 이벤트 정말 [감동이에요] ㅠㅠ",
                     cat: "K-Pop",
                     nuance_en: "Used whenever a sweet gesture gives you happy emotional chills.",
-                    nuance_es: "Usado cuando un lindo gesto te emociona hasta las lágrimas."
+                    nuance_es: "Usado cuando un lindo gesto te emociona hasta las lágrimas.",
+                    nuance_ja: "サプライズや温かいプレゼントに胸がいっぱいになった時に！",
+                    nuance_zh: "当看到感人的粉丝应援或收到贴心礼物时使用。",
+                    nuance_th: "ใช้เวลาเจอเรื่องราวดีๆ หรือแฟนโปรเจกต์ที่ทำให้รู้สึกประทับใจจนน้ำตาซึม"
                 },
                 {
                     target: "응원해요",
@@ -940,10 +1316,16 @@
                     synonyms: ["eungwonhaeyo", "응원"],
                     prompt_en: "How to tell your idol: 'I'm cheering for you!'",
                     prompt_es: "¿Cómo le dices a tu idol: '¡Te apoyo siempre!'?",
+                    prompt_ja: "推しに「ずっと応援してます！」と伝える時は？",
+                    prompt_zh: "对本命爱豆说“我会一直为你应援/支持你！”",
+                    prompt_th: "บอกไอดอลคนโปรดว่า 'คอยเชียร์และสนับสนุนอยู่นะครับ/ค่ะ'",
                     sentence: "앞으로도 계속 [응원해요]!",
                     cat: "K-Pop",
                     nuance_en: "Written on concert fan banners and Weverse comments all the time.",
-                    nuance_es: "Se escribe en pancartas de conciertos y comentarios de Weverse."
+                    nuance_es: "Se escribe en pancartas de conciertos y comentarios de Weverse.",
+                    nuance_ja: "コンサートのスローガンやWeverseコメントの定番！",
+                    nuance_zh: "演唱会手幅标语和Weverse留言区最常出现的暖心句子！",
+                    nuance_th: "พบบ่อยตามป้ายเชียร์ในคอนเสิร์ตและคอมเมนต์ใน Weverse"
                 },
                 {
                     target: "라이브켜줘",
@@ -951,10 +1333,16 @@
                     synonyms: ["live", "라이브 켜줘"],
                     prompt_en: "Comment on idol streams: 'Please turn on a Live stream!'",
                     prompt_es: "Comentario en redes: '¡Haz una transmisión en vivo!'",
+                    prompt_ja: "配信をねだる時「ライブ配信やって！」",
+                    prompt_zh: "催促爱豆开直播“快开直播吧！”",
+                    prompt_th: "อ้อนให้ไอดอลมาไลฟ์ 'เปิดไลฟ์หน่อยครับ/ค่ะ'",
                     sentence: "오빠, 오늘 밤에 [라이브켜줘] 제발!",
                     cat: "K-Pop",
                     nuance_en: "Used on Instagram Live or Weverse when begging your bias to stream.",
-                    nuance_es: "Usado en Instagram o Weverse cuando pides a tu artista favorito que transmita."
+                    nuance_es: "Usado en Instagram o Weverse cuando pides a tu artista favorito que transmita.",
+                    nuance_ja: "インスタライブやWeverseで推しに配信を催促する時のコメント！",
+                    nuance_zh: "在Instagram或Weverse呼唤偶像上线开直播时的弹幕热词！",
+                    nuance_th: "พิมพ์คอมเมนต์ใน Instagram หรือ Weverse อ้อนให้เมนมาไลฟ์สดคุยกับแฟนๆ"
                 },
                 {
                     target: "컴백",
@@ -962,10 +1350,16 @@
                     synonyms: ["comeback", "comback"],
                     prompt_en: "K-Pop music term for releasing a new album ('Comeback')",
                     prompt_es: "Término del K-Pop para lanzar nuevo álbum ('Regreso / Comeback')",
+                    prompt_ja: "新曲・新アルバム発表を表す「カムバック(カムバ)」",
+                    prompt_zh: "K-POP新专辑发歌回归专有名词“Comeback / 回归”",
+                    prompt_th: "คำเรียกการปล่อยอัลบั้มใหม่ของไอดอล 'คัมแบ็ก (Comeback)'",
                     sentence: "다음 달에 드디어 [컴백]한다고 합니다!",
                     cat: "K-Pop",
                     nuance_en: "In K-Pop, every album cycle is hailed as a high-concept 'Comeback'.",
-                    nuance_es: "En el K-Pop, cada lanzamiento de álbum se celebra como un 'Comeback'."
+                    nuance_es: "En el K-Pop, cada lanzamiento de álbum se celebra como un 'Comeback'.",
+                    nuance_ja: "K-POPではアルバム発売活動をすべて『カムバック』と呼びます。",
+                    nuance_zh: "在韩国流行乐坛，每一次新概念发歌都被尊称为隆重的回归！",
+                    nuance_th: "ในวงการ K-POP การออกผลงานใหม่ทุกชุดจะเรียกว่าเป็นการ 'คัมแบ็ก'"
                 },
                 {
                     target: "심쿵",
@@ -973,10 +1367,16 @@
                     synonyms: ["simkung", "simkoong"],
                     prompt_en: "Korean slang for 'Heart flutter / My heart skipped a beat!'",
                     prompt_es: "Modismo para '¡Me dio un flechazo / Me dio un vuelco el corazón!'",
+                    prompt_ja: "推しにときめいた時の「胸キュン！」",
+                    prompt_zh: "形容心跳骤停、心动不已的“心动暴击 / 怦然心动”",
+                    prompt_th: "คำสแลงแทนอาการใจเต้นตึกตัก 'ใจบาง / ตกหลุมรักอย่างแรง'",
                     sentence: "그 미소 한 방에 완전 [심쿵]했잖아!",
                     cat: "K-Pop",
                     nuance_en: "'심장' (heart) + '쿵' (thump). When an idol looks at you and your heart drops!",
-                    nuance_es: "Cuando tu idol favorito te mira y sientes mariposas en el estómago."
+                    nuance_es: "Cuando tu idol favorito te mira y sientes mariposas en el estómago.",
+                    nuance_ja: "「심장 (心臓)」＋「쿵 (ドクン)」。ハートを撃ち抜かれた瞬間！",
+                    nuance_zh: "由“심장 (心脏)”＋“쿵 (扑通)”缩写而成，指被颜值击中内心的瞬间！",
+                    nuance_th: "ย่อมาจาก 'หัวใจ' + 'ตึกตัก' อาการเวลาเมนสบตาแล้วใจละลาย!"
                 },
                 {
                     target: "멋있어요",
@@ -984,10 +1384,16 @@
                     synonyms: ["meosisseoyo", "멋있다"],
                     prompt_en: "Compliment: 'You are so cool / handsome!'",
                     prompt_es: "Cumplido: '¡Qué guapo/genial eres!'",
+                    prompt_ja: "「本当にかっこいいです！」と褒める時は？",
+                    prompt_zh: "夸赞对方“太帅气了 / 太酷了！”",
+                    prompt_th: "ชมว่า 'เท่มากเลยครับ/ค่ะ / หล่อสุดๆ'",
                     sentence: "무대 위에서 춤출 때 진짜 [멋있어요]!",
                     cat: "K-Pop",
                     nuance_en: "The greatest praise for male idols or anyone performing with swagger.",
-                    nuance_es: "El mayor elogio para quien baila o canta con estilo y elegancia."
+                    nuance_es: "El mayor elogio para quien baila o canta con estilo y elegancia.",
+                    nuance_ja: "ステージ上でキレキレのダンスを見せるアイドルへの最高の賛辞！",
+                    nuance_zh: "舞台上展现高难度刀群舞和克里斯马舞台魅力时的最高称赞！",
+                    nuance_th: "คำชมยอดนิยมเวลาเห็นไอดอลเต้นอย่างทรงพลังบนเวทีคอนเสิร์ต"
                 },
                 {
                     target: "귀여워요",
@@ -995,10 +1401,16 @@
                     synonyms: ["gwiyeowoyo", "귀여워"],
                     prompt_en: "Compliment: 'You're so cute! / Adorable!'",
                     prompt_es: "Cumplido: '¡Qué tierno/a eres! / ¡Qué lindo!'",
+                    prompt_ja: "愛嬌を見た時の「可愛いです！」",
+                    prompt_zh: "看到爱豆撒娇时脱口而出“好可爱！”",
+                    prompt_th: "ชมว่า 'น่ารักจังเลยครับ/ค่ะ'",
                     sentence: "볼 꼬집고 싶을 만큼 [귀여워요]!",
                     cat: "K-Pop",
                     nuance_en: "The core praise in 'Aegyo' (acting cute) culture in Korea.",
-                    nuance_es: "El elogio principal en la cultura de actuar tierno ('Aegyo')."
+                    nuance_es: "El elogio principal en la cultura de actuar tierno ('Aegyo').",
+                    nuance_ja: "韓国の愛嬌(エギョ)文化において最も中心的な褒め言葉！",
+                    nuance_zh: "在韩国著名的撒娇 (Aegyo) 文化中最核心的赞美词汇！",
+                    nuance_th: "คำชมหลักเวลาเห็นไอดอลทำท่าแอ๊บแบ๊วหรือทำตัวน่ารัก (Aegyo)!"
                 },
                 {
                     target: "수고했어요",
@@ -1006,10 +1418,16 @@
                     synonyms: ["sugohaesseoyo", "수고하셨습니다"],
                     prompt_en: "Warm comfort: 'You worked so hard today!'",
                     prompt_es: "Frase de reconocimiento: '¡Hiciste un gran esfuerzo hoy!'",
+                    prompt_ja: "労いの言葉「今日もお疲れ様でした」",
+                    prompt_zh: "温暖慰藉名台词“辛苦了 / 今天也辛苦啦”",
+                    prompt_th: "คำพูดปลอบใจให้กำลังใจ 'เหนื่อยมาทั้งวัน ขอบคุณสำหรับความพยายามนะ'",
                     sentence: "오늘 하루도 정말 [수고했어요].",
                     cat: "K-Pop",
                     nuance_en: "Koreans say this after work or practice to validate everyone's efforts.",
-                    nuance_es: "Los coreanos lo dicen al terminar el trabajo para valorar el esfuerzo de todos."
+                    nuance_es: "Los coreanos lo dicen al terminar el trabajo para valorar el esfuerzo de todos.",
+                    nuance_ja: "仕事や練習を終えた後に、お互いの努力を認め合う温かい一言。",
+                    nuance_zh: "在工作或排练结束后，体恤他人辛劳与付出的温情名言。",
+                    nuance_th: "คนเกาหลีจะพูดคำนี้หลังเลิกงานหรือซ้อมเสร็จเพื่อขอบคุณในความเหน็ดเหนื่อย"
                 },
                 {
                     target: "영원히함께해요",
@@ -1017,10 +1435,16 @@
                     synonyms: ["영원히 함께해요", "together"],
                     prompt_en: "Fandom pledge: 'Let's be together forever!'",
                     prompt_es: "Promesa de fandom: '¡Estemos juntos por siempre!'",
+                    prompt_ja: "ファンとアイドルの誓い「永遠に一緒にいようね」",
+                    prompt_zh: "粉丝与偶像的双向奔赴“永远在一起吧”",
+                    prompt_th: "คำมั่นสัญญาระหว่างแฟนคลับกับไอดอล 'อยู่ด้วยกันตลอดไปนะ'",
                     sentence: "우리 앞으로도 [영원히함께해요]!",
                     cat: "K-Pop",
                     nuance_en: "The emotional promise exchanged at the climax of K-Pop concerts.",
-                    nuance_es: "La emotiva promesa que se dicen los fans y artistas en conciertos."
+                    nuance_es: "La emotiva promesa que se dicen los fans y artistas en conciertos.",
+                    nuance_ja: "コンサートのアンコールで交わされる感動的なお約束の言葉。",
+                    nuance_zh: "演唱会高潮谢幕时大合唱与告白环节最催泪的永恒誓约。",
+                    nuance_th: "ประโยคซึ้งๆ ที่แฟนคลับและศิลปินมักจะสัญญากันในช่วงท้ายของคอนเสิร์ต"
                 }
             ],
             5: [
@@ -1030,10 +1454,16 @@
                     synonyms: ["menbung", "mental breakdown"],
                     prompt_en: "Slang for 'Mental breakdown / Panic / My brain froze!'",
                     prompt_es: "Modismo para 'Colapso mental / ¡Entré en pánico!'",
+                    prompt_ja: "パニック状態を表すスラング「メンタル崩壊 (メン崩)」",
+                    prompt_zh: "形容大脑当机、心态炸裂的“崩溃 / 抓狂”",
+                    prompt_th: "สแลงเกาหลีแปลว่า 'สติแตก / หัวหมุน (เมนบุง)'",
                     sentence: "지갑 잃어버려서 완전 [멘붕] 왔어.",
                     cat: "Slang",
                     nuance_en: "Short for '멘탈 붕괴' (Mental Collapse). Expresses funny or real panic.",
-                    nuance_es: "Abreviatura de 'Colapso mental'. Expresa cuando no sabes qué hacer del susto."
+                    nuance_es: "Abreviatura de 'Colapso mental'. Expresa cuando no sabes qué hacer del susto.",
+                    nuance_ja: "「メンタル崩壊」の略。プチパニックやおかしな大混乱の時に使います。",
+                    nuance_zh: "“精神崩溃”的缩写，形容遭遇意外突发状况时原地宕机！",
+                    nuance_th: "ย่อมาจาก 'จิตใจพังทลาย' ใช้เวลาตกใจ ช็อก หรือทำอะไรไม่ถูก!"
                 },
                 {
                     target: "어쩌라고",
@@ -1041,10 +1471,16 @@
                     synonyms: ["eojjeorago", "so what"],
                     prompt_en: "Sassy response: 'So what? / What do you want me to do?'",
                     prompt_es: "Respuesta descarada: '¿Y qué? / ¿Qué quieres que haga?'",
+                    prompt_ja: "強気なタメ口「だから何？ / どうしろと？」",
+                    prompt_zh: "霸气怼人“那又怎样？ / 关我什么事？”",
+                    prompt_th: "คำพูดกวนๆ แนว 'แล้วจะทำไม? / แล้วไงใครแคร์?'",
                     sentence: "네가 화나면 [어쩌라고]? 내 알 바야?",
                     cat: "Slang",
                     nuance_en: "Very informal and bold! Use only with close friends as playful banter.",
-                    nuance_es: "¡Muy informal! Úsalo solo en broma con amigos de mucha confianza."
+                    nuance_es: "¡Muy informal! Úsalo solo en broma con amigos de mucha confianza.",
+                    nuance_ja: "とてもフランクで強気な表現！親しい友達との冗談にのみ使ってください。",
+                    nuance_zh: "非常傲娇口语化！务必仅在关系极好的死党开玩笑时使用。",
+                    nuance_th: "เป็นภาษาพูดกวนๆ ให้ใช้แซวเฉพาะกับเพื่อนสนิทมากๆ เท่านั้น!"
                 },
                 {
                     target: "귀찮아",
@@ -1052,10 +1488,16 @@
                     synonyms: ["gwichanha", "귀찮아요"],
                     prompt_en: "Relatable feeling: 'It's such a hassle / I'm feeling so lazy'",
                     prompt_es: "Sensación común: '¡Qué pereza / Qué flojera / Qué molestia!'",
+                    prompt_ja: "休日にベッドでつぶやく「めんどくさい…」",
+                    prompt_zh: "周末躺平口头禅“好麻烦 / 懒得动”",
+                    prompt_th: "ความรู้สึกเวลาขี้เกียจ 'ขี้เกียจจัง / ขี้เกียจทำง่ะ'",
                     sentence: "오늘 외출하기 너무 [귀찮아].",
                     cat: "Slang",
                     nuance_en: "The word every Korean whispers when lying on the bed on a Sunday.",
-                    nuance_es: "La palabra que todo coreano dice un domingo acostado en el sillón."
+                    nuance_es: "La palabra que todo coreano dice un domingo acostado en el sillón.",
+                    nuance_ja: "動きたくない時、韓国人みんなが心の中でつぶやく定番の言葉。",
+                    nuance_zh: "每当星期天赖在被窝里不想出门时，每个人都会嘀咕的感叹！",
+                    nuance_th: "คำที่คนเกาหลีพูดบ่อยสุดๆ เวลาอยากนอนเฉยๆ อยู่บนเตียงในวันหยุด"
                 },
                 {
                     target: "내스타일이야",
@@ -1063,10 +1505,16 @@
                     synonyms: ["내 스타일", "style"],
                     prompt_en: "Romance & fashion: 'Totally my type / Exactly my style!'",
                     prompt_es: "Para romance o moda: '¡Totalmente mi tipo / mi estilo!'",
+                    prompt_ja: "好みの人や服を見た時「めっちゃ私のタイプ！」",
+                    prompt_zh: "遇到心仪对象或物品时“完全是我的菜 / 我的风格！”",
+                    prompt_th: "เวลาเจอคนที่ใช่หรือของที่ชอบ 'ตรงสเปกฉันเลย / สไตล์ฉันเลย'",
                     sentence: "저 사람 코트 입은 거 완전 [내스타일이야]!",
                     cat: "Slang",
                     nuance_en: "Used for ideal romantic crushes, clothes, food, or cafes.",
-                    nuance_es: "Se usa para tu tipo ideal de persona, ropa, comida o lugares."
+                    nuance_es: "Se usa para tu tipo ideal de persona, ropa, comida o lugares.",
+                    nuance_ja: "理想の異性、お気に入りの服、カフェ、料理などに幅広く使えます。",
+                    nuance_zh: "无论是相中理想型帅哥美女，还是遇到特别对胃口的衣服美食都能用！",
+                    nuance_th: "ใช้บอกเวลาเจอคนที่เป็นสเปกในฝัน หรือเจอเสื้อผ้า/คาเฟ่ที่ถูกใจสุดๆ"
                 },
                 {
                     target: "소름",
@@ -1074,10 +1522,16 @@
                     synonyms: ["soreum", "goosebumps"],
                     prompt_en: "Slang for 'Goosebumps! / Chills!'",
                     prompt_es: "Modismo para '¡Piel de gallina! / ¡Qué escalofríos!'",
+                    prompt_ja: "圧倒的な歌声や怪談に「鳥肌！」",
+                    prompt_zh: "形容被惊艳或吓到时的“起鸡皮疙瘩！”",
+                    prompt_th: "อาการเวลาขนลุกซู่ 'ขนลุกเลย! (โซรึม)'",
                     sentence: "노래 고음 듣는데 온몸에 [소름] 돋았어!",
                     cat: "Slang",
                     nuance_en: "Can mean goosebumps from mind-blowing talent, or from a ghost story!",
-                    nuance_es: "Puede ser por escuchar una voz impresionante o por una historia de terror."
+                    nuance_es: "Puede ser por escuchar una voz impresionante o por una historia de terror.",
+                    nuance_ja: "凄すぎる才能に圧倒された時も、怖い話を聞いた時も両方使えます！",
+                    nuance_zh: "听到天籁高音被震撼，或者听鬼故事后背发凉时都可以高呼！",
+                    nuance_th: "ใช้ได้ทั้งเวลารู้สึกทึ่งกับความสามารถสุดยอด หรือเวลาฟังเรื่องผีจนเสียวสันหลัง!"
                 },
                 {
                     target: "노잼",
@@ -1085,10 +1539,16 @@
                     synonyms: ["nojaem", "no jam"],
                     prompt_en: "Modern slang for 'No fun / So boring / Lame joke'",
                     prompt_es: "Modismo moderno para 'Cero divertido / Qué aburrido / Mal chiste'",
+                    prompt_ja: "つまらない時に言う若者言葉「ノー面白 (ノージェム)」",
+                    prompt_zh: "指人或事物毫无趣味的“无聊 / 毫无笑点”",
+                    prompt_th: "สแลงวัยรุ่นแปลว่า 'กร่อย / ไม่สนุกเลย / มุกแป้ก (โนแจม)'",
                     sentence: "그 영화 진짜 완전 [노잼]이더라.",
                     cat: "Slang",
                     nuance_en: "'No' + '재미' (jam/fun). Opposite of 꿀잼 (honey jam / super fun)!",
-                    nuance_es: "'No' + '재미' (diversión). ¡Lo opuesto es 꿀잼 (dulce diversión)!"
+                    nuance_es: "'No' + '재미' (diversión). ¡Lo opuesto es 꿀잼 (dulce diversión)!",
+                    nuance_ja: "「No」＋「재미 (面白さ)」。反対語は꿀잼 (クルジェム＝超面白い)！",
+                    nuance_zh: "由“No”＋“재미 (乐趣)”组成。反义词是超好玩的“꿀잼 (蜜趣)”！",
+                    nuance_th: "มาจากคำว่า 'No' + '재미' (ความสนุก) คำตรงข้ามคือ '꿀잼' (โครตสนุก)!"
                 },
                 {
                     target: "꿀잼",
@@ -1096,10 +1556,16 @@
                     synonyms: ["kkuljaem", "honey jam"],
                     prompt_en: "Opposite of No-Jam: 'Super fun / Hilarious!'",
                     prompt_es: "Lo opuesto a aburrido: '¡Súper divertido / Buenísimo!'",
+                    prompt_ja: "ノージェムの反対語「超面白い！ / 神回！」",
+                    prompt_zh: "无聊的反义词“超级有趣 / 巨好看 / 爆笑！”",
+                    prompt_th: "คำตรงข้ามของโนแจม 'สนุกโคตรๆ / ฮากระจาย (กุลแจม)'",
                     sentence: "어제 본 예능 프로그램 진짜 [꿀잼]이었어!",
                     cat: "Slang",
                     nuance_en: "'꿀' (honey) + '재미' (fun). Means something is as sweet and delightful as honey!",
-                    nuance_es: "Significa que algo es tan dulce y agradable como la miel."
+                    nuance_es: "Significa que algo es tan dulce y agradable como la miel.",
+                    nuance_ja: "「꿀 (ハチミツ)」＋「재미 (面白さ)」。ハチミツのように甘く楽しいこと！",
+                    nuance_zh: "“꿀 (蜂蜜)”＋“재미 (乐趣)”，意思是像蜂蜜一样甜美绝妙的乐趣！",
+                    nuance_th: "'꿀' (น้ำผึ้ง) + '재미' (ความสนุก) เปรียบเหมือนความสนุกที่หอมหวานดั่งน้ำผึ้ง!"
                 },
                 {
                     target: "눈치",
@@ -1107,10 +1573,16 @@
                     synonyms: ["nunchi", "noonchi"],
                     prompt_en: "Famous Korean cultural concept: 'Tact / Reading the room'",
                     prompt_es: "Famoso concepto cultural coreano: 'Tacto / Darse cuenta del ambiente'",
+                    prompt_ja: "韓国社会で最も重要な能力「空気を読むこと (ヌンチ)」",
+                    prompt_zh: "韩国职场社交第一潜规则“眼力见儿 / 会察言观色”",
+                    prompt_th: "ทักษะการเอาตัวรอดในสังคมเกาหลี 'การดูกาลเทศะ / การจับสังเกตคน (นุนชี)'",
                     sentence: "사회생활 잘하려면 [눈치]가 빨라야 해.",
                     cat: "Slang",
                     nuance_en: "The sixth sense of sensing other people's feelings and unspoken vibes.",
-                    nuance_es: "El sexto sentido de percibir el estado de ánimo y ambiente sin que nadie hable."
+                    nuance_es: "El sexto sentido de percibir el estado de ánimo y ambiente sin que nadie hable.",
+                    nuance_ja: "言葉にしなくても相手の機嫌や場の空気を察知する『第6感』のこと。",
+                    nuance_zh: "不用对方开口，就能精准捕捉周围人脸色与微妙氛围的第六感能力。",
+                    nuance_th: "สัมผัสที่หกในการจับอารมณ์และบรรยากาศรอบตัวโดยไม่ต้องให้ใครพูดบอก"
                 },
                 {
                     target: "티엠아이",
@@ -1118,10 +1590,16 @@
                     synonyms: ["tmi", "TMI"],
                     prompt_en: "Konglish term: 'TMI (Too much unnecessary information)'",
                     prompt_es: "Término adoptado: 'TMI (Demasiada información innecesaria)'",
+                    prompt_ja: "どうでもいい情報「TMI (多すぎる情報)」",
+                    prompt_zh: "无伤大雅的琐碎琐事“TMI (无需知道过多的细节信息)”",
+                    prompt_th: "คำทับศัพท์ที่คนเกาหลีชอบพูด 'TMI (ข้อมูลเยอะเกินเบอร์ / เรื่องเล็กๆ น้อยๆ)'",
                     sentence: "오늘 아침 뭐 먹었는지는 그냥 [티엠아이]야.",
                     cat: "Slang",
                     nuance_en: "Koreans love sharing small harmless personal facts labeled as 'TMI'!",
-                    nuance_es: "A los coreanos les encanta compartir datos curiosos diciendo que es 'TMI'."
+                    nuance_es: "A los coreanos les encanta compartir datos curiosos diciendo que es 'TMI'.",
+                    nuance_ja: "韓国人は日常の些細なプチ情報を「今日のTMI」と言って共有するのが大好き！",
+                    nuance_zh: "韩国年轻人非常喜欢分享生活日常中的可爱小八卦，冠以TMI之名！",
+                    nuance_th: "คนเกาหลีชอบแชร์เรื่องส่วนตัวเล็กๆ น่ารักๆ ในชีวิตประจำวันโดยเกริ่นว่า 'TMI'"
                 },
                 {
                     target: "행복해",
@@ -1129,28 +1607,42 @@
                     synonyms: ["행복해요", "haengbokhae"],
                     prompt_en: "Pure positive feeling: 'I am so happy!'",
                     prompt_es: "Pura emoción positiva: '¡Soy tan feliz!'",
+                    prompt_ja: "心からの喜び「幸せ！」",
+                    prompt_zh: "发自内心的纯真感叹“太幸福啦！”",
+                    prompt_th: "ความรู้สึกดีใจจากใจจริง 'มีความสุขจังเลย!'",
                     sentence: "좋아하는 K-드라마 볼 때 제일 [행복해]!",
                     cat: "Slang",
                     nuance_en: "Share this happiness whenever you reach a milestone in Korean!",
-                    nuance_es: "¡Comparte esta alegría cada vez que aprendas una nueva frase en coreano!"
+                    nuance_es: "¡Comparte esta alegría cada vez que aprendas una nueva frase en coreano!",
+                    nuance_ja: "韓国語が通じた瞬間や、大好きなドラマを見る時の最高の感情表現！",
+                    nuance_zh: "每当听懂了韩语对话或看到喜欢的爱豆时，尽情享受这种幸福吧！",
+                    nuance_th: "คำพูดเวลาฟินกับซีรีส์หรือเวลาที่เราสามารถพูดเกาหลีกับคนอื่นรู้เรื่อง!"
                 }
             ]
         };
 
         const dailyVoca = [
-            { hangul: "감사합니다", pron: "gam-sa-ham-ni-da", en: "Thank you (Polite)", es: "Gracias (Formal)", cat: "travel", level: "Lv.1" },
-            { hangul: "진짜요", pron: "jin-jja-yo", en: "Really?! (K-Drama staple)", es: "¿En serio? (Clásico de K-Drama)", cat: "kdrama", level: "Lv.2" },
-            { hangul: "대박", pron: "dae-bak", en: "Awesome! / Jackpot!", es: "¡Increíble! / ¡Genial!", cat: "kdrama", level: "Lv.2" },
-            { hangul: "사랑해요", pron: "sa-rang-hae-yo", en: "I love you (K-Pop)", es: "Te amo (K-Pop)", cat: "kpop", level: "Lv.4" },
-            { hangul: "화이팅", pron: "hwa-i-ting", en: "Cheer up! / You got this!", es: "¡Ánimo! / ¡A por ello!", cat: "kdrama", level: "Lv.2" },
-            { hangul: "멘붕", pron: "men-bung", en: "Mental breakdown / Panic", es: "Colapso mental / Pánico", cat: "slang", level: "Lv.5" },
-            { hangul: "꿀잼", pron: "kkul-jaem", en: "Super fun / Hilarious", es: "Súper divertido / Buenísimo", cat: "slang", level: "Lv.5" },
-            { hangul: "심쿵", pron: "sim-kung", en: "Heart flutter / Butterfly", es: "Flechazo / Vuelco al corazón", cat: "kpop", level: "Lv.4" },
-            { hangul: "얼마예요", pron: "eol-ma-ye-yo", en: "How much is this?", es: "¿Cuánto cuesta esto?", cat: "travel", level: "Lv.1" },
-            { hangul: "맛있어요", pron: "ma-si-sseo-yo", en: "It's delicious!", es: "¡Está delicioso!", cat: "travel", level: "Lv.1" },
-            { hangul: "눈치", pron: "nun-chi", en: "Reading the room / Tact", es: "Tacto / Darse cuenta del ambiente", cat: "slang", level: "Lv.5" },
-            { hangul: "수고했어요", pron: "su-go-hae-sseo-yo", en: "You worked so hard today!", es: "¡Buen trabajo hoy!", cat: "kpop", level: "Lv.4" }
+            { hangul: "감사합니다", pron: "gam-sa-ham-ni-da", en: "Thank you (Polite)", es: "Gracias (Formal)", ja: "ありがとうございます (丁寧)", zh: "谢谢 (礼貌敬语)", th: "ขอบคุณครับ/ค่ะ (สุภาพ)", cat: "travel", level: "Lv.1" },
+            { hangul: "진짜요", pron: "jin-jja-yo", en: "Really?! (K-Drama staple)", es: "¿En serio? (Clásico K-Drama)", ja: "本当に？！ (韓ドラ定番)", zh: "真的吗？！ (韩剧高频词)", th: "จริงเหรอครับ/คะ?! (วลีฮิตซีรีส์)", cat: "kdrama", level: "Lv.2" },
+            { hangul: "대박", pron: "dae-bak", en: "Awesome! / Jackpot!", es: "¡Increíble! / ¡Genial!", ja: "最高！ / ヤバい！", zh: "大发！ / 绝了！", th: "สุดยอด! / เจ๋งเป้ง!", cat: "kdrama", level: "Lv.2" },
+            { hangul: "사랑해요", pron: "sa-rang-hae-yo", en: "I love you (K-Pop)", es: "Te amo (K-Pop)", ja: "愛してます (K-POP定番)", zh: "我爱你 (K-POP追星)", th: "รักนะครับ/ค่ะ (K-POP)", cat: "kpop", level: "Lv.4" },
+            { hangul: "화이팅", pron: "hwa-i-ting", en: "Cheer up! / You got this!", es: "¡Ánimo! / ¡A por ello!", ja: "ファイト！ / 応援してる！", zh: "加油！ / 怀挺！", th: "สู้ๆ นะ! (ฮวาอีทิง)", cat: "kdrama", level: "Lv.2" },
+            { hangul: "멘붕", pron: "men-bung", en: "Mental breakdown / Panic", es: "Colapso mental / Pánico", ja: "メンタル崩壊 / パニック", zh: "心态崩溃 / 抓狂", th: "สติแตก / หัวหมุน (เมนบุง)", cat: "slang", level: "Lv.5" },
+            { hangul: "꿀잼", pron: "kkul-jaem", en: "Super fun / Hilarious", es: "Súper divertido / Buenísimo", ja: "超面白い / 神回", zh: "超级好玩 / 巨搞笑", th: "สนุกโคตรๆ / ฮากระจาย (กุลแจม)", cat: "slang", level: "Lv.5" },
+            { hangul: "심쿵", pron: "sim-kung", en: "Heart flutter / Butterfly", es: "Flechazo / Vuelco al corazón", ja: "胸キュン / ドキドキ", zh: "心动暴击 / 怦然心动", th: "ใจบาง / ตกหลุมรักอย่างแรง", cat: "kpop", level: "Lv.4" },
+            { hangul: "얼마예요", pron: "eol-ma-ye-yo", en: "How much is this?", es: "¿Cuánto cuesta esto?", ja: "いくらですか？", zh: "多少钱？", th: "ราคาเท่าไหร่ครับ/ค่ะ?", cat: "travel", level: "Lv.1" },
+            { hangul: "맛있어요", pron: "ma-si-sseo-yo", en: "It's delicious!", es: "¡Está delicioso!", ja: "美味しいです！", zh: "很好吃！", th: "อร่อยมากเลยครับ/ค่ะ!", cat: "travel", level: "Lv.1" },
+            { hangul: "눈치", pron: "nun-chi", en: "Reading the room / Tact", es: "Tacto / Darse cuenta del ambiente", ja: "空気を読むこと / 察知", zh: "眼力见儿 / 察言观色", th: "การดูกาลเทศะ (นุนชี)", cat: "slang", level: "Lv.5" },
+            { hangul: "수고했어요", pron: "su-go-hae-sseo-yo", en: "You worked so hard today!", es: "¡Buen trabajo hoy!", ja: "今日もお疲れ様でした！", zh: "今天也辛苦啦！", th: "ขอบคุณสำหรับความเหน็ดเหนื่อยในวันนี้!", cat: "kpop", level: "Lv.4" }
         ];
+
+        // Helper getters for dynamic multilingual content
+        function getQuizPrompt(q) {
+            return q['prompt_' + currentLang] || q.prompt_en;
+        }
+        function getQuizNuance(q) {
+            return q['nuance_' + currentLang] || q.nuance_en;
+        }
 
         // ==========================================
         // 3. APP STATE & PERSISTENCE
@@ -1253,9 +1745,9 @@
                 const osc = ctx.createOscillator();
                 const gain = ctx.createGain();
                 osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523.25, now); // C5
-                osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
-                osc.frequency.setValueAtTime(783.99, now + 0.2); // G5
+                osc.frequency.setValueAtTime(523.25, now);
+                osc.frequency.setValueAtTime(659.25, now + 0.1);
+                osc.frequency.setValueAtTime(783.99, now + 0.2);
                 gain.gain.setValueAtTime(0.2, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
                 osc.connect(gain);
@@ -1284,21 +1776,58 @@
         }
 
         // ==========================================
-        // 5. LANGUAGE TOGGLE (EN <-> ES)
+        // 5. LANGUAGE MODAL & SWITCHER (5 GLOBAL LANGS)
         // ==========================================
-        function toggleLanguage() {
-            currentLang = currentLang === 'en' ? 'es' : 'en';
+        function openLangModal() {
+            const container = document.getElementById('lang-options-container');
+            let html = '';
+            const langs = ['en', 'es', 'ja', 'zh', 'th'];
+            langs.forEach(key => {
+                const item = langMeta[key];
+                const isActive = key === currentLang;
+                const activeStyle = isActive
+                    ? "bg-rose-600 text-white border-rose-500 shadow-md font-black"
+                    : "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700 font-bold";
+                html += `
+                    <button onclick="selectLanguage('${key}')" class="w-full flex items-center justify-between p-3 rounded-2xl border transition active:scale-98 ${activeStyle}">
+                        <div class="flex items-center space-x-2.5">
+                            <span class="text-xl">${item.flag}</span>
+                            <span class="text-sm">${item.name} (${item.label})</span>
+                        </div>
+                        ${isActive ? '<i class="fa-solid fa-circle-check text-white"></i>' : '<i class="fa-regular fa-circle text-slate-600"></i>'}
+                    </button>
+                `;
+            });
+            container.innerHTML = html;
+            document.getElementById('lang-modal').classList.remove('hidden');
+        }
+
+        function closeLangModal() {
+            document.getElementById('lang-modal').classList.add('hidden');
+        }
+
+        function selectLanguage(langKey) {
+            currentLang = langKey;
             localStorage.setItem('kTalkLang', currentLang);
+            closeLangModal();
             applyLanguage();
             loadQuiz();
             if (!document.getElementById('section-flashcard').classList.contains('hidden')) loadFlashCard();
             if (!document.getElementById('section-voca').classList.contains('hidden')) renderVocaList();
             renderAttendanceCalendar();
-            showToast(currentLang === 'en' ? "Language switched to English 🇺🇸" : "Idioma cambiado a Español 🇪🇸");
+
+            const toastMessages = {
+                en: "Language set to English 🇺🇸",
+                es: "Idioma cambiado a Español 🇪🇸",
+                ja: "言語を日本語に設定しました 🇯🇵",
+                zh: "语言已切换为中文 🇨🇳",
+                th: "เปลี่ยนภาษาเป็นภาษาไทยแล้ว 🇹🇭"
+            };
+            showToast(toastMessages[currentLang] || "Language Updated!");
         }
 
         function applyLanguage() {
-            const t = i18n[currentLang];
+            const t = i18n[currentLang] || i18n.en;
             document.getElementById('lang-flag').innerText = t.flag;
             document.getElementById('lang-label').innerText = t.langLabel;
             document.getElementById('app-tagline').innerText = t.tagline;
@@ -1354,6 +1883,12 @@
             document.getElementById('nav-label-review').innerText = t.navReview;
             document.getElementById('nav-label-stats').innerText = t.navStreak;
 
+            // Modals
+            const modalTitleEl = document.getElementById('lang-modal-title');
+            if (modalTitleEl) modalTitleEl.innerText = t.langModalTitle;
+            const modalDescEl = document.getElementById('lang-modal-desc');
+            if (modalDescEl) modalDescEl.innerText = t.langModalDesc;
+
             updateResumeBanner();
         }
 
@@ -1372,11 +1907,11 @@
             const q = list[quizIdx];
             hintStep = 0;
 
-            const t = i18n[currentLang];
-            document.getElementById('quiz-prompt').innerText = currentLang === 'es' ? q.prompt_es : q.prompt_en;
+            const t = i18n[currentLang] || i18n.en;
+            document.getElementById('quiz-prompt').innerText = getQuizPrompt(q);
             document.getElementById('quiz-pron').innerText = `[ ${q.targetPron} ]`;
             document.getElementById('quiz-category').innerHTML = isReviewMode
-                ? `<i class="fa-solid fa-fire mr-1 text-rose-400"></i> ${currentLang === 'es' ? 'Repaso' : 'Review'} (${q.wrongCount || 1})`
+                ? `<i class="fa-solid fa-fire mr-1 text-rose-400"></i> ${t.navReview} (${q.wrongCount || 1})`
                 : `<i class="fa-solid fa-tag mr-1"></i> ${q.cat}`;
             document.getElementById('quiz-progress').innerText = `${quizIdx + 1} / ${list.length}`;
 
@@ -1448,7 +1983,7 @@
             } else if (hintStep === 2) {
                 showToast(`💡 2nd Syllable: '${q.target[1] || ''}'`);
             } else {
-                const nuance = currentLang === 'es' ? q.nuance_es : q.nuance_en;
+                const nuance = getQuizNuance(q);
                 showToast(`💡 Tip: ${nuance}`);
             }
         }
@@ -1462,8 +1997,31 @@
             const box = document.getElementById('result-box');
             box.classList.remove('hidden');
 
-            const isEn = currentLang === 'en';
-            const nuance = isEn ? q.nuance_en : q.nuance_es;
+            const nuance = getQuizNuance(q);
+
+            const correctHeaders = {
+                en: "Correct!",
+                es: "¡Correcto!",
+                ja: "正解です！",
+                zh: "回答正确！",
+                th: "ถูกต้องแล้ว!"
+            };
+
+            const synonymHeaders = {
+                en: "Great Synonym / Match!",
+                es: "¡Excelente sinónimo / respuesta!",
+                ja: "通じる良い表現です！",
+                zh: "意思相通的优秀表达！",
+                th: "ความหมายตรงกัน ยอดเยี่ยมมาก!"
+            };
+
+            const wrongHeaders = {
+                en: "Not quite! The correct answer is:",
+                es: "¡Casi! La respuesta correcta es:",
+                ja: "惜しい！ 正解はこちら:",
+                zh: "差一点点！ 正确答案是：",
+                th: "เกือบถูกแล้ว! คำตอบที่ถูกต้องคือ:"
+            };
 
             // 1. Exact Hangul or Exact Romanization match
             if (raw && (raw === targetClean || raw === targetPronClean || raw === q.sentence.replace(/[.,!?\s]/g, '').toLowerCase())) {
@@ -1479,7 +2037,7 @@
                 box.className = "p-4 rounded-2xl text-sm font-medium bg-emerald-950/80 text-emerald-200 border border-emerald-700/80 space-y-2";
                 box.innerHTML = `
                     <div class="flex items-center justify-between">
-                        <span class="font-black text-emerald-300 text-base"><i class="fa-solid fa-circle-check mr-1.5"></i> ${isEn ? 'Correct!' : '¡Correcto!'} (+${bonusPoints} EXP)</span>
+                        <span class="font-black text-emerald-300 text-base"><i class="fa-solid fa-circle-check mr-1.5"></i> ${correctHeaders[currentLang] || correctHeaders.en} (+${bonusPoints} EXP)</span>
                         <span class="text-xs bg-emerald-900 text-emerald-300 px-2 py-0.5 rounded-full font-bold">${comboCount} COMBO! 🔥</span>
                     </div>
                     <div class="text-base text-white font-bold bg-slate-900/80 p-2.5 rounded-xl border border-emerald-800/50">${q.sentence.replace(/[\[\]]/g, '')}</div>
@@ -1500,7 +2058,7 @@
                     if (q.streak >= 3) {
                         reviewList = reviewList.filter(item => item.target !== q.target);
                         confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-                        showToast(isEn ? "🎉 3 Streak! Mastered and graduated from review!" : "🎉 ¡3 racha! ¡Completado y graduado del repaso!");
+                        showToast("🎉 3 Streak! Mastered and graduated from review!");
                         if (reviewList.length === 0) isReviewMode = false;
                     }
                     saveReview();
@@ -1512,10 +2070,10 @@
                 box.className = "p-4 rounded-2xl text-sm font-medium bg-amber-950/80 text-amber-200 border border-amber-700 space-y-2";
                 box.innerHTML = `
                     <div class="font-black text-amber-300 text-sm">
-                        <i class="fa-solid fa-star-half-stroke mr-1.5"></i> ${isEn ? 'Great Synonym / Match!' : '¡Excelente sinónimo / respuesta!'}
+                        <i class="fa-solid fa-star-half-stroke mr-1.5"></i> ${synonymHeaders[currentLang] || synonymHeaders.en}
                     </div>
                     <p class="text-xs text-amber-200 leading-relaxed">
-                        ${isEn ? `You typed a natural phrase, but here let's master the standard expression: <b>'${q.target}' [${q.targetPron}]</b>!` : `Escribiste una frase natural, pero aquí practiquemos la forma clave: <b>'${q.target}' [${q.targetPron}]</b>!`}
+                        Practice standard expression: <b>'${q.target}' [${q.targetPron}]</b>!
                     </p>
                     <div class="text-xs text-slate-300 bg-slate-900 p-2 rounded-lg border border-amber-800">${q.sentence.replace(/[\[\]]/g, '')}</div>
                 `;
@@ -1530,9 +2088,9 @@
 
                 box.className = "p-4 rounded-2xl text-sm font-medium bg-rose-950/80 text-rose-200 border border-rose-800 space-y-2";
                 box.innerHTML = `
-                    <div class="font-black text-rose-400 text-sm"><i class="fa-solid fa-circle-xmark mr-1.5"></i> ${isEn ? 'Not quite! The correct answer is' : '¡Casi! La respuesta correcta es'}: <span class="underline font-black text-white">${q.target}</span> [${q.targetPron}]</div>
+                    <div class="font-black text-rose-400 text-sm"><i class="fa-solid fa-circle-xmark mr-1.5"></i> ${wrongHeaders[currentLang] || wrongHeaders.en} <span class="underline font-black text-white">${q.target}</span> [${q.targetPron}]</div>
                     <div class="text-sm text-slate-200 font-bold bg-slate-900 p-2.5 rounded-xl border border-rose-900">${q.sentence.replace(/[\[\]]/g, '')}</div>
-                    <div class="text-xs text-rose-300 pt-1 leading-relaxed"><i class="fa-solid fa-info-circle mr-1"></i> ${nuance} (${isEn ? 'Saved to Ebbinghaus Review' : 'Guardado en Repaso Inteligente'})</div>
+                    <div class="text-xs text-rose-300 pt-1 leading-relaxed"><i class="fa-solid fa-info-circle mr-1"></i> ${nuance}</div>
                 `;
 
                 speakKorean(q.sentence.replace(/[\[\]]/g, ''));
@@ -1576,9 +2134,9 @@
                     currentLevel++;
                     quizIdx = 0;
                     localStorage.setItem('kTalkLevel', currentLevel);
-                    document.getElementById('level-badge').innerText = i18n[currentLang].levelNames[currentLevel - 1];
+                    document.getElementById('level-badge').innerText = (i18n[currentLang] || i18n.en).levelNames[currentLevel - 1];
                     confetti({ particleCount: 100, spread: 80, origin: { y: 0.5 } });
-                    showToast(`🎉 Level Up! ${i18n[currentLang].levelNames[currentLevel - 1]} unlocked!`);
+                    showToast(`🎉 Level Up! ${(i18n[currentLang] || i18n.en).levelNames[currentLevel - 1]} unlocked!`);
                 } else {
                     quizIdx = 0;
                     showToast("🏆 You completed all levels! Reviewing from #1.");
@@ -1603,10 +2161,10 @@
             lastProgress = {
                 level: currentLevel,
                 index: quizIdx,
-                levelName: i18n[currentLang].levelNames[currentLevel - 1],
+                levelName: (i18n[currentLang] || i18n.en).levelNames[currentLevel - 1],
                 word: q.target,
                 pron: q.targetPron,
-                prompt: currentLang === 'es' ? q.prompt_es : q.prompt_en,
+                prompt: getQuizPrompt(q),
                 date: getTodayString(),
                 time: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
             };
@@ -1618,34 +2176,37 @@
             quizIdx = 0;
             saveCurrentPosition();
             loadQuiz();
-            showToast(`🔄 Starting ${i18n[currentLang].levelNames[currentLevel - 1]} from #1.`);
+            showToast(`🔄 Starting ${(i18n[currentLang] || i18n.en).levelNames[currentLevel - 1]} from #1.`);
         }
 
         function changeLevel() {
             isReviewMode = false;
             currentLevel = currentLevel >= 5 ? 1 : currentLevel + 1;
             localStorage.setItem('kTalkLevel', currentLevel);
-            document.getElementById('level-badge').innerText = i18n[currentLang].levelNames[currentLevel - 1];
+            document.getElementById('level-badge').innerText = (i18n[currentLang] || i18n.en).levelNames[currentLevel - 1];
             quizIdx = 0;
             loadQuiz();
-            showToast(`Level set to [${i18n[currentLang].levelNames[currentLevel - 1]}]`);
+            showToast(`Level set to [${(i18n[currentLang] || i18n.en).levelNames[currentLevel - 1]}]`);
         }
 
         function startLevelTest() {
-            const isEn = currentLang === 'en';
-            const qText = isEn
-                ? "Korean Quick Diagnostic Quiz!\nWhat is the famous K-Drama word for 'Awesome / Jackpot'?\n(Type in Hangul or Latin: e.g. daebak)\n(Press Cancel to skip)"
-                : "¡Test Rápido de Diagnóstico!\n¿Cuál es la palabra famosa para '¡Increíble / Genial!'?\n(Escribe en Hangul o letras: ej. daebak)\n(Pulsa Cancelar para omitir)";
-            const ans = prompt(qText);
+            const prompts = {
+                en: "Korean Quick Diagnostic Quiz!\nWhat is the famous K-Drama word for 'Awesome / Jackpot'?\n(Type in Hangul or Latin: e.g. daebak)\n(Press Cancel to skip)",
+                es: "¡Test Rápido de Diagnóstico!\n¿Cuál es la palabra famosa para '¡Increíble / Genial!'?\n(Escribe en Hangul o letras: ej. daebak)\n(Pulsa Cancelar para omitir)",
+                ja: "韓国語レベル診断ミニテスト！\n「ヤバい！/ 大当たり！」を表す超有名単語は何？\n(ハングルまたはアルファベットで入力: daebak)\n(スキップする場合はキャンセル)",
+                zh: "韩语水平快速诊断测试！\n形容“太棒了/大发！”的经典韩流词汇是什么？\n(输入韩文或罗马拼音：如 daebak)\n(点击取消跳过)",
+                th: "แบบทดสอบวัดระดับเกาหลีแบบเร็ว!\nคำสแลงยอดฮิตที่แปลว่า 'สุดยอด/แจ็กพอต' คือคำไหน?\n(พิมพ์ฮันกึลหรือคำอ่าน: เช่น daebak)\n(กด Cancel เพื่อข้าม)"
+            };
+            const ans = prompt(prompts[currentLang] || prompts.en);
             if (ans && (ans.trim().toLowerCase().includes('대박') || ans.trim().toLowerCase().includes('daebak'))) {
                 currentLevel = 2;
-                showToast(isEn ? "Passed! Set to Lv.2 K-Drama level." : "¡Aprobado! Nivel Lv.2 K-Drama activado.");
+                showToast("Passed! Set to Lv.2 K-Drama level.");
             } else {
                 currentLevel = 1;
-                showToast(isEn ? "Starting from solid foundation: Lv.1 Survival." : "Comenzando desde las bases: Lv.1 Supervivencia.");
+                showToast("Starting from solid foundation: Lv.1 Survival.");
             }
             localStorage.setItem('kTalkLevel', currentLevel);
-            document.getElementById('level-badge').innerText = i18n[currentLang].levelNames[currentLevel - 1];
+            document.getElementById('level-badge').innerText = (i18n[currentLang] || i18n.en).levelNames[currentLevel - 1];
             isReviewMode = false;
             quizIdx = 0;
             loadQuiz();
@@ -1655,14 +2216,14 @@
         function startVoiceRecognition() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
-                showToast(currentLang === 'en' ? "Voice recognition not supported in this browser. Use Chrome or Safari." : "Reconocimiento de voz no soportado. Usa Chrome o Safari.");
+                showToast("Voice recognition not supported in this browser. Use Chrome or Safari.");
                 return;
             }
             const recognition = new SpeechRecognition();
             recognition.lang = 'ko-KR';
             const btn = document.getElementById('mic-btn');
             btn.classList.add('animate-pulse', 'bg-rose-600', 'text-white');
-            showToast(currentLang === 'en' ? "🎙️ Speak aloud in Korean!" : "🎙️ ¡Habla en voz alta en coreano!");
+            showToast("🎙️ Speak aloud in Korean!");
 
             recognition.onresult = function(event) {
                 const transcript = event.results[0][0].transcript.replace(/[.,!?]/g, '').trim();
@@ -1689,8 +2250,8 @@
             document.getElementById('fc-category').innerText = q.cat;
             document.getElementById('fc-hangul').innerText = q.target;
             document.getElementById('fc-pron').innerText = `[ ${q.targetPron} ]`;
-            document.getElementById('fc-meaning').innerText = currentLang === 'es' ? q.prompt_es : q.prompt_en;
-            document.getElementById('fc-nuance').innerText = currentLang === 'es' ? q.nuance_es : q.nuance_en;
+            document.getElementById('fc-meaning').innerText = getQuizPrompt(q);
+            document.getElementById('fc-nuance').innerText = getQuizNuance(q);
             document.getElementById('fc-example').innerText = `"${q.sentence.replace(/[\[\]]/g, '')}"`;
 
             isCardFlipped = false;
@@ -1723,6 +2284,7 @@
             let html = '';
             list.forEach(item => {
                 const isBookmarked = bookmarkedWords.includes(item.hangul);
+                const meaning = item[currentLang] || item.en;
                 html += `
                     <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 flex justify-between items-center shadow-xs">
                         <div class="space-y-1">
@@ -1731,7 +2293,7 @@
                                 <span class="text-lg font-black text-white">${item.hangul}</span>
                                 <span class="text-xs text-rose-400 font-mono">[${item.pron}]</span>
                             </div>
-                            <p class="text-xs text-slate-300">${currentLang === 'es' ? item.es : item.en}</p>
+                            <p class="text-xs text-slate-300">${meaning}</p>
                         </div>
                         <div class="flex items-center space-x-2">
                             <button onclick="speakKorean('${item.hangul}')" class="w-8 h-8 rounded-xl bg-slate-700 hover:bg-slate-600 active:scale-95 text-rose-300 flex items-center justify-center transition">
@@ -1789,19 +2351,20 @@
 
         function filterBookmarkedVoca() {
             if (bookmarkedWords.length === 0) {
-                showToast(currentLang === 'en' ? "No favorites yet. Tap the star to bookmark words!" : "No tienes favoritos aún. ¡Toca la estrella para guardar!");
+                showToast("No favorites yet. Tap the star to bookmark words!");
                 return;
             }
             const container = document.getElementById('voca-list-container');
             const list = dailyVoca.filter(v => bookmarkedWords.includes(v.hangul));
             let html = '';
             list.forEach(item => {
+                const meaning = item[currentLang] || item.en;
                 html += `
                     <div class="bg-slate-800 p-4 rounded-2xl border border-amber-500/30 flex justify-between items-center shadow-xs">
                         <div class="space-y-1">
                             <span class="text-lg font-black text-amber-300">${item.hangul}</span>
                             <span class="text-xs text-rose-400 font-mono ml-2">[${item.pron}]</span>
-                            <p class="text-xs text-slate-300">${currentLang === 'es' ? item.es : item.en}</p>
+                            <p class="text-xs text-slate-300">${meaning}</p>
                         </div>
                         <button onclick="speakKorean('${item.hangul}')" class="w-8 h-8 rounded-xl bg-slate-700 text-rose-300 flex items-center justify-center">
                             <i class="fa-solid fa-volume-high text-xs"></i>
@@ -1821,8 +2384,8 @@
                 container.innerHTML = `
                     <div class="bg-slate-800 p-6 rounded-3xl border border-slate-700 text-center space-y-2 text-slate-400">
                         <i class="fa-solid fa-circle-check text-3xl text-emerald-400"></i>
-                        <p class="font-bold text-white">${currentLang === 'en' ? 'No words to review!' : '¡No hay palabras para repasar!'}</p>
-                        <p class="text-xs">${currentLang === 'en' ? 'Mistakes in the quiz will automatically appear here.' : 'Los errores del cuestionario aparecerán automáticamente aquí.'}</p>
+                        <p class="font-bold text-white">No words to review!</p>
+                        <p class="text-xs">Mistakes in the quiz will automatically appear here.</p>
                     </div>
                 `;
                 return;
@@ -1838,7 +2401,7 @@
                                 <span class="font-black text-white text-base">${q.target}</span>
                                 <span class="text-xs text-rose-400 font-mono">[${q.targetPron}]</span>
                             </div>
-                            <p class="text-xs text-slate-300">${currentLang === 'es' ? q.prompt_es : q.prompt_en}</p>
+                            <p class="text-xs text-slate-300">${getQuizPrompt(q)}</p>
                         </div>
                         <button onclick="speakKorean('${q.target}')" class="w-8 h-8 rounded-xl bg-slate-700 text-rose-300 flex items-center justify-center">
                             <i class="fa-solid fa-volume-high text-xs"></i>
@@ -1851,23 +2414,23 @@
 
         function startReviewQuiz() {
             if (reviewList.length === 0) {
-                showToast(currentLang === 'en' ? "No review words! Solve some quizzes first." : "¡No hay palabras de repaso! Resuelve cuestionarios primero.");
+                showToast("No review words! Solve some quizzes first.");
                 return;
             }
             isReviewMode = true;
             quizIdx = 0;
             switchTab('quiz');
             loadQuiz();
-            showToast(currentLang === 'en' ? "🔥 Starting Smart Review Mode!" : "🔥 ¡Modo Repaso Inteligente iniciado!");
+            showToast("🔥 Starting Smart Review Mode!");
         }
 
         function clearReviewList() {
-            if (confirm(currentLang === 'en' ? "Clear all review items?" : "¿Borrar todas las palabras de repaso?")) {
+            if (confirm("Clear all review items?")) {
                 reviewList = [];
                 isReviewMode = false;
                 saveReview();
                 renderReviewList();
-                showToast(currentLang === 'en' ? "Review note cleared." : "Lista de repaso vaciada.");
+                showToast("Review note cleared.");
             }
         }
 
@@ -1919,7 +2482,7 @@
 
                 addExp(20);
                 confetti({ particleCount: 90, spread: 70, origin: { y: 0.5 } });
-                showToast(currentLang === 'en' ? `🌺 Today's attendance complete! (+20 EXP, ${streakDays} Day Streak 🔥)` : `🌺 ¡Asistencia completada! (+20 EXP, Racha de ${streakDays} días 🔥)`);
+                showToast(`🌺 Today's attendance complete! (+20 EXP, ${streakDays} Day Streak 🔥)`);
             }
 
             attendanceLog[today].solvedCount++;
@@ -1949,7 +2512,7 @@
                 index: nextIdx,
                 solvedLevel: currentLevel,
                 solvedIndex: quizIdx,
-                levelName: i18n[currentLang].levelNames[nextLevel - 1],
+                levelName: (i18n[currentLang] || i18n.en).levelNames[nextLevel - 1],
                 word: q ? q.target : '',
                 pron: q ? q.targetPron : '',
                 date: today,
@@ -1965,19 +2528,19 @@
             const resumeEl = document.getElementById('resume-text');
             const resumeBtn = document.getElementById('resume-btn');
             if (!resumeEl) return;
-            const t = i18n[currentLang];
+            const t = i18n[currentLang] || i18n.en;
 
             if (lastProgress) {
                 const isResumePoint = (currentLevel === lastProgress.level && quizIdx === lastProgress.index);
                 if (isResumePoint) {
-                    resumeEl.innerHTML = `<span class="text-rose-400 font-extrabold">${currentLang === 'es' ? 'En curso' : 'Active'}:</span> ${t.levelNames[lastProgress.level - 1]} (#${lastProgress.index + 1})`;
+                    resumeEl.innerHTML = `<span class="text-rose-400 font-extrabold">Active:</span> ${t.levelNames[lastProgress.level - 1]} (#${lastProgress.index + 1})`;
                     if (resumeBtn) {
                         resumeBtn.className = "bg-slate-700 hover:bg-slate-600 text-slate-300 text-xs font-bold px-3 py-1.5 rounded-xl transition flex items-center";
                         resumeBtn.innerHTML = `<i class="fa-solid fa-rotate-left mr-1 text-[10px]"></i> ${t.restartBtn}`;
                         resumeBtn.onclick = restartCurrentLevel;
                     }
                 } else {
-                    resumeEl.innerHTML = `<span class="text-slate-400 font-bold">${currentLang === 'es' ? 'Siguiente' : 'Next up'}:</span> ${t.levelNames[lastProgress.level - 1]} (#${lastProgress.index + 1})`;
+                    resumeEl.innerHTML = `<span class="text-slate-400 font-bold">Next up:</span> ${t.levelNames[lastProgress.level - 1]} (#${lastProgress.index + 1})`;
                     if (resumeBtn) {
                         resumeBtn.className = "bg-rose-600 hover:bg-rose-500 active:scale-95 text-white text-xs font-black px-3.5 py-1.5 rounded-xl shadow-xs transition flex items-center";
                         resumeBtn.innerHTML = `${t.resumeBtn} <i class="fa-solid fa-chevron-right ml-1 text-[10px]"></i>`;
@@ -2001,29 +2564,27 @@
             currentLevel = lastProgress.level;
             quizIdx = lastProgress.index;
             localStorage.setItem('kTalkLevel', currentLevel);
-            document.getElementById('level-badge').innerText = i18n[currentLang].levelNames[currentLevel - 1];
+            document.getElementById('level-badge').innerText = (i18n[currentLang] || i18n.en).levelNames[currentLevel - 1];
             switchTab('quiz');
             loadQuiz();
-            showToast(`📌 [${i18n[currentLang].levelNames[currentLevel - 1]} #${quizIdx + 1}]`);
+            showToast(`📌 [${(i18n[currentLang] || i18n.en).levelNames[currentLevel - 1]} #${quizIdx + 1}]`);
         }
 
         function renderAttendanceCalendar() {
-            const monthNamesEn = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            const monthNamesEs = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-            const monthNames = currentLang === 'es' ? monthNamesEs : monthNamesEn;
-
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const monthEl = document.getElementById('calendar-month-year');
             if (monthEl) monthEl.innerText = `${monthNames[calendarMonth]} ${calendarYear}`;
 
             const todayStr = getTodayString();
             const todayBadge = document.getElementById('attendance-today-badge');
+            const t = i18n[currentLang] || i18n.en;
             if (todayBadge) {
                 if (attendanceLog[todayStr]) {
                     todayBadge.className = "text-[10px] px-2.5 py-1 rounded-full font-black bg-emerald-950 text-emerald-300 border border-emerald-800 flex items-center";
-                    todayBadge.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-emerald-400"></i> ${i18n[currentLang].todayDone}`;
+                    todayBadge.innerHTML = `<i class="fa-solid fa-circle-check mr-1 text-emerald-400"></i> ${t.todayDone}`;
                 } else {
                     todayBadge.className = "text-[10px] px-2.5 py-1 rounded-full font-black bg-amber-950 text-amber-300 border border-amber-800";
-                    todayBadge.innerHTML = i18n[currentLang].todayPending;
+                    todayBadge.innerHTML = t.todayPending;
                 }
             }
 
@@ -2079,11 +2640,11 @@
                     </div>
                     <div class="grid grid-cols-3 gap-1.5 py-1 text-center">
                         <div class="bg-slate-950 p-1.5 rounded-xl border border-slate-800">
-                            <span class="text-[10px] text-slate-400 block">${currentLang === 'es' ? 'Resueltos' : 'Solved'}</span>
+                            <span class="text-[10px] text-slate-400 block">Solved</span>
                             <span class="font-black text-rose-400 text-sm">${record.solvedCount}</span>
                         </div>
                         <div class="bg-slate-950 p-1.5 rounded-xl border border-slate-800">
-                            <span class="text-[10px] text-slate-400 block">${currentLang === 'es' ? 'Precisión' : 'Accuracy'}</span>
+                            <span class="text-[10px] text-slate-400 block">Accuracy</span>
                             <span class="font-black text-emerald-400 text-sm">${rate}%</span>
                         </div>
                         <div class="bg-slate-950 p-1.5 rounded-xl border border-slate-800">
@@ -2100,9 +2661,9 @@
                 detailBox.innerHTML = `
                     <div class="flex justify-between items-center text-slate-400">
                         <span class="font-bold"><i class="fa-solid fa-calendar-day mr-1"></i> ${dateStr}</span>
-                        <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">${currentLang === 'es' ? 'Sin registro' : 'No activity'}</span>
+                        <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full">No activity</span>
                     </div>
-                    <p class="text-[11px] text-slate-500 pt-1">${currentLang === 'es' ? 'Resuelve al menos 1 pregunta para obtener tu flor hibisco diaria.' : 'Solve at least 1 Korean question to collect your daily hibiscus flower.'}</p>
+                    <p class="text-[11px] text-slate-500 pt-1">Solve at least 1 Korean question to collect your daily hibiscus flower.</p>
                 `;
             }
         }
@@ -2125,7 +2686,7 @@
 
         function updateExpUI() {
             document.getElementById('stat-total-exp').innerText = exp;
-            document.getElementById('stat-streak').innerText = `${streakDays} ${currentLang === 'es' ? 'Días' : 'Days'} 🔥`;
+            document.getElementById('stat-streak').innerText = `${streakDays} Days 🔥`;
             document.getElementById('stat-wrong').innerText = reviewList.length;
 
             const progress = exp % 100;
@@ -2148,18 +2709,16 @@
         function closeProModal() { document.getElementById('pro-modal').classList.add('hidden'); }
 
         function simulateSubscription() {
-            alert(currentLang === 'en'
-                ? "🌟 Stripe / Apple In-App Purchase integration connects here!\nUsers subscribe at $4.99/mo for passive recurring revenue."
-                : "🌟 ¡Aquí se conecta la pasarela de pago (Stripe / Google In-App Purchase)!\nLos usuarios pagan $4.99/mes generando ingresos pasivos recurrentes.");
+            alert("🌟 Stripe / Apple In-App Purchase integration connects here!\nUsers subscribe at $4.99/mo for passive recurring revenue.");
             closeProModal();
         }
 
         function simulateRewardedAd() {
-            showToast(currentLang === 'en' ? "🎬 Simulating 5s Google AdMob rewarded video..." : "🎬 Simulando video con recompensa de Google AdMob...");
+            showToast("🎬 Simulating 5s Google AdMob rewarded video...");
             setTimeout(() => {
                 addExp(30);
                 confetti({ particleCount: 80, spread: 60 });
-                showToast(currentLang === 'en' ? "🎉 Ad complete! You earned 3 Free Hints and +30 EXP!" : "🎉 ¡Anuncio terminado! Ganaste 3 pistas gratis y +30 EXP!");
+                showToast("🎉 Ad complete! You earned 3 Free Hints and +30 EXP!");
                 closeProModal();
             }, 1800);
         }
@@ -2237,15 +2796,20 @@
             updateExpUI();
             updateResumeBanner();
             renderAttendanceCalendar();
-            document.getElementById('level-badge').innerText = i18n[currentLang].levelNames[currentLevel - 1];
+            document.getElementById('level-badge').innerText = (i18n[currentLang] || i18n.en).levelNames[currentLevel - 1];
             loadQuiz();
             renderVocaList();
 
             if (lastProgress) {
                 setTimeout(() => {
-                    showToast(currentLang === 'en'
-                        ? `👋 Welcome back! Resuming from [${i18n[currentLang].levelNames[currentLevel - 1]} #${quizIdx + 1}]`
-                        : `👋 ¡Bienvenido de nuevo! Continuando desde [${i18n[currentLang].levelNames[currentLevel - 1]} #${quizIdx + 1}]`);
+                    const welcomeMsgs = {
+                        en: `👋 Welcome back! Resuming from [${(i18n[currentLang] || i18n.en).levelNames[currentLevel - 1]} #${quizIdx + 1}]`,
+                        es: `👋 ¡Bienvenido de nuevo! Continuando desde [${(i18n[currentLang] || i18n.en).levelNames[currentLevel - 1]} #${quizIdx + 1}]`,
+                        ja: `👋 おかえりなさい！前回の続き [${(i18n[currentLang] || i18n.en).levelNames[currentLevel - 1]} #${quizIdx + 1}] から始めます！`,
+                        zh: `👋 欢迎回来！自动为您接续 [${(i18n[currentLang] || i18n.en).levelNames[currentLevel - 1]} 第${quizIdx + 1}题]`,
+                        th: `👋 ยินดีต้อนรับกลับมา! เรียนต่อจาก [${(i18n[currentLang] || i18n.en).levelNames[currentLevel - 1]} ข้อ ${quizIdx + 1}]`
+                    };
+                    showToast(welcomeMsgs[currentLang] || welcomeMsgs.en);
                 }, 400);
             }
         };
