@@ -17,6 +17,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Confetti & Web Audio Effects -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Real Korean 60 Situations Data -->
+    <script src="real-korean-data.js"></script>
 
     <style>
         .perspective-1000 { perspective: 1000px; }
@@ -383,29 +385,173 @@
                 </button>
             </div>
         </section>
+
+        <!-- ==================== TAB: REAL KOREAN (실전 상황별 한국어 60) ==================== -->
+        <section id="section-realkorean" class="hidden space-y-4">
+            <!-- Header Banner with Native Speaker Disclaimer -->
+            <div class="bg-gradient-to-r from-rose-900 via-pink-900 to-indigo-950 text-white p-4 rounded-3xl shadow-lg border border-rose-700/50 space-y-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2.5">
+                        <span class="text-2xl shadow-xs">🇰🇷</span>
+                        <div>
+                            <h2 class="text-base font-black tracking-tight" id="rk-header-title">Real Korean 60</h2>
+                            <p class="text-[11px] text-rose-200" id="rk-header-sub">실제 한국인이 매일 쓰는 진짜 상황별 한국어 표현</p>
+                        </div>
+                    </div>
+                    <span class="text-[10px] bg-rose-950/90 text-rose-300 border border-rose-500/50 px-2.5 py-1 rounded-xl font-black">
+                        60 Situations
+                    </span>
+                </div>
+
+                <!-- Disclaimer Notice Badge (원어민 최종 검수 대상) -->
+                <div class="bg-amber-950/80 border border-amber-500/60 rounded-2xl p-2.5 text-[11px] text-amber-200 flex items-start space-x-2 shadow-inner">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm mt-0.5 shrink-0"></i>
+                    <div class="leading-snug">
+                        <span class="font-black text-amber-300 block mb-0.5">⚠️ [원어민 최종 검수 대상 / Native Speaker Final Review]</span>
+                        <span>본 학습 콘텐츠의 한국어 표현, 반말/존댓말/격식체 변환 및 상황별 정답은 표준 실생활 회화 관용구를 기반으로 기획되었으며, 추후 원어민 최종 검수를 거칠 예정입니다.</span>
+                    </div>
+                </div>
+
+                <!-- Mode Switch Tabs: Situational Quiz vs Explore 60 -->
+                <div class="grid grid-cols-2 gap-2 pt-1">
+                    <button onclick="setRealKoreanMode('quiz')" id="rk-tab-quiz" class="py-2 rounded-xl text-xs font-black bg-rose-600 text-white shadow-md transition active:scale-95 flex items-center justify-center">
+                        <i class="fa-solid fa-circle-question mr-1.5"></i> <span id="rk-mode-quiz-btn">상황별 퀴즈</span>
+                    </button>
+                    <button onclick="setRealKoreanMode('explore')" id="rk-tab-explore" class="py-2 rounded-xl text-xs font-bold bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition active:scale-95 flex items-center justify-center">
+                        <i class="fa-solid fa-compass mr-1.5"></i> <span id="rk-mode-explore-btn">60개 표현 탐색</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Category Filter Pills -->
+            <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs no-scrollbar" id="rk-cat-container">
+                <!-- Dynamically rendered pills: All, Greetings, Dining, Gratitude, Empathy, Requests, Workplace -->
+            </div>
+
+            <!-- VIEW 1: Situational Quiz Container -->
+            <div id="rk-quiz-view" class="space-y-4">
+                <div class="bg-slate-800 rounded-3xl p-5 shadow-xl border border-slate-700 space-y-4">
+                    <!-- Progress & Category info -->
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-black text-rose-400 bg-rose-950/80 border border-rose-800/80 px-2.5 py-1 rounded-xl" id="rk-quiz-counter">
+                            Question 1 / 60
+                        </span>
+                        <span class="text-slate-400 text-[11px] font-bold" id="rk-quiz-category">
+                            💼 카테고리
+                        </span>
+                    </div>
+
+                    <!-- Situation Scenario Card -->
+                    <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-4 space-y-2">
+                        <div class="flex items-center text-amber-400 text-xs font-black">
+                            <i class="fa-solid fa-location-dot mr-1.5"></i>
+                            <span id="rk-situation-label">상황 (Situation)</span>
+                        </div>
+                        <p class="text-sm font-bold text-slate-100 leading-relaxed" id="rk-situation-desc">
+                            상황 설명이 들어갑니다.
+                        </p>
+                        <p class="text-xs text-slate-400 italic" id="rk-situation-desc-en">
+                            Situation description in English
+                        </p>
+                    </div>
+
+                    <!-- Target Question Prompt -->
+                    <div class="pt-1">
+                        <h3 class="text-sm font-black text-white flex items-center mb-1">
+                            <i class="fa-solid fa-circle-question mr-2 text-rose-400"></i>
+                            <span id="rk-question-prompt">이 상황에서 가장 자연스러운 표현은?</span>
+                        </h3>
+                        <p class="text-xs text-slate-400" id="rk-question-prompt-en"></p>
+                    </div>
+
+                    <!-- Options List -->
+                    <div class="space-y-2.5" id="rk-quiz-options">
+                        <!-- Options injected by JS -->
+                    </div>
+
+                    <!-- Detailed Explanation & Politeness Level Comparison (Hidden until answered) -->
+                    <div id="rk-quiz-feedback-box" class="hidden bg-slate-900 border border-slate-700/80 rounded-2xl p-4 space-y-3">
+                        <div id="rk-feedback-banner" class="flex items-center font-black text-sm">
+                            <!-- Correct / Incorrect banner -->
+                        </div>
+                        <p id="rk-feedback-text" class="text-xs text-slate-300 leading-relaxed"></p>
+
+                        <!-- Politeness Matrix (반말 / 해요체 / 격식체) -->
+                        <div class="bg-slate-950/80 rounded-xl p-3 border border-slate-800 space-y-2 text-xs">
+                            <span class="text-[10px] font-black text-slate-400 block tracking-wider uppercase">
+                                💬 격식 단계별 자연스러운 표현 비교 (Politeness Levels)
+                            </span>
+                            <div class="grid grid-cols-1 gap-1.5 text-xs">
+                                <div class="flex items-center justify-between bg-slate-900/90 p-2 rounded-lg border border-slate-800">
+                                    <span class="text-amber-400 font-black w-24 shrink-0 text-[11px]">반말 (Casual):</span>
+                                    <span class="text-slate-100 font-bold flex-1 text-right" id="rk-detail-banmal">-</span>
+                                    <button onclick="speakRealKorean('banmal')" class="ml-2 text-slate-400 hover:text-rose-400 active:scale-95" title="Listen Audio"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                </div>
+                                <div class="flex items-center justify-between bg-slate-900/90 p-2 rounded-lg border border-slate-800">
+                                    <span class="text-emerald-400 font-black w-24 shrink-0 text-[11px]">해요체 (Everyday):</span>
+                                    <span class="text-slate-100 font-bold flex-1 text-right" id="rk-detail-haeyoche">-</span>
+                                    <button onclick="speakRealKorean('haeyoche')" class="ml-2 text-slate-400 hover:text-rose-400 active:scale-95" title="Listen Audio"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                </div>
+                                <div class="flex items-center justify-between bg-slate-900/90 p-2 rounded-lg border border-slate-800">
+                                    <span class="text-cyan-400 font-black w-24 shrink-0 text-[11px]">격식체 (Formal):</span>
+                                    <span class="text-slate-100 font-bold flex-1 text-right" id="rk-detail-hasipsioche">-</span>
+                                    <button onclick="speakRealKorean('hasipsioche')" class="ml-2 text-slate-400 hover:text-rose-400 active:scale-95" title="Listen Audio"><i class="fa-solid fa-volume-high text-xs"></i></button>
+                                </div>
+                            </div>
+                            <div class="pt-1 border-t border-slate-800 text-[11px] text-slate-400">
+                                <b class="text-rose-300">💡 뉘앙스 & 팁:</b> <span id="rk-detail-nuance">-</span>
+                            </div>
+                        </div>
+
+                        <!-- Next Quiz Button -->
+                        <button onclick="nextRealKoreanQuiz()" id="rk-next-quiz-btn" class="w-full bg-rose-600 hover:bg-rose-500 active:scale-98 text-white font-black py-3 rounded-xl text-xs transition shadow-md flex items-center justify-center">
+                            <span>다음 상황 문제 (Next Scenario)</span> <i class="fa-solid fa-chevron-right ml-1.5 text-[11px]"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: Explore 60 Expressions List Container -->
+            <div id="rk-explore-view" class="hidden space-y-3">
+                <!-- Search Box -->
+                <div class="relative">
+                    <input type="text" id="rk-search-input" oninput="filterRealKoreanExplore()" placeholder="상황, 한글 표현 또는 영어 검색..." class="w-full bg-slate-800 border border-slate-700 rounded-2xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-rose-500">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+                </div>
+
+                <!-- Card List -->
+                <div id="rk-explore-list" class="space-y-3">
+                    <!-- Cards populated dynamically -->
+                </div>
+            </div>
+        </section>
     </main>
 
     <!-- Bottom Navigation Bar -->
     <nav class="bg-slate-900/95 backdrop-blur-md border-t border-slate-800 fixed bottom-0 left-0 right-0 z-50 flex justify-around py-2 max-w-lg mx-auto shadow-2xl">
-        <button onclick="switchTab('quiz')" id="nav-quiz" class="flex flex-col items-center py-1 px-3 text-rose-500 font-black text-[11px] transition">
-            <i class="fa-solid fa-puzzle-piece text-lg mb-0.5"></i>
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-rose-500 font-black text-[10px] sm:text-[11px] transition">
+            <i class="fa-solid fa-puzzle-piece text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-quiz">Quiz</span>
         </button>
-        <button onclick="switchTab('flashcard')" id="nav-flashcard" class="flex flex-col items-center py-1 px-3 text-slate-400 font-bold text-[11px] hover:text-rose-400 transition">
-            <i class="fa-solid fa-layer-group text-lg mb-0.5"></i>
+        <button onclick="switchTab('realkorean')" id="nav-realkorean" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition">
+            <i class="fa-solid fa-comments text-base sm:text-lg mb-0.5"></i>
+            <span id="nav-label-realkorean">Real K</span>
+        </button>
+        <button onclick="switchTab('flashcard')" id="nav-flashcard" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition">
+            <i class="fa-solid fa-layer-group text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-fc">Cards</span>
         </button>
-        <button onclick="switchTab('voca')" id="nav-voca" class="flex flex-col items-center py-1 px-3 text-slate-400 font-bold text-[11px] hover:text-rose-400 transition">
-            <i class="fa-solid fa-book-open text-lg mb-0.5"></i>
+        <button onclick="switchTab('voca')" id="nav-voca" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition">
+            <i class="fa-solid fa-book-open text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-voca">Words</span>
         </button>
-        <button onclick="switchTab('review')" id="nav-review" class="flex flex-col items-center py-1 px-3 text-slate-400 font-bold text-[11px] hover:text-rose-400 transition relative">
-            <i class="fa-solid fa-rotate-left text-lg mb-0.5"></i>
+        <button onclick="switchTab('review')" id="nav-review" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition relative">
+            <i class="fa-solid fa-rotate-left text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-review">Review</span>
             <span id="review-count-badge" class="hidden absolute top-0 right-1 bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">0</span>
         </button>
-        <button onclick="switchTab('stats')" id="nav-stats" class="flex flex-col items-center py-1 px-3 text-slate-400 font-bold text-[11px] hover:text-rose-400 transition">
-            <i class="fa-solid fa-calendar-check text-lg mb-0.5"></i>
+        <button onclick="switchTab('stats')" id="nav-stats" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition">
+            <i class="fa-solid fa-calendar-check text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-stats">Streak</span>
         </button>
     </nav>
@@ -538,6 +684,7 @@
                 proTitle: "K-Talk Pro Membership",
                 proDesc: "Learn Korean 3x faster with native speech analysis, all K-Drama phrases, and ad-free experience.",
                 navQuiz: "Quiz",
+                navRealKorean: "Real K",
                 navFc: "Cards",
                 navVoca: "Words",
                 navReview: "Review",
@@ -590,6 +737,7 @@
                 proTitle: "Membresía K-Talk Pro",
                 proDesc: "Aprende coreano 3 veces más rápido con análisis de voz nativo y frases de K-Drama sin anuncios.",
                 navQuiz: "Cuestionario",
+                navRealKorean: "Real K",
                 navFc: "Tarjetas",
                 navVoca: "Palabras",
                 navReview: "Repaso",
@@ -642,6 +790,7 @@
                 proTitle: "K-Talk Pro メンバーシップ",
                 proDesc: "ドラマの全表現500個解禁、無制限ハート、広告なしで3倍速学習。",
                 navQuiz: "クイズ",
+                navRealKorean: "リアル韓",
                 navFc: "カード",
                 navVoca: "単語",
                 navReview: "復習",
@@ -694,6 +843,7 @@
                 proTitle: "K-Talk Pro 尊享会员",
                 proDesc: "解锁500+韩剧独家口语包，无限红心练习，无广告加速学习。",
                 navQuiz: "实战",
+                navRealKorean: "地道韩语",
                 navFc: "闪卡",
                 navVoca: "词库",
                 navReview: "复习",
@@ -746,6 +896,7 @@
                 proTitle: "สมาชิก K-Talk Pro",
                 proDesc: "ปลดล็อกคำศัพท์ซีรีส์กว่า 500 คำ หัวใจไม่จำกัด ไร้โฆษณา",
                 navQuiz: "ควิซ",
+                navRealKorean: "เกาหลีจริง",
                 navFc: "การ์ด",
                 navVoca: "คำศัพท์",
                 navReview: "ทบทวน",
@@ -1878,6 +2029,8 @@
 
             // Navigation
             document.getElementById('nav-label-quiz').innerText = t.navQuiz;
+            const rkNavEl = document.getElementById('nav-label-realkorean');
+            if (rkNavEl) rkNavEl.innerText = t.navRealKorean || "Real K";
             document.getElementById('nav-label-fc').innerText = t.navFc;
             document.getElementById('nav-label-voca').innerText = t.navVoca;
             document.getElementById('nav-label-review').innerText = t.navReview;
@@ -2742,23 +2895,389 @@
         }
 
         // ==========================================
-        // 14. NAVIGATION & INITIALIZATION
+        // 14. REAL KOREAN 60 (SITUATIONAL QUIZ & EXPLORER)
+        // ==========================================
+        let rkMode = 'quiz'; // 'quiz' or 'explore'
+        let rkSelectedCategory = 'ALL';
+        let rkQuizIdx = 0;
+        let rkFilteredList = [];
+        let rkAnswered = false;
+
+        const RK_CATEGORIES = [
+            { key: 'ALL', label: '전체 (60)', icon: 'fa-globe' },
+            { key: '인사와 안부', label: '인사·안부', icon: 'fa-handshake' },
+            { key: '식사 및 일상', label: '식사·일상', icon: 'fa-utensils' },
+            { key: '감사와 사과', label: '감사·사과', icon: 'fa-heart' },
+            { key: '공감과 리액션', label: '공감·리액션', icon: 'fa-face-laugh-squint' },
+            { key: '부탁과 제안', label: '부탁·제안', icon: 'fa-comments' },
+            { key: '직장 및 사회생활', label: '직장·사회', icon: 'fa-briefcase' }
+        ];
+
+        function initRealKorean() {
+            renderRealKoreanCategories();
+            updateRealKoreanFilteredList();
+            if (rkMode === 'quiz') {
+                loadRealKoreanQuiz();
+            } else {
+                renderRealKoreanExplorer();
+            }
+        }
+
+        function renderRealKoreanCategories() {
+            const container = document.getElementById('rk-cat-container');
+            if (!container) return;
+
+            let html = '';
+            RK_CATEGORIES.forEach(cat => {
+                const isActive = rkSelectedCategory === cat.key;
+                const activeStyle = isActive
+                    ? 'bg-rose-600 text-white border-rose-500 shadow-md font-black'
+                    : 'bg-slate-800 text-slate-300 border-slate-700 font-bold hover:bg-slate-700';
+                html += `
+                    <button onclick="selectRealKoreanCat('${cat.key}')" class="whitespace-nowrap px-3 py-1.5 rounded-xl border text-[11px] transition shrink-0 active:scale-95 flex items-center ${activeStyle}">
+                        <i class="fa-solid ${cat.icon} mr-1 text-[10px]"></i>
+                        <span>${cat.label}</span>
+                    </button>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function updateRealKoreanFilteredList() {
+            if (typeof REAL_KOREAN_DATA === 'undefined') {
+                console.error("REAL_KOREAN_DATA is not loaded");
+                return;
+            }
+            if (rkSelectedCategory === 'ALL') {
+                rkFilteredList = [...REAL_KOREAN_DATA];
+            } else {
+                rkFilteredList = REAL_KOREAN_DATA.filter(item => item.category === rkSelectedCategory);
+            }
+            if (rkQuizIdx >= rkFilteredList.length) {
+                rkQuizIdx = 0;
+            }
+        }
+
+        function selectRealKoreanCat(catKey) {
+            rkSelectedCategory = catKey;
+            rkQuizIdx = 0;
+            renderRealKoreanCategories();
+            updateRealKoreanFilteredList();
+            if (rkMode === 'quiz') {
+                loadRealKoreanQuiz();
+            } else {
+                renderRealKoreanExplorer();
+            }
+        }
+
+        function setRealKoreanMode(mode) {
+            rkMode = mode;
+            const quizView = document.getElementById('rk-quiz-view');
+            const exploreView = document.getElementById('rk-explore-view');
+            const tabQuiz = document.getElementById('rk-tab-quiz');
+            const tabExplore = document.getElementById('rk-tab-explore');
+
+            if (mode === 'quiz') {
+                quizView.classList.remove('hidden');
+                exploreView.classList.add('hidden');
+                tabQuiz.className = "py-2 rounded-xl text-xs font-black bg-rose-600 text-white shadow-md transition active:scale-95 flex items-center justify-center";
+                tabExplore.className = "py-2 rounded-xl text-xs font-bold bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition active:scale-95 flex items-center justify-center";
+                loadRealKoreanQuiz();
+            } else {
+                quizView.classList.add('hidden');
+                exploreView.classList.remove('hidden');
+                tabQuiz.className = "py-2 rounded-xl text-xs font-bold bg-slate-800/90 text-slate-300 hover:bg-slate-700 transition active:scale-95 flex items-center justify-center";
+                tabExplore.className = "py-2 rounded-xl text-xs font-black bg-rose-600 text-white shadow-md transition active:scale-95 flex items-center justify-center";
+                renderRealKoreanExplorer();
+            }
+        }
+
+        function loadRealKoreanQuiz() {
+            if (!rkFilteredList || rkFilteredList.length === 0) {
+                updateRealKoreanFilteredList();
+            }
+            if (!rkFilteredList || rkFilteredList.length === 0) return;
+
+            const cur = rkFilteredList[rkQuizIdx];
+            rkAnswered = false;
+
+            // Header counter & Category
+            document.getElementById('rk-quiz-counter').innerText = `Question ${rkQuizIdx + 1} / ${rkFilteredList.length}`;
+            document.getElementById('rk-quiz-category').innerText = `📁 ${cur.category} (${cur.category_en})`;
+
+            // Situation Description
+            document.getElementById('rk-situation-desc').innerText = cur.situation;
+            document.getElementById('rk-situation-desc-en').innerText = cur.situation_en;
+
+            // Question prompt
+            document.getElementById('rk-question-prompt').innerText = cur.quiz.question;
+            document.getElementById('rk-question-prompt-en').innerText = cur.quiz.question_en;
+
+            // Options
+            const optionsContainer = document.getElementById('rk-quiz-options');
+            let optsHtml = '';
+            cur.quiz.options.forEach((opt, idx) => {
+                optsHtml += `
+                    <button onclick="selectRealKoreanOption(${idx})" id="rk-opt-${idx}" class="w-full text-left p-3.5 rounded-2xl bg-slate-900/90 hover:bg-slate-700/80 border border-slate-700 text-white font-bold text-xs sm:text-sm transition flex items-center justify-between group active:scale-98">
+                        <div class="flex items-center space-x-2.5 flex-1 pr-2">
+                            <span class="w-6 h-6 rounded-full bg-slate-800 text-rose-300 text-xs flex items-center justify-center font-black group-hover:bg-rose-600 group-hover:text-white transition shrink-0">
+                                ${idx + 1}
+                            </span>
+                            <span class="text-slate-100">${opt.text}</span>
+                        </div>
+                        <div class="shrink-0 flex items-center space-x-2">
+                            <button onclick="event.stopPropagation(); speakKorean('${opt.text.replace(/'/g, "\\'")}')" class="text-slate-400 hover:text-rose-400 p-1" title="Listen Audio">
+                                <i class="fa-solid fa-volume-high text-xs"></i>
+                            </button>
+                            <span id="rk-opt-icon-${idx}" class="text-slate-600 text-sm">
+                                <i class="fa-regular fa-circle"></i>
+                            </span>
+                        </div>
+                    </button>
+                `;
+            });
+            optionsContainer.innerHTML = optsHtml;
+
+            // Hide feedback box
+            document.getElementById('rk-quiz-feedback-box').classList.add('hidden');
+        }
+
+        function selectRealKoreanOption(optIdx) {
+            if (rkAnswered) return;
+            rkAnswered = true;
+
+            const cur = rkFilteredList[rkQuizIdx];
+            const chosen = cur.quiz.options[optIdx];
+            const isCorrect = chosen.isCorrect;
+
+            // Style options
+            cur.quiz.options.forEach((opt, idx) => {
+                const btn = document.getElementById(`rk-opt-${idx}`);
+                const icon = document.getElementById(`rk-opt-icon-${idx}`);
+                if (!btn) return;
+
+                if (opt.isCorrect) {
+                    btn.className = "w-full text-left p-3.5 rounded-2xl bg-emerald-950/70 border-2 border-emerald-500 text-emerald-100 font-black text-xs sm:text-sm transition flex items-center justify-between";
+                    if (icon) icon.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i>';
+                } else if (idx === optIdx && !isCorrect) {
+                    btn.className = "w-full text-left p-3.5 rounded-2xl bg-rose-950/70 border-2 border-rose-500 text-rose-100 font-bold text-xs sm:text-sm transition flex items-center justify-between";
+                    if (icon) icon.innerHTML = '<i class="fa-solid fa-circle-xmark text-rose-400"></i>';
+                } else {
+                    btn.className = "w-full text-left p-3.5 rounded-2xl bg-slate-900/50 border border-slate-800 text-slate-400 text-xs sm:text-sm transition flex items-center justify-between opacity-60";
+                }
+            });
+
+            // Audio & EXP feedback
+            if (isCorrect) {
+                playCorrectSound();
+                comboCount++;
+                addExp(15);
+                if (comboCount % 3 === 0) confetti({ particleCount: 70, spread: 60 });
+            } else {
+                playWrongSound();
+                comboCount = 0;
+            }
+            updateExpUI();
+
+            // Daily Attendance Record
+            recordDailyAttendanceForRealKorean(isCorrect, cur);
+
+            // Populate Feedback Box
+            const feedbackBox = document.getElementById('rk-quiz-feedback-box');
+            const feedbackBanner = document.getElementById('rk-feedback-banner');
+            const feedbackText = document.getElementById('rk-feedback-text');
+
+            if (isCorrect) {
+                feedbackBanner.className = "flex items-center font-black text-sm text-emerald-400";
+                feedbackBanner.innerHTML = `<i class="fa-solid fa-circle-check mr-2 text-base"></i> 정답입니다! (+15 EXP) 🎉`;
+            } else {
+                feedbackBanner.className = "flex items-center font-black text-sm text-rose-400";
+                feedbackBanner.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2 text-base"></i> 아쉬워요! 상황에 더 알맞은 표현을 확인해 보세요.`;
+            }
+
+            feedbackText.innerText = chosen.feedback;
+
+            // Politeness Matrix
+            document.getElementById('rk-detail-banmal').innerText = cur.banmal;
+            document.getElementById('rk-detail-haeyoche').innerText = cur.haeyoche;
+            document.getElementById('rk-detail-hasipsioche').innerText = cur.hasipsioche;
+            document.getElementById('rk-detail-nuance').innerText = cur.usage_nuance;
+
+            feedbackBox.classList.remove('hidden');
+        }
+
+        function recordDailyAttendanceForRealKorean(isCorrect, curItem) {
+            const today = getTodayString();
+            const isFirstToday = !attendanceLog[today];
+
+            if (isFirstToday) {
+                attendanceLog[today] = {
+                    date: today,
+                    solvedCount: 0,
+                    correctCount: 0,
+                    expGained: 0,
+                    lastLevel: 1,
+                    lastIndex: rkQuizIdx + 1,
+                    lastWord: curItem ? (curItem.haeyoche || curItem.banmal) : '',
+                    lastTime: new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+                };
+
+                const yesterday = getYesterdayString();
+                if (attendanceLog[yesterday]) {
+                    streakDays = (parseInt(localStorage.getItem('kTalkStreak') || '1')) + 1;
+                } else {
+                    streakDays = 1;
+                }
+                localStorage.setItem('kTalkStreak', streakDays);
+
+                addExp(20);
+                confetti({ particleCount: 90, spread: 70, origin: { y: 0.5 } });
+                showToast(`🌺 Today's attendance complete! (+20 EXP, ${streakDays} Day Streak 🔥)`);
+            }
+
+            attendanceLog[today].solvedCount++;
+            if (isCorrect) attendanceLog[today].correctCount++;
+            attendanceLog[today].expGained += (isCorrect ? 15 : 0);
+            attendanceLog[today].lastWord = curItem ? (curItem.haeyoche || curItem.banmal) : '';
+            attendanceLog[today].lastTime = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+
+            localStorage.setItem('kTalkAttendanceLog', JSON.stringify(attendanceLog));
+            renderAttendanceCalendar();
+        }
+
+        function nextRealKoreanQuiz() {
+            if (rkQuizIdx < rkFilteredList.length - 1) {
+                rkQuizIdx++;
+            } else {
+                rkQuizIdx = 0;
+                confetti({ particleCount: 100, spread: 80 });
+                showToast("🎉 축하합니다! 모든 상황 퀴즈를 완료했습니다!");
+            }
+            loadRealKoreanQuiz();
+        }
+
+        function speakRealKorean(type) {
+            const cur = rkFilteredList[rkQuizIdx];
+            if (!cur) return;
+            const text = cur[type];
+            if (text) {
+                speakKorean(text.split('/')[0].trim());
+            }
+        }
+
+        function renderRealKoreanExplorer() {
+            const container = document.getElementById('rk-explore-list');
+            if (!container) return;
+
+            const searchKw = (document.getElementById('rk-search-input')?.value || '').toLowerCase().trim();
+
+            let list = rkFilteredList;
+            if (searchKw) {
+                list = list.filter(item =>
+                    item.situation.toLowerCase().includes(searchKw) ||
+                    item.situation_en.toLowerCase().includes(searchKw) ||
+                    item.banmal.toLowerCase().includes(searchKw) ||
+                    item.haeyoche.toLowerCase().includes(searchKw) ||
+                    item.hasipsioche.toLowerCase().includes(searchKw) ||
+                    item.english.toLowerCase().includes(searchKw) ||
+                    item.usage_nuance.toLowerCase().includes(searchKw)
+                );
+            }
+
+            if (list.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-slate-800/80 p-8 rounded-3xl text-center space-y-2 border border-slate-700">
+                        <i class="fa-solid fa-magnifying-glass text-slate-500 text-3xl"></i>
+                        <p class="text-sm font-bold text-slate-300">검색 결과가 없습니다.</p>
+                        <p class="text-xs text-slate-500">다른 키워드 또는 카테고리를 선택해 보세요.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            list.forEach(item => {
+                html += `
+                    <div class="bg-slate-800 rounded-3xl p-4 border border-slate-700 shadow-md space-y-3">
+                        <div class="flex justify-between items-start">
+                            <span class="text-[10px] font-black bg-rose-950 text-rose-300 border border-rose-800 px-2 py-0.5 rounded-lg">
+                                #${item.id} ${item.category}
+                            </span>
+                            <span class="text-[11px] text-slate-400 font-mono italic">
+                                ${item.english}
+                            </span>
+                        </div>
+
+                        <!-- Situation -->
+                        <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-800 space-y-1">
+                            <div class="text-[11px] font-black text-amber-400 flex items-center">
+                                <i class="fa-solid fa-location-dot mr-1"></i> 상황
+                            </div>
+                            <p class="text-xs font-bold text-slate-200">${item.situation}</p>
+                            <p class="text-[10px] text-slate-400">${item.situation_en}</p>
+                        </div>
+
+                        <!-- 3 Politeness Levels -->
+                        <div class="space-y-1.5 text-xs">
+                            <!-- Banmal -->
+                            <div class="flex items-center justify-between bg-slate-950/70 px-3 py-2 rounded-xl border border-slate-800">
+                                <span class="text-[11px] font-black text-amber-400 w-24 shrink-0">반말 (Casual):</span>
+                                <span class="font-bold text-slate-100 flex-1 text-right">${item.banmal}</span>
+                                <button onclick="speakKorean('${item.banmal.replace(/'/g, "\\'")}')" class="ml-2.5 text-slate-400 hover:text-rose-400 active:scale-95">
+                                    <i class="fa-solid fa-volume-high text-xs"></i>
+                                </button>
+                            </div>
+                            <!-- Haeyoche -->
+                            <div class="flex items-center justify-between bg-slate-950/70 px-3 py-2 rounded-xl border border-slate-800">
+                                <span class="text-[11px] font-black text-emerald-400 w-24 shrink-0">해요체 (Everyday):</span>
+                                <span class="font-bold text-slate-100 flex-1 text-right">${item.haeyoche}</span>
+                                <button onclick="speakKorean('${item.haeyoche.split('/')[0].trim().replace(/'/g, "\\'")}')" class="ml-2.5 text-slate-400 hover:text-rose-400 active:scale-95">
+                                    <i class="fa-solid fa-volume-high text-xs"></i>
+                                </button>
+                            </div>
+                            <!-- Hasipsioche -->
+                            <div class="flex items-center justify-between bg-slate-950/70 px-3 py-2 rounded-xl border border-slate-800">
+                                <span class="text-[11px] font-black text-cyan-400 w-24 shrink-0">격식체 (Formal):</span>
+                                <span class="font-bold text-slate-100 flex-1 text-right">${item.hasipsioche}</span>
+                                <button onclick="speakKorean('${item.hasipsioche.replace(/'/g, "\\'")}')" class="ml-2.5 text-slate-400 hover:text-rose-400 active:scale-95">
+                                    <i class="fa-solid fa-volume-high text-xs"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Nuance Note -->
+                        <div class="text-[11px] text-slate-400 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800/80">
+                            <span class="text-rose-300 font-bold">💡 뉘앙스 & 사용 팁:</span> ${item.usage_nuance}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function filterRealKoreanExplore() {
+            renderRealKoreanExplorer();
+        }
+
+        // ==========================================
+        // 15. NAVIGATION & INITIALIZATION
         // ==========================================
         function switchTab(tab) {
-            ['quiz', 'flashcard', 'voca', 'review', 'stats'].forEach(t => {
+            ['quiz', 'realkorean', 'flashcard', 'voca', 'review', 'stats'].forEach(t => {
                 const sec = document.getElementById(`section-${t}`);
                 if (sec) sec.classList.add('hidden');
                 const nav = document.getElementById(`nav-${t}`);
-                if (nav) nav.className = "flex flex-col items-center py-1 px-3 text-slate-400 font-bold text-[11px] hover:text-rose-400 transition";
+                if (nav) nav.className = "flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition";
             });
 
             const activeSec = document.getElementById(`section-${tab}`);
             if (activeSec) activeSec.classList.remove('hidden');
 
             const activeNav = document.getElementById(`nav-${tab}`);
-            if (activeNav) activeNav.className = "flex flex-col items-center py-1 px-3 text-rose-500 font-black text-[11px] transition";
+            if (activeNav) activeNav.className = "flex flex-col items-center py-1 px-1.5 sm:px-2 text-rose-500 font-black text-[10px] sm:text-[11px] transition";
 
             if (tab === 'quiz') loadQuiz();
+            if (tab === 'realkorean') initRealKorean();
             if (tab === 'flashcard') loadFlashCard();
             if (tab === 'voca') renderVocaList();
             if (tab === 'review') renderReviewList();
