@@ -1,5 +1,5 @@
 // Service Worker for K-Talk Coach PWA
-const CACHE_NAME = 'k-talk-v12';
+const CACHE_NAME = 'k-talk-v13';
 const ASSETS = [
   './',
   './index.html',
