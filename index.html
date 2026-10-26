@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>K-Talk Coach 🇰🇷 | Speak Korean with K-Drama & K-Pop</title>
-    <!-- PWA Meta Tags -->
-    <link rel="manifest" href="manifest.json?v=3">
-    <meta name="theme-color" content="#0f172a">
+    <link rel="manifest" href="manifest.json?v=4">
+    <meta name="theme-color" content="#000000">
+    <meta name="msapplication-navbutton-color" content="#000000">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="K-Talk">
-    <link rel="icon" type="image/png" href="./icon-192.png?v=3">
-    <link rel="apple-touch-icon" href="./icon-512.png?v=3">
+    <link rel="icon" type="image/png" href="./icon-192.png?v=4">
+    <link rel="apple-touch-icon" href="./icon-512.png?v=4">
 
     <!-- Tailwind CSS & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,7 +32,7 @@
 <body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col antialiased selection:bg-rose-500 selection:text-white">
 
     <!-- Top Sticky Header -->
-    <header class="bg-slate-900/90 backdrop-blur-md border-b border-slate-800 text-white p-3.5 flex justify-between items-center sticky top-0 z-50 shadow-md">
+    <header class="bg-black/95 backdrop-blur-md border-b border-slate-900 text-white p-3.5 flex justify-between items-center sticky top-0 z-50 shadow-md">
         <div class="flex items-center space-x-2.5">
             <span class="text-2xl shadow-xs">🇰🇷</span>
             <div>
@@ -626,7 +626,7 @@
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="bg-slate-900/95 backdrop-blur-md border-t border-slate-800 fixed bottom-0 left-0 right-0 z-50 flex justify-around py-2 max-w-lg mx-auto shadow-2xl">
+    <nav class="bg-black/95 backdrop-blur-md border-t border-slate-900 fixed bottom-0 left-0 right-0 z-50 flex justify-around py-2 max-w-lg mx-auto shadow-2xl">
         <button onclick="switchTab('quiz')" id="nav-quiz" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-rose-500 font-black text-[10px] sm:text-[11px] transition">
             <i class="fa-solid fa-puzzle-piece text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-quiz">Quiz</span>
