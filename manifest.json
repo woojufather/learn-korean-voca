@@ -1,8 +1,10 @@
 {
+  "id": "learn-korean-voca-v2",
   "name": "K-Talk Coach: Learn Korean & K-Drama Phrases",
   "short_name": "K-Talk",
-  "description": "Speak authentic Korean with K-Drama, K-Pop, and daily expressions. Made for English & Spanish speakers.",
+  "description": "Speak authentic Korean with K-Drama, K-Pop, and daily expressions.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#e11d48",
@@ -12,13 +14,19 @@
       "src": "./icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "./icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "./icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
