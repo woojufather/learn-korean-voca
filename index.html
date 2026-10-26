@@ -53,11 +53,6 @@
             <button id="level-badge" onclick="changeLevel()" class="bg-rose-950/80 hover:bg-rose-900 text-rose-300 border border-rose-800/80 px-2.5 py-1.5 rounded-xl text-xs font-black transition shadow-inner">
                 Lv.1 Survival
             </button>
-
-            <!-- PWA Install / Pro Button -->
-            <button onclick="openProModal()" class="bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 active:scale-95 text-slate-950 font-black text-xs px-2.5 py-1.5 rounded-xl transition shadow-xs flex items-center">
-                <i class="fa-solid fa-crown mr-1"></i> <span id="pro-btn-text">PRO</span>
-            </button>
         </div>
     </header>
 
@@ -395,16 +390,6 @@
                 <!-- Selected Day Log Detail -->
                 <div id="selected-date-detail" class="bg-slate-900 p-3.5 rounded-2xl border border-slate-700/80 text-xs space-y-2"></div>
             </div>
-
-            <!-- Monetization & App Upgrade Card -->
-            <div class="bg-gradient-to-r from-amber-500/20 to-rose-500/20 border border-amber-500/30 rounded-3xl p-5 space-y-3 text-center">
-                <i class="fa-solid fa-crown text-3xl text-amber-400"></i>
-                <h4 class="font-black text-base text-white" id="monetize-title">Unlock K-Pass Premium</h4>
-                <p class="text-xs text-slate-300" id="monetize-desc">Get unlimited hearts, offline audio downloads, and all 500+ K-Drama & K-Pop conversation packs for only $4.99/mo!</p>
-                <button onclick="openProModal()" class="w-full bg-gradient-to-r from-amber-400 to-rose-500 hover:from-amber-300 hover:to-rose-400 text-slate-950 font-black py-3 rounded-2xl text-xs transition shadow-md">
-                    Start 7-Day Free Trial
-                </button>
-            </div>
         </section>
 
         <!-- ==================== TAB: REAL KOREAN (실전 상황별 한국어) ==================== -->
@@ -667,33 +652,6 @@
             <p class="text-[11px] text-slate-400" id="lang-modal-desc">Learn Korean with explanations in your native language:</p>
             <div class="space-y-2 pt-1" id="lang-options-container">
                 <!-- Dynamically populated buttons for EN, ES, JA, ZH, TH -->
-            </div>
-        </div>
-    </div>
-
-    <!-- PRO / MONETIZATION MODAL -->
-    <div id="pro-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 max-w-sm w-full rounded-3xl p-6 shadow-2xl space-y-4 text-center relative animate-in fade-in zoom-in duration-200">
-            <button onclick="closeProModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-            <div class="w-14 h-14 bg-gradient-to-tr from-amber-400 to-rose-500 rounded-2xl mx-auto flex items-center justify-center text-slate-950 text-2xl shadow-lg">
-                <i class="fa-solid fa-crown"></i>
-            </div>
-            <h3 class="text-xl font-black text-white" id="modal-pro-title">K-Talk Pro Membership</h3>
-            <p class="text-xs text-slate-300 leading-relaxed" id="modal-pro-desc">
-                Learn Korean 3x faster with native speech analysis, all K-Drama phrases, and ad-free experience.
-            </p>
-            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 text-left space-y-2 text-xs">
-                <div class="flex items-center text-rose-300"><i class="fa-solid fa-circle-check mr-2"></i> All 500+ K-Drama & K-Pop expression packs</div>
-                <div class="flex items-center text-rose-300"><i class="fa-solid fa-circle-check mr-2"></i> Unlimited hearts & speech pronunciation tests</div>
-                <div class="flex items-center text-rose-300"><i class="fa-solid fa-circle-check mr-2"></i> 100% Ad-Free offline learning</div>
-            </div>
-            <div class="pt-2">
-                <button onclick="simulateSubscription()" class="w-full bg-gradient-to-r from-amber-400 to-rose-500 text-slate-950 font-black py-3.5 rounded-2xl text-sm shadow-lg hover:brightness-110 active:scale-98 transition">
-                    Subscribe for $4.99 / month
-                </button>
-                <button onclick="simulateRewardedAd()" class="w-full mt-2 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2.5 rounded-2xl text-xs font-bold border border-slate-700 transition">
-                    🎬 Watch 5s Ad for 3 Free Hints
-                </button>
             </div>
         </div>
     </div>
@@ -2123,8 +2081,6 @@
             document.getElementById('stats-wrong-label').innerText = t.wordsReview;
             document.getElementById('cal-header-title').innerText = t.calTitle;
             document.getElementById('cal-header-desc').innerText = t.calDesc;
-            document.getElementById('monetize-title').innerText = t.proTitle;
-            document.getElementById('monetize-desc').innerText = t.proDesc;
 
             // Navigation
             document.getElementById('nav-label-quiz').innerText = t.navQuiz;
@@ -2957,23 +2913,8 @@
         // ==========================================
         // 12. MONETIZATION & PRO MODAL
         // ==========================================
-        function openProModal() { document.getElementById('pro-modal').classList.remove('hidden'); }
-        function closeProModal() { document.getElementById('pro-modal').classList.add('hidden'); }
-
-        function simulateSubscription() {
-            alert("🌟 Stripe / Apple In-App Purchase integration connects here!\nUsers subscribe at $4.99/mo for passive recurring revenue.");
-            closeProModal();
-        }
-
-        function simulateRewardedAd() {
-            showToast("🎬 Simulating 5s Google AdMob rewarded video...");
-            setTimeout(() => {
-                addExp(30);
-                confetti({ particleCount: 80, spread: 60 });
-                showToast("🎉 Ad complete! You earned 3 Free Hints and +30 EXP!");
-                closeProModal();
-            }, 1800);
-        }
+        function openProModal() {}
+        function closeProModal() {}
 
         // ==========================================
         // 13. PWA INSTALLATION TRIGGER
