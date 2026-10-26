@@ -697,20 +697,20 @@
         </div>
     </div>
 
-    <!-- PWA Install Guide Modal (For iOS Safari) -->
-    <div id="pwa-guide-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
-        <div class="bg-slate-900 border border-slate-700 max-w-sm w-full rounded-3xl p-6 shadow-2xl space-y-4 text-center relative">
+    <!-- PWA Install Guide Modal (Smart Detect: KakaoTalk, Android, iOS) -->
+    <div id="pwa-guide-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 max-w-sm w-full rounded-3xl p-6 shadow-2xl space-y-4 text-center relative animate-in fade-in zoom-in duration-150">
             <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
-            <div class="w-12 h-12 bg-rose-600 rounded-2xl mx-auto flex items-center justify-center text-white text-xl">
-                <i class="fa-solid fa-arrow-up-from-bracket"></i>
+            <div class="w-12 h-12 bg-rose-600 rounded-2xl mx-auto flex items-center justify-center text-white text-xl shadow-md" id="pwa-guide-icon">
+                <i class="fa-solid fa-mobile-screen"></i>
             </div>
-            <h3 class="text-base font-black text-white" id="pwa-guide-title">Install on iPhone / iPad</h3>
-            <p class="text-xs text-slate-300 leading-relaxed text-left space-y-2 bg-slate-800 p-3.5 rounded-2xl">
-                1. Tap the <b class="text-rose-400">Share button ( <i class="fa-solid fa-arrow-up-from-bracket"></i> )</b> in Safari's bottom toolbar.<br>
-                2. Scroll down and tap <b class="text-rose-400">'Add to Home Screen'</b>.<br>
-                3. Tap <b class="text-rose-400">'Add'</b> to launch K-Talk like a native app!
-            </p>
-            <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">Got it!</button>
+            <h3 class="text-base font-black text-white" id="pwa-guide-title">스마트폰 앱 설치 안내</h3>
+            <div id="pwa-guide-content" class="text-left">
+                <!-- Injected dynamically based on browser/OS -->
+            </div>
+            <div id="pwa-guide-btn-container" class="space-y-1.5 pt-1">
+                <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">확인</button>
+            </div>
         </div>
     </div>
 
@@ -2986,9 +2986,80 @@
                     }
                     deferredPrompt = null;
                 });
+                return;
+            }
+
+            const ua = navigator.userAgent || '';
+            const isKakao = /KAKAOTALK/i.test(ua);
+            const isAndroid = /android/i.test(ua);
+            const isIOS = /iphone|ipad|ipod/i.test(ua);
+
+            const guideModal = document.getElementById('pwa-guide-modal');
+            const guideTitle = document.getElementById('pwa-guide-title');
+            const guideContent = document.getElementById('pwa-guide-content');
+            const guideBtnContainer = document.getElementById('pwa-guide-btn-container');
+
+            if (isKakao) {
+                guideTitle.innerText = "카카오톡에서 열림 (설치 안내)";
+                guideContent.innerHTML = `
+                    <div class="space-y-2 text-left text-xs">
+                        <p class="text-amber-300 font-bold">⚠️ 카카오톡 내부에서는 보안 정책상 앱 바로 설치가 제한됩니다.</p>
+                        <div class="bg-slate-800 p-3.5 rounded-2xl space-y-2 text-slate-200">
+                            <p class="leading-relaxed"><b>방법 1 (가장 쉬움):</b><br>아래 <span class="text-rose-400 font-black">'Chrome 브라우저로 열기'</span>를 누르면 크롬에서 바로 앱 설치가 가능합니다!</p>
+                            <p class="pt-2 border-t border-slate-700 leading-relaxed"><b>방법 2 (수동):</b><br>화면 우측 상단/하단의 <span class="text-rose-400 font-bold">점 세 개 (⋮)</span> ➔ <span class="text-emerald-400 font-bold">'다른 브라우저로 열기'</span>를 선택해 주세요.</p>
+                        </div>
+                    </div>
+                `;
+                if (guideBtnContainer) {
+                    guideBtnContainer.innerHTML = `
+                        <button onclick="openInExternalBrowser()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-black py-3 rounded-2xl text-xs shadow-md transition active:scale-95 flex items-center justify-center space-x-1.5">
+                            <i class="fa-brands fa-chrome text-sm"></i>
+                            <span>Chrome 브라우저로 열어서 설치하기</span>
+                        </button>
+                        <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-slate-300 font-bold py-2.5 rounded-2xl text-xs mt-1">닫기</button>
+                    `;
+                }
+            } else if (isAndroid) {
+                guideTitle.innerText = "안드로이드 홈 화면에 앱 설치";
+                guideContent.innerHTML = `
+                    <div class="space-y-2 text-left text-xs">
+                        <div class="bg-slate-800 p-3.5 rounded-2xl space-y-2 text-slate-200">
+                            <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">1</span> <span>브라우저 우측 상단(또는 하단)의 <b>메뉴 버튼 ( <i class="fa-solid fa-ellipsis-vertical"></i> )</b>을 누릅니다.</span></p>
+                            <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">2</span> <span>메뉴에서 <b>'앱 설치'</b> 또는 <b>'홈 화면에 추가'</b>를 선택합니다.</span></p>
+                            <p class="flex items-start"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">3</span> <span>스마트폰 바탕화면에 진짜 어플처럼 아이콘이 쏙 들어갑니다!</span></p>
+                        </div>
+                    </div>
+                `;
+                if (guideBtnContainer) {
+                    guideBtnContainer.innerHTML = `
+                        <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">확인</button>
+                    `;
+                }
             } else {
-                // If on iOS Safari
-                document.getElementById('pwa-guide-modal').classList.remove('hidden');
+                // iPhone / iPad Safari
+                guideTitle.innerText = "Install on iPhone / iPad";
+                guideContent.innerHTML = `
+                    <div class="space-y-2 text-left text-xs bg-slate-800 p-3.5 rounded-2xl text-slate-200">
+                        <p>1. Tap the <b class="text-rose-400">Share button ( <i class="fa-solid fa-arrow-up-from-bracket"></i> )</b> in Safari's bottom toolbar.</p>
+                        <p>2. Scroll down and tap <b class="text-rose-400">'Add to Home Screen'</b>.</p>
+                        <p>3. Tap <b class="text-rose-400">'Add'</b> to launch K-Talk like a native app!</p>
+                    </div>
+                `;
+                if (guideBtnContainer) {
+                    guideBtnContainer.innerHTML = `
+                        <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">Got it!</button>
+                    `;
+                }
+            }
+
+            guideModal.classList.remove('hidden');
+        }
+
+        function openInExternalBrowser() {
+            if (/KAKAOTALK/i.test(navigator.userAgent)) {
+                location.href = 'kakaotalk://web/openExternal?url=' + encodeURIComponent(window.location.href);
+            } else {
+                window.open(window.location.href, '_system');
             }
         }
 
