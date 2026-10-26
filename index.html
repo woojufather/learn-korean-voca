@@ -2993,14 +2993,16 @@
             const ua = navigator.userAgent || '';
             const isKakao = /KAKAOTALK/i.test(ua);
             const isAndroid = /android/i.test(ua);
-            const isIOS = /iphone|ipad|ipod/i.test(ua);
+            const isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
             const guideModal = document.getElementById('pwa-guide-modal');
             const guideTitle = document.getElementById('pwa-guide-title');
             const guideContent = document.getElementById('pwa-guide-content');
+            const guideIcon = document.getElementById('pwa-guide-icon');
             const guideBtnContainer = document.getElementById('pwa-guide-btn-container');
 
             if (isKakao) {
+                if (guideIcon) guideIcon.innerHTML = '<i class="fa-solid fa-comment"></i>';
                 guideTitle.innerText = "카카오톡에서 열림 (설치 안내)";
                 guideContent.innerHTML = `
                     <div class="space-y-2 text-left text-xs">
@@ -3021,6 +3023,7 @@
                     `;
                 }
             } else if (isAndroid) {
+                if (guideIcon) guideIcon.innerHTML = '<i class="fa-brands fa-android"></i>';
                 guideTitle.innerText = "안드로이드 홈 화면에 앱 설치";
                 guideContent.innerHTML = `
                     <div class="space-y-2 text-left text-xs">
@@ -3036,19 +3039,38 @@
                         <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">확인</button>
                     `;
                 }
-            } else {
-                // iPhone / iPad Safari
-                guideTitle.innerText = "Install on iPhone / iPad";
+            } else if (isIOS) {
+                if (guideIcon) guideIcon.innerHTML = '<i class="fa-brands fa-apple"></i>';
+                guideTitle.innerText = "아이폰 / 아이패드 앱 설치 (Safari)";
                 guideContent.innerHTML = `
                     <div class="space-y-2 text-left text-xs bg-slate-800 p-3.5 rounded-2xl text-slate-200">
-                        <p>1. Tap the <b class="text-rose-400">Share button ( <i class="fa-solid fa-arrow-up-from-bracket"></i> )</b> in Safari's bottom toolbar.</p>
-                        <p>2. Scroll down and tap <b class="text-rose-400">'Add to Home Screen'</b>.</p>
-                        <p>3. Tap <b class="text-rose-400">'Add'</b> to launch K-Talk like a native app!</p>
+                        <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">1</span> <span>사파리(Safari) 하단 중앙의 <b>공유 버튼 ( <i class="fa-solid fa-arrow-up-from-bracket"></i> )</b>을 누릅니다.</span></p>
+                        <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">2</span> <span>메뉴를 아래로 내려 <b>'홈 화면에 추가'</b>를 선택합니다.</span></p>
+                        <p class="flex items-start"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">3</span> <span>우측 상단 <b>'추가'</b>를 누르면 홈 화면에 앱이 설치됩니다!</span></p>
                     </div>
                 `;
                 if (guideBtnContainer) {
                     guideBtnContainer.innerHTML = `
-                        <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">Got it!</button>
+                        <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">확인</button>
+                    `;
+                }
+            } else {
+                // Desktop PC (Windows / Mac / Linux)
+                if (guideIcon) guideIcon.innerHTML = '<i class="fa-solid fa-desktop"></i>';
+                guideTitle.innerText = "💻 PC / 노트북 단독 앱 설치 안내";
+                guideContent.innerHTML = `
+                    <div class="space-y-2 text-left text-xs">
+                        <div class="bg-slate-800 p-3.5 rounded-2xl space-y-2.5 text-slate-200">
+                            <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">1</span> <span>브라우저(Edge/Chrome) 상단 <b>주소창 오른쪽</b>을 보세요.</span></p>
+                            <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">2</span> <span>주소창 안에 있는 <b>앱 설치 아이콘 ( <i class="fa-solid fa-download text-amber-400"></i> 또는 <i class="fa-solid fa-desktop text-amber-400"></i> )</b>을 누릅니다.</span></p>
+                            <p class="flex items-start"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">3</span> <span><b>'설치'</b>를 클릭하시면 PC 바탕화면과 작업표시줄에 단독 앱으로 설치되어 편리하게 사용하실 수 있습니다!</span></p>
+                            <p class="text-[11px] text-slate-400 pt-1.5 border-t border-slate-700">💡 <b>브라우저 메뉴(···)</b> ➔ <b>'앱'</b> ➔ <b>'K-Talk Coach 설치'</b>를 누르셔도 바로 설치됩니다.</p>
+                        </div>
+                    </div>
+                `;
+                if (guideBtnContainer) {
+                    guideBtnContainer.innerHTML = `
+                        <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">확인</button>
                     `;
                 }
             }
