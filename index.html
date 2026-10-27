@@ -22,6 +22,7 @@
     <script src="real-korean-data.js"></script>
 
     <style>
+        .hide-romanization :is(#quiz-pron, #fc-pron, #hb-romanization, #rk-hero-pron, .learning-roman) { display: none !important; }
         .perspective-1000 { perspective: 1000px; }
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
@@ -74,6 +75,7 @@
 
     <!-- Main Container -->
     <main class="flex-1 max-w-lg w-full mx-auto p-4 pb-28">
+        <section id="learning-coach" aria-label="Korean listening coach"></section>
 
         <!-- ==================== TAB 0: HANGUL LAB (한글 문자 & 발음 연구소) ==================== -->
         <section id="section-hangul" class="hidden space-y-4">
@@ -1087,6 +1089,7 @@
     <!-- ========================================================================= -->
     <!-- JAVASCRIPT LOGIC                                                          -->
     <!-- ========================================================================= -->
+    <script src="coach.js"></script>
     <script>
         // ==========================================
         // 1. MULTILINGUAL DICTIONARY (EN, ES, JA, ZH, TH)
@@ -2287,14 +2290,14 @@
 
         const dailyVoca = [
             { hangul: "감사합니다", pron: "gam-sa-ham-ni-da", en: "Thank you (Polite)", es: "Gracias (Formal)", ja: "ありがとうございます (丁寧)", zh: "谢谢 (礼貌敬语)", th: "ขอบคุณครับ/ค่ะ (สุภาพ)", cat: "travel", level: "Lv.1" },
-            { hangul: "진짜요", pron: "jin-jja-yo", en: "Really?! (K-Drama staple)", es: "¿En serio? (Clásico K-Drama)", ja: "本当に？！ (韓ドラ定番)", zh: "真的吗？！ (韩剧高频词)", th: "จริงเหรอครับ/คะ?! (วลีฮิตซีรีส์)", cat: "kdrama", level: "Lv.2" },
+            { hangul: "진짜요?", pron: "jin-jja-yo", en: "Really?! (K-Drama staple)", es: "¿En serio? (Clásico K-Drama)", ja: "本当に？！ (韓ドラ定番)", zh: "真的吗？！ (韩剧高频词)", th: "จริงเหรอครับ/คะ?! (วลีฮิตซีรีส์)", cat: "kdrama", level: "Lv.2" },
             { hangul: "대박", pron: "dae-bak", en: "Awesome! / Jackpot!", es: "¡Increíble! / ¡Genial!", ja: "最高！ / ヤバい！", zh: "大发！ / 绝了！", th: "สุดยอด! / เจ๋งเป้ง!", cat: "kdrama", level: "Lv.2" },
             { hangul: "사랑해요", pron: "sa-rang-hae-yo", en: "I love you (K-Pop)", es: "Te amo (K-Pop)", ja: "愛してます (K-POP定番)", zh: "我爱你 (K-POP追星)", th: "รักนะครับ/ค่ะ (K-POP)", cat: "kpop", level: "Lv.4" },
             { hangul: "화이팅", pron: "hwa-i-ting", en: "Cheer up! / You got this!", es: "¡Ánimo! / ¡A por ello!", ja: "ファイト！ / 応援してる！", zh: "加油！ / 怀挺！", th: "สู้ๆ นะ! (ฮวาอีทิง)", cat: "kdrama", level: "Lv.2" },
             { hangul: "멘붕", pron: "men-bung", en: "Mental breakdown / Panic", es: "Colapso mental / Pánico", ja: "メンタル崩壊 / パニック", zh: "心态崩溃 / 抓狂", th: "สติแตก / หัวหมุน (เมนบุง)", cat: "slang", level: "Lv.5" },
             { hangul: "꿀잼", pron: "kkul-jaem", en: "Super fun / Hilarious", es: "Súper divertido / Buenísimo", ja: "超面白い / 神回", zh: "超级好玩 / 巨搞笑", th: "สนุกโคตรๆ / ฮากระจาย (กุลแจม)", cat: "slang", level: "Lv.5" },
             { hangul: "심쿵", pron: "sim-kung", en: "Heart flutter / Butterfly", es: "Flechazo / Vuelco al corazón", ja: "胸キュン / ドキドキ", zh: "心动暴击 / 怦然心动", th: "ใจบาง / ตกหลุมรักอย่างแรง", cat: "kpop", level: "Lv.4" },
-            { hangul: "얼마예요", pron: "eol-ma-ye-yo", en: "How much is this?", es: "¿Cuánto cuesta esto?", ja: "いくらですか？", zh: "多少钱？", th: "ราคาเท่าไหร่ครับ/ค่ะ?", cat: "travel", level: "Lv.1" },
+            { hangul: "얼마예요?", pron: "eol-ma-ye-yo", en: "How much is this?", es: "¿Cuánto cuesta esto?", ja: "いくらですか？", zh: "多少钱？", th: "ราคาเท่าไหร่ครับ/ค่ะ?", cat: "travel", level: "Lv.1" },
             { hangul: "맛있어요", pron: "ma-si-sseo-yo", en: "It's delicious!", es: "¡Está delicioso!", ja: "美味しいです！", zh: "很好吃！", th: "อร่อยมากเลยครับ/ค่ะ!", cat: "travel", level: "Lv.1" },
             { hangul: "눈치", pron: "nun-chi", en: "Reading the room / Tact", es: "Tacto / Darse cuenta del ambiente", ja: "空気を読むこと / 察知", zh: "眼力见儿 / 察言观色", th: "การดูกาลเทศะ (นุนชี)", cat: "slang", level: "Lv.5" },
             { hangul: "수고했어요", pron: "su-go-hae-sseo-yo", en: "You worked so hard today!", es: "¡Buen trabajo hoy!", ja: "今日もお疲れ様でした！", zh: "今天也辛苦啦！", th: "ขอบคุณสำหรับความเหน็ดเหนื่อยในวันนี้!", cat: "kpop", level: "Lv.4" }
@@ -2331,8 +2334,6 @@
         let calendarMonth = new Date().getMonth();
 
         // Audio & TTS
-        let speechRate = 1.0;
-        let koreanVoice = null;
         let flashcardIdx = 0;
         let isCardFlipped = false;
 
@@ -2367,141 +2368,9 @@
             'ㄿ': '리을피읖', 'ㅀ': '리을히읗', 'ㅄ': '비읍시옷'
         };
 
-        function getBestKoreanVoice() {
-            if (!('speechSynthesis' in window)) return null;
-            const voices = window.speechSynthesis.getVoices();
-            if (!voices || voices.length === 0) return koreanVoice;
-            return voices.find(v => v.lang.startsWith('ko') && (v.name.includes('Natural') || v.name.includes('Online')))
-                || voices.find(v => v.lang.startsWith('ko') && (v.name.includes('SunHi') || v.name.includes('InJoon')))
-                || voices.find(v => v.lang.startsWith('ko') && (v.name.includes('Google') || v.name.includes('Yuna') || v.name.includes('Sora')))
-                || voices.find(v => v.lang.startsWith('ko') && v.name.includes('Heami'))
-                || voices.find(v => v.lang.startsWith('ko'))
-                || null;
-        }
-
-        function initTTS() {
-            if (!('speechSynthesis' in window)) return;
-            const loadVoices = () => {
-                koreanVoice = getBestKoreanVoice();
-            };
-            loadVoices();
-            if (window.speechSynthesis.onvoiceschanged !== undefined) {
-                window.speechSynthesis.onvoiceschanged = loadVoices;
-            }
-        }
-
-        let ttsDebounceTimer = null;
-
-        function speakKorean(text) {
-            if (!text || !('speechSynthesis' in window)) return;
-            try {
-                if (ttsDebounceTimer) {
-                    clearTimeout(ttsDebounceTimer);
-                    ttsDebounceTimer = null;
-                }
-
-                // Stop any running speech safely
-                if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
-                    window.speechSynthesis.cancel();
-                }
-
-                let clean = text.trim();
-                if (!clean) return;
-
-                // 1. Convert isolated Hangul Jamo vowels and consonants to pronounceable syllabic forms
-                if (HANGUL_VOWEL_SPEAK_MAP[clean]) {
-                    clean = HANGUL_VOWEL_SPEAK_MAP[clean];
-                } else if (HANGUL_CONSONANT_SPEAK_MAP[clean]) {
-                    clean = HANGUL_CONSONANT_SPEAK_MAP[clean];
-                }
-
-                // 2. High-rising question prosody detection (끝 올림)
-                const isQuestion = /[?？]/.test(clean) ||
-                    /(나요|가요|까|요\?|어\?|야\?|죠\?|습니까|입니까|래요|줄래|어때|할까|갈까|뭐해|어디|누구|왜|언제|얼마|어떻게)[?\s]*$/.test(clean);
-
-                const cleanTextWithoutPunct = clean.replace(/[?.!~\s]+$/, '');
-                const isSingleSyllable = clean.length === 1 && !/[.!?]/.test(clean);
-
-                // For interrogative questions (>= 3 syllables), split sentence body and the final interrogative syllable
-                // Playing the final syllable at pitch 1.40 produces an authentic, natural high-rising intonation (끝 올림)
-                if (isQuestion && cleanTextWithoutPunct.length >= 3) {
-                    const lastChar = cleanTextWithoutPunct.slice(-1);
-                    const bodyText = cleanTextWithoutPunct.slice(0, -1);
-                    const endingText = lastChar + '?';
-
-                    ttsDebounceTimer = setTimeout(() => {
-                        try {
-                            const currentVoice = getBestKoreanVoice() || koreanVoice;
-                            const speakerBtn = document.getElementById('speaker-btn');
-                            if (speakerBtn) speakerBtn.classList.add('animate-pulse', 'ring-2', 'ring-rose-400');
-
-                            const u1 = new SpeechSynthesisUtterance(bodyText);
-                            u1.lang = 'ko-KR';
-                            u1.pitch = 1.0;
-                            u1.rate = Math.max(0.85, speechRate * 0.98);
-                            if (currentVoice) u1.voice = currentVoice;
-
-                            const u2 = new SpeechSynthesisUtterance(endingText);
-                            u2.lang = 'ko-KR';
-                            u2.pitch = 1.40; // Elevated pitch creates true audible rising question inflection (끝 올림)
-                            u2.rate = Math.max(0.80, speechRate * 0.88);
-                            if (currentVoice) u2.voice = currentVoice;
-
-                            u2.onend = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
-                            u2.onerror = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
-
-                            window.speechSynthesis.speak(u1);
-                            window.speechSynthesis.speak(u2);
-                        } catch (err) {
-                            console.error("Utterance error:", err);
-                        }
-                    }, 40);
-                    return;
-                }
-
-                let speechText = clean;
-                if (isQuestion) {
-                    speechText = cleanTextWithoutPunct + '?';
-                } else if (isSingleSyllable) {
-                    // Single syllable sustain (e.g. '고.') so formant filter fully synthesizes the syllable without clipping
-                    speechText = clean + '.';
-                }
-
-                // 3. 40ms micro-delay prevents audio hardware buffer crackling/clipping across mobile & desktop browsers
-                ttsDebounceTimer = setTimeout(() => {
-                    try {
-                        const u = new SpeechSynthesisUtterance(speechText);
-                        u.lang = 'ko-KR';
-
-                        if (isQuestion) {
-                            u.pitch = 1.35;
-                            u.rate = Math.max(0.85, speechRate * 0.90);
-                        } else if (isSingleSyllable) {
-                            u.pitch = 1.02;
-                            u.rate = Math.max(0.85, speechRate * 0.90);
-                        } else {
-                            u.pitch = 1.02;
-                            u.rate = speechRate;
-                        }
-
-                        const currentVoice = getBestKoreanVoice() || koreanVoice;
-                        if (currentVoice) u.voice = currentVoice;
-
-                        const speakerBtn = document.getElementById('speaker-btn');
-                        if (speakerBtn) speakerBtn.classList.add('animate-pulse', 'ring-2', 'ring-rose-400');
-
-                        u.onend = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
-                        u.onerror = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
-
-                        window.speechSynthesis.speak(u);
-                    } catch (err) {
-                        console.error("Utterance speak error:", err);
-                    }
-                }, 40);
-            } catch (e) {
-                console.error("TTS error:", e);
-            }
-        }
+        function getBestKoreanVoice() { return KTalkCoach.bestVoice(); }
+        function initTTS() { KTalkCoach.init(); }
+        function speakKorean(text) { KTalkCoach.speak(text); }
 
         function speakCurrentSentence() {
             const list = getActiveQuizList();
@@ -2609,6 +2478,8 @@
         }
 
         function applyLanguage() {
+            document.documentElement.lang = currentLang === "zh" ? "zh-Hans" : currentLang;
+            KTalkCoach.render();
             const t = i18n[currentLang] || i18n.en;
             document.getElementById('lang-flag').innerText = t.flag;
             document.getElementById('lang-label').innerText = t.langLabel;
@@ -3024,6 +2895,7 @@
 
         // Voice Recognition (Speech-to-Text: ko-KR)
         function startVoiceRecognition() {
+            KTalkCoach.stop();
             if (typeof trackSpeechPractice === 'function') trackSpeechPractice();
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
@@ -4113,6 +3985,7 @@
 
         // Voice Speaking Practice
         function startSpeakingPractice() {
+            KTalkCoach.stop();
             if (typeof trackSpeechPractice === 'function') trackSpeechPractice();
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const micBtn = document.getElementById('rk-mic-btn');
@@ -4148,7 +4021,7 @@
                 recognition.onresult = function(event) {
                     const spoken = event.results[0][0].transcript.replace(/[.,!?]/g, '').trim();
                     speechFeedback.classList.remove('hidden');
-                    resultText.innerHTML = `You said: <span class="text-white font-black text-sm">"${spoken}"</span>`;
+                    resultText.textContent = `“${spoken}” — ${KTalkCoach.recognitionNote()}`;
 
                     let matchCount = 0;
                     keywords.forEach(kw => {
@@ -4157,7 +4030,7 @@
                     const matchRate = keywords.length > 0 ? (matchCount / keywords.length) : (spoken === targetSentence ? 1 : 0);
 
                     if (matchRate >= 0.5 || spoken.replace(/\s+/g, '') === targetSentence.replace(/\s+/g, '')) {
-                        scoreBadge.innerHTML = `<span class="text-emerald-400 text-sm font-black">🌟 Perfect Pronunciation! (+10 EXP)</span>`;
+                        scoreBadge.innerHTML = `<span class="text-emerald-400 text-sm font-black">🌟 Words matched (+10 EXP)</span>`;
                         playCorrectSound();
                         addExp(10);
                         confetti({ particleCount: 70, spread: 60 });
@@ -4729,7 +4602,7 @@
                         ${rule.examples.map(ex => `
                             <button onclick="speakKorean('${ex.word}')" class="bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 text-xs px-2.5 py-1.5 rounded-xl transition flex items-center space-x-1.5">
                                 <span class="font-black text-white">${ex.word}</span>
-                                <span class="text-[10px] text-rose-300 font-mono">[${ex.pron}]</span>
+                                <span class="learning-roman text-[10px] text-rose-300 font-mono">[${ex.pron}]</span>
                                 <span class="text-[10px] text-slate-400">· ${ex.meaning}</span>
                                 <i class="fa-solid fa-volume-high text-[10px] text-amber-400 ml-1"></i>
                             </button>
