@@ -35,7 +35,7 @@
     <header class="bg-black/95 backdrop-blur-md border-b border-slate-900 text-white p-3.5 flex justify-between items-center sticky top-0 z-50 shadow-md">
         <div class="flex items-center space-x-2.5">
             <span class="text-2xl shadow-xs">🇰🇷</span>
-            <div>
+            <div onclick="onHeaderTitleClick()" class="cursor-pointer select-none">
                 <h1 class="text-base font-black tracking-tight leading-none bg-gradient-to-r from-rose-400 via-pink-400 to-amber-300 bg-clip-text text-transparent">
                     K-Talk Coach
                 </h1>
@@ -75,8 +75,225 @@
     <!-- Main Container -->
     <main class="flex-1 max-w-lg w-full mx-auto p-4 pb-28">
 
+        <!-- ==================== TAB 0: HANGUL LAB (한글 문자 & 발음 연구소) ==================== -->
+        <section id="section-hangul" class="hidden space-y-4">
+            <!-- Header Banner -->
+            <div class="bg-gradient-to-r from-indigo-900 via-purple-900 to-slate-900 text-white p-4 rounded-3xl shadow-lg border border-indigo-500/40 space-y-3">
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center space-x-2.5">
+                        <span class="text-2xl shadow-xs">🔤</span>
+                        <div>
+                            <h2 class="text-base font-black tracking-tight leading-tight" id="hangul-title">한글 문자 & 발음 연구소</h2>
+                            <p class="text-[10px] text-indigo-200" id="hangul-sub">자모 조합기 & 5개 국어 원어민 발음 가이드</p>
+                        </div>
+                    </div>
+                    <span class="bg-indigo-950/80 text-indigo-300 text-[10px] font-black px-2.5 py-1 rounded-full border border-indigo-700/60 font-mono">
+                        Hangul Lab
+                    </span>
+                </div>
+
+                <!-- 4 Sub-Tabs: Builder, Consonants, Vowels, Batchim -->
+                <div class="grid grid-cols-4 gap-1.5 pt-1 text-center">
+                    <button onclick="setHangulSubTab('builder')" id="hb-tab-builder" class="py-2 rounded-xl text-[11px] font-black bg-indigo-600 text-white shadow-md transition active:scale-95 flex items-center justify-center">
+                        <i class="fa-solid fa-puzzle-piece mr-1 text-[10px]"></i> <span id="hb-label-tab-builder">조합기</span>
+                    </button>
+                    <button onclick="setHangulSubTab('consonants')" id="hb-tab-consonants" class="py-2 rounded-xl text-[11px] font-bold bg-slate-800 text-slate-300 hover:text-white transition active:scale-95 flex items-center justify-center">
+                        <i class="fa-solid fa-shapes mr-1 text-[10px]"></i> <span id="hb-label-tab-consonants">자음 (19)</span>
+                    </button>
+                    <button onclick="setHangulSubTab('vowels')" id="hb-tab-vowels" class="py-2 rounded-xl text-[11px] font-bold bg-slate-800 text-slate-300 hover:text-white transition active:scale-95 flex items-center justify-center">
+                        <i class="fa-solid fa-font mr-1 text-[10px]"></i> <span id="hb-label-tab-vowels">모음 (21)</span>
+                    </button>
+                    <button onclick="setHangulSubTab('batchim')" id="hb-tab-batchim" class="py-2 rounded-xl text-[11px] font-bold bg-slate-800 text-slate-300 hover:text-white transition active:scale-95 flex items-center justify-center">
+                        <i class="fa-solid fa-shield-halved mr-1 text-[10px]"></i> <span id="hb-label-tab-batchim">받침 7법칙</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUB-VIEW 1: SYLLABLE BUILDER (자모 조합기) -->
+            <div id="hb-view-builder" class="space-y-4">
+                <!-- Combined Syllable Showcase Card -->
+                <div class="bg-gradient-to-br from-slate-900 via-indigo-950/60 to-slate-900 rounded-3xl p-6 border-2 border-indigo-500/50 shadow-xl text-center space-y-4 relative overflow-hidden">
+                    <div class="absolute -right-6 -bottom-6 text-indigo-950/40 text-9xl font-black select-none pointer-events-none">가</div>
+                    
+                    <div class="space-y-2 relative z-10">
+                        <div class="inline-flex items-center space-x-1.5 bg-indigo-950/80 border border-indigo-700/60 px-3 py-1 rounded-full text-[10px] text-indigo-300 font-bold">
+                            <i class="fa-solid fa-sparkles text-amber-400"></i>
+                            <span>실시간 자모 결합 (Real-time Composition)</span>
+                        </div>
+                        <div class="py-1">
+                            <span id="hb-syllable" class="text-7xl font-black text-white tracking-tight drop-shadow-lg">고</span>
+                        </div>
+                        <div>
+                            <span id="hb-romanization" class="text-xl font-mono font-black text-amber-300 tracking-wider">[ go ]</span>
+                        </div>
+                        <div class="flex items-center justify-center flex-wrap gap-2 pt-1">
+                            <span id="hb-formula" class="text-xs text-slate-200 font-bold bg-slate-900/90 px-3.5 py-1.5 rounded-xl border border-slate-700 shadow-inner">
+                                ㄱ [g] + ㅗ [o] = 고 [go]
+                            </span>
+                            <span id="hb-sample-word" class="text-xs text-rose-300 font-bold bg-rose-950/80 px-3.5 py-1.5 rounded-xl border border-rose-800/80">
+                                🥩 고기 (Meat) · 고양이 (Cat)
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 relative z-10">
+                        <button onclick="speakCurrentHangul()" class="w-full bg-gradient-to-r from-rose-600 via-pink-600 to-indigo-600 hover:from-rose-500 hover:to-indigo-500 active:scale-98 text-white py-3.5 rounded-2xl text-xs sm:text-sm font-black transition shadow-lg shadow-rose-950 flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-volume-high text-base"></i>
+                            <span id="hb-listen-btn-text">원어민 발음 듣기 (Listen Audio 🔊)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 1-Tap Preset Korean Words (자주 쓰는 한국어 단어 조합 프리셋) -->
+                <div class="bg-slate-800/80 rounded-2xl p-3.5 border border-slate-700 space-y-2">
+                    <span class="text-[11px] font-black text-amber-300 flex items-center">
+                        <i class="fa-solid fa-star mr-1.5 text-amber-400"></i> 원터치 단어 조합 프리셋 (Tap to Build Words)
+                    </span>
+                    <div class="flex flex-wrap gap-1.5" id="hb-presets-container">
+                        <!-- Populated by JS: 안녕, 사랑, 감사, 대박, 밥, 물, 한국, 친구 -->
+                    </div>
+                </div>
+
+                <!-- 1. 초성 (Initial Consonants) Selector -->
+                <div class="bg-slate-900/90 rounded-2xl p-3.5 border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-black text-rose-300 flex items-center">
+                            <span class="w-5 h-5 rounded-lg bg-rose-600 text-white flex items-center justify-center font-bold text-[10px] mr-1.5">1</span>
+                            초성 (Initial Consonant)
+                        </span>
+                        <span class="text-[10px] text-slate-400" id="hb-cho-selected-label">Selected: ㄱ [g]</span>
+                    </div>
+                    <div class="grid grid-cols-7 sm:grid-cols-10 gap-1.5 text-center font-bold text-xs" id="hb-cho-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- 2. 중성 (Vowels) Selector -->
+                <div class="bg-slate-900/90 rounded-2xl p-3.5 border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-black text-amber-300 flex items-center">
+                            <span class="w-5 h-5 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center font-bold text-[10px] mr-1.5">2</span>
+                            중성 (Vowel)
+                        </span>
+                        <span class="text-[10px] text-slate-400" id="hb-jung-selected-label">Selected: ㅗ [o]</span>
+                    </div>
+                    <div class="grid grid-cols-6 sm:grid-cols-8 gap-1.5 text-center font-bold text-xs" id="hb-jung-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- 3. 종성 / 받침 (Final Consonants - Optional) Selector -->
+                <div class="bg-slate-900/90 rounded-2xl p-3.5 border border-slate-800 space-y-2">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-black text-emerald-300 flex items-center">
+                            <span class="w-5 h-5 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-[10px] mr-1.5">3</span>
+                            종성 / 받침 (Final Consonant · Optional)
+                        </span>
+                        <span class="text-[10px] text-slate-400" id="hb-jong-selected-label">Selected: 없음 (None)</span>
+                    </div>
+                    <div class="grid grid-cols-6 sm:grid-cols-9 gap-1.5 text-center font-bold text-xs" id="hb-jong-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SUB-VIEW 2: CONSONANTS GUIDE (자음 19개) -->
+            <div id="hb-view-consonants" class="hidden space-y-3">
+                <div class="bg-slate-800/80 rounded-2xl p-3 border border-slate-700 flex justify-between items-center text-xs">
+                    <span class="text-slate-300 font-bold" id="hb-c-count-label">총 19개 자음 (14 기본 + 5 쌍자음)</span>
+                    <span class="text-[10px] text-rose-300">카드를 누르면 발음 재생 🔊</span>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="hb-consonants-list">
+                    <!-- Populated dynamically with 5-language comparison guide -->
+                </div>
+            </div>
+
+            <!-- SUB-VIEW 3: VOWELS GUIDE (모음 21개) -->
+            <div id="hb-view-vowels" class="hidden space-y-3">
+                <!-- Distinction Tips for Foreigners -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <!-- Tip 1: ㅓ vs ㅗ -->
+                    <div class="bg-slate-900/95 border border-rose-500/40 rounded-2xl p-3.5 space-y-2">
+                        <span class="text-xs font-black text-rose-300 flex items-center">
+                            <i class="fa-solid fa-fire mr-1 text-amber-400"></i> 외국인 필수 구별 1: ㅓ [eo] vs ㅗ [o]
+                        </span>
+                        <p class="text-[11px] text-slate-300 leading-relaxed">
+                            <b class="text-white">ㅓ (eo)</b>: 입을 세로로 크게 벌리고 입술에 힘을 뺍니다 (cup의 u).<br>
+                            <b class="text-white">ㅗ (o)</b>: 입술을 앞으로 둥글게 모아 '오' 소리를 냅니다.
+                        </p>
+                        <div class="flex space-x-2 pt-1">
+                            <button onclick="speakKorean('어')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-rose-300 py-1.5 rounded-xl text-xs font-black border border-slate-700">
+                                🔊 어 [eo]
+                            </button>
+                            <button onclick="speakKorean('오')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-amber-300 py-1.5 rounded-xl text-xs font-black border border-slate-700">
+                                🔊 오 [o]
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tip 2: ㅡ vs ㅜ -->
+                    <div class="bg-slate-900/95 border border-indigo-500/40 rounded-2xl p-3.5 space-y-2">
+                        <span class="text-xs font-black text-indigo-300 flex items-center">
+                            <i class="fa-solid fa-fire mr-1 text-amber-400"></i> 외국인 필수 구별 2: ㅡ [eu] vs ㅜ [u]
+                        </span>
+                        <p class="text-[11px] text-slate-300 leading-relaxed">
+                            <b class="text-white">ㅡ (eu)</b>: 미소 짓듯이 입꼬리를 옆으로 당기며 소리냅니다.<br>
+                            <b class="text-white">ㅜ (u)</b>: 입술을 촛불 끄듯 앞으로 뾰족하게 내밉니다.
+                        </p>
+                        <div class="flex space-x-2 pt-1">
+                            <button onclick="speakKorean('으')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-indigo-300 py-1.5 rounded-xl text-xs font-black border border-slate-700">
+                                🔊 으 [eu]
+                            </button>
+                            <button onclick="speakKorean('우')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-pink-300 py-1.5 rounded-xl text-xs font-black border border-slate-700">
+                                🔊 우 [u]
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2" id="hb-vowels-list">
+                    <!-- Populated dynamically with 5-language comparison guide -->
+                </div>
+            </div>
+
+            <!-- SUB-VIEW 4: BATCHIM 7 RULES (받침 7법칙) -->
+            <div id="hb-view-batchim" class="hidden space-y-3">
+                <div class="bg-slate-800/90 rounded-2xl p-3.5 border border-slate-700 space-y-1">
+                    <span class="text-xs font-black text-emerald-300 flex items-center">
+                        <i class="fa-solid fa-shield-halved mr-1.5"></i> 한국어 받침의 7대 대표음 법칙
+                    </span>
+                    <p class="text-[11px] text-slate-300 leading-relaxed">
+                        한글의 모든 복잡한 받침(27개)은 음절 끝에서 <b class="text-amber-300">단 7가지 소리 [ ㄱ, ㄴ, ㄷ, ㄹ, ㅁ, ㅂ, ㅇ ]</b>로만 발음됩니다!
+                    </p>
+                </div>
+                <div class="space-y-2.5" id="hb-batchim-list">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </section>
+
         <!-- ==================== TAB 1: QUIZ (말해보카 K-Coach Mode) ==================== -->
         <section id="section-quiz" class="space-y-4">
+            <!-- Quick Link to Hangul Lab for absolute beginners -->
+            <div onclick="switchTab('hangul')" class="cursor-pointer bg-gradient-to-r from-indigo-950/90 via-purple-950/80 to-slate-900 border border-indigo-500/50 hover:border-indigo-400 rounded-2xl p-3 flex justify-between items-center shadow-md active:scale-98 transition group">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center font-black text-sm shadow-xs group-hover:scale-105 transition">
+                        가
+                    </div>
+                    <div>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="text-xs font-black text-white" id="hangul-banner-title">🌱 한글 처음이신가요? (Hangul Lab)</span>
+                            <span class="bg-indigo-400 text-slate-950 text-[9px] font-black px-1.5 py-0.2 rounded-full uppercase">START</span>
+                        </div>
+                        <span class="text-[10px] text-indigo-200 block" id="hangul-banner-sub">ㄱㄴㄷㄹ + ㅏㅑㅓㅕ 자모 조합기 & 원어민 발음 기초</span>
+                    </div>
+                </div>
+                <div class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-black px-2.5 py-1.5 rounded-xl flex items-center space-x-1 shadow-sm shrink-0">
+                    <span id="hangul-banner-btn">배우기</span>
+                    <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                </div>
+            </div>
+
             <!-- PWA Install Prompt Banner (Shows on mobile) -->
             <div id="pwa-install-banner" class="bg-gradient-to-r from-rose-950/60 to-purple-950/60 border border-rose-500/30 rounded-2xl p-3 flex justify-between items-center shadow-lg">
                 <div class="flex items-center space-x-2.5">
@@ -233,9 +450,12 @@
                             <span id="fc-category" class="text-xs bg-rose-950 text-rose-300 border border-rose-800 px-3 py-1 rounded-full font-bold">K-Drama</span>
                             <span class="text-xs text-slate-400 font-bold"><i class="fa-solid fa-hand-pointer mr-1"></i><span id="fc-tap-flip">Tap to flip</span></span>
                         </div>
-                        <div class="text-center space-y-3">
+                        <div class="text-center space-y-2">
                             <p id="fc-hangul" class="text-4xl font-black text-white tracking-tight"></p>
                             <p id="fc-pron" class="text-sm text-rose-400 font-mono font-bold"></p>
+                            <div class="pt-1">
+                                <span id="fc-front-meaning" class="inline-block text-xs sm:text-sm font-extrabold text-amber-300 bg-slate-900/90 px-3.5 py-1.5 rounded-xl border border-amber-500/30 shadow-xs max-w-xs"></span>
+                            </div>
                         </div>
                         <button onclick="event.stopPropagation(); speakKorean(document.getElementById('fc-hangul').innerText)" class="bg-rose-600 hover:bg-rose-500 active:scale-95 text-white px-5 py-2.5 rounded-2xl text-xs font-black transition flex items-center shadow-lg shadow-rose-950">
                             <i class="fa-solid fa-volume-high mr-2 text-base"></i> <span id="fc-audio-btn-text">Listen Audio</span>
@@ -389,6 +609,15 @@
 
                 <!-- Selected Day Log Detail -->
                 <div id="selected-date-detail" class="bg-slate-900 p-3.5 rounded-2xl border border-slate-700/80 text-xs space-y-2"></div>
+
+                <!-- Admin Dashboard Access Button for Owner -->
+                <div class="pt-2 border-t border-slate-700/60 flex justify-between items-center text-[11px]">
+                    <span class="text-slate-400 font-medium">관리자 전용 기능</span>
+                    <button onclick="openAdminModal()" class="bg-slate-900 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white px-3 py-1.5 rounded-xl border border-slate-700 font-bold transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-chart-line text-rose-400"></i>
+                        <span>방문자 분석 대시보드</span>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -407,15 +636,6 @@
                     <span class="text-[10px] bg-rose-950/90 text-rose-300 border border-rose-500/50 px-2.5 py-1 rounded-xl font-black" id="rk-header-badge">
                         5 Featured Samples
                     </span>
-                </div>
-
-                <!-- Disclaimer Notice Badge (원어민 최종 검수 대상) -->
-                <div class="bg-amber-950/80 border border-amber-500/60 rounded-2xl p-2.5 text-[11px] text-amber-200 flex items-start space-x-2 shadow-inner">
-                    <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm mt-0.5 shrink-0"></i>
-                    <div class="leading-snug">
-                        <span class="font-black text-amber-300 block mb-0.5">⚠️ [원어민 최종 검수 대상 / Native Speaker Final Review]</span>
-                        <span>본 학습 콘텐츠의 한국어 표현, 반말/존댓말/격식체 변환 및 상황별 정답은 표준 실생활 회화 관용구를 기반으로 기획되었으며, 원어민 최종 검수 대상입니다.</span>
-                    </div>
                 </div>
 
                 <!-- Mode Switch Tabs: Card Deck vs Explore 60 -->
@@ -611,34 +831,225 @@
     </main>
 
     <!-- Bottom Navigation Bar -->
-    <nav class="bg-black/95 backdrop-blur-md border-t border-slate-900 fixed bottom-0 left-0 right-0 z-50 flex justify-around py-2 max-w-lg mx-auto shadow-2xl">
-        <button onclick="switchTab('quiz')" id="nav-quiz" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-rose-500 font-black text-[10px] sm:text-[11px] transition">
+    <nav class="bg-black/95 backdrop-blur-md border-t border-slate-900 fixed bottom-0 left-0 right-0 z-50 flex justify-around py-1.5 px-0.5 max-w-lg mx-auto shadow-2xl">
+        <button onclick="switchTab('hangul')" id="nav-hangul" class="flex flex-col items-center py-1 px-1 sm:px-1.5 text-slate-400 font-bold text-[9.5px] sm:text-[10.5px] hover:text-rose-400 transition">
+            <i class="fa-solid fa-font text-base sm:text-lg mb-0.5"></i>
+            <span id="nav-label-hangul">Hangul</span>
+        </button>
+        <button onclick="switchTab('quiz')" id="nav-quiz" class="flex flex-col items-center py-1 px-1 sm:px-1.5 text-rose-500 font-black text-[9.5px] sm:text-[10.5px] transition">
             <i class="fa-solid fa-puzzle-piece text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-quiz">Quiz</span>
         </button>
-        <button onclick="switchTab('realkorean')" id="nav-realkorean" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition relative">
+        <button onclick="switchTab('realkorean')" id="nav-realkorean" class="flex flex-col items-center py-1 px-1 sm:px-1.5 text-slate-400 font-bold text-[9.5px] sm:text-[10.5px] hover:text-rose-400 transition relative">
             <i class="fa-solid fa-comments text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-realkorean">Real K</span>
-            <span class="absolute -top-1 right-0 sm:right-1 bg-gradient-to-r from-amber-400 to-rose-500 text-slate-950 text-[8px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-tighter animate-pulse shadow-xs">NEW</span>
+            <span class="absolute -top-1 right-0 bg-gradient-to-r from-amber-400 to-rose-500 text-slate-950 text-[7.5px] font-black px-1 rounded-full uppercase tracking-tighter">NEW</span>
         </button>
-        <button onclick="switchTab('flashcard')" id="nav-flashcard" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition">
+        <button onclick="switchTab('flashcard')" id="nav-flashcard" class="flex flex-col items-center py-1 px-1 sm:px-1.5 text-slate-400 font-bold text-[9.5px] sm:text-[10.5px] hover:text-rose-400 transition">
             <i class="fa-solid fa-layer-group text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-fc">Cards</span>
         </button>
-        <button onclick="switchTab('voca')" id="nav-voca" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition">
+        <button onclick="switchTab('voca')" id="nav-voca" class="flex flex-col items-center py-1 px-1 sm:px-1.5 text-slate-400 font-bold text-[9.5px] sm:text-[10.5px] hover:text-rose-400 transition">
             <i class="fa-solid fa-book-open text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-voca">Words</span>
         </button>
-        <button onclick="switchTab('review')" id="nav-review" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition relative">
+        <button onclick="switchTab('review')" id="nav-review" class="flex flex-col items-center py-1 px-1 sm:px-1.5 text-slate-400 font-bold text-[9.5px] sm:text-[10.5px] hover:text-rose-400 transition relative">
             <i class="fa-solid fa-rotate-left text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-review">Review</span>
-            <span id="review-count-badge" class="hidden absolute top-0 right-1 bg-rose-500 text-white text-[9px] font-black px-1.5 py-0.2 rounded-full">0</span>
+            <span id="review-count-badge" class="hidden absolute top-0 right-0 bg-rose-500 text-white text-[8px] font-black px-1 rounded-full">0</span>
         </button>
-        <button onclick="switchTab('stats')" id="nav-stats" class="flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition">
+        <button onclick="switchTab('stats')" id="nav-stats" class="flex flex-col items-center py-1 px-1 sm:px-1.5 text-slate-400 font-bold text-[9.5px] sm:text-[10.5px] hover:text-rose-400 transition">
             <i class="fa-solid fa-calendar-check text-base sm:text-lg mb-0.5"></i>
             <span id="nav-label-stats">Streak</span>
         </button>
     </nav>
+
+    <!-- ADMIN ANALYTICS DASHBOARD MODAL (소유자 전용 관리자 페이지) -->
+    <div id="admin-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
+        <!-- VIEW 1: PIN AUTHENTICATION -->
+        <div id="admin-login-view" class="bg-slate-900 border border-slate-700 max-w-sm w-full rounded-3xl p-6 shadow-2xl space-y-4 text-center relative animate-in fade-in zoom-in duration-150">
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <div class="w-12 h-12 bg-rose-600 rounded-2xl mx-auto flex items-center justify-center text-white text-xl shadow-md">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <div class="space-y-1">
+                <h3 class="text-base font-black text-white">관리자 인증 (Owner Access)</h3>
+                <p class="text-[11px] text-slate-400">사이트 소유자 전용 통계 대시보드입니다.<br>PIN 번호 4자리를 입력하세요 (기본: 1234)</p>
+            </div>
+            <div class="space-y-3 pt-1">
+                <input type="password" id="admin-pin-input" maxlength="8" placeholder="PIN 입력 (1234)" class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-center text-lg font-mono tracking-widest text-white focus:outline-none focus:border-rose-500" onkeypress="if(event.key==='Enter') submitAdminPin()">
+                <p id="admin-pin-error" class="hidden text-xs text-rose-400 font-bold">비밀번호가 올바르지 않습니다.</p>
+                <div class="flex space-x-2">
+                    <button onclick="closeAdminModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-2xl text-xs transition">취소</button>
+                    <button onclick="submitAdminPin()" class="flex-1 bg-rose-600 hover:bg-rose-500 text-white font-black py-3 rounded-2xl text-xs transition shadow-md shadow-rose-950">인증하기</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 2: ANALYTICS DASHBOARD -->
+        <div id="admin-dashboard-view" class="hidden bg-slate-900 border border-slate-700 max-w-lg w-full max-h-[90vh] overflow-y-auto rounded-3xl p-5 sm:p-6 shadow-2xl space-y-4 text-left relative animate-in fade-in zoom-in duration-150">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xl">📊</span>
+                    <div>
+                        <h3 class="text-sm sm:text-base font-black text-white flex items-center">
+                            K-Talk Coach 관리자 대시보드
+                        </h3>
+                        <span class="text-[10px] text-emerald-400 font-mono flex items-center">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1"></span> Live ktalkcoach.online
+                        </span>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="refreshAdminStats()" title="새로고침" class="text-slate-400 hover:text-white p-1 text-sm"><i class="fa-solid fa-arrows-rotate"></i></button>
+                    <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+
+            <!-- 4 Key KPI Cards -->
+            <div class="grid grid-cols-2 gap-2.5">
+                <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-rose-500/30 space-y-1">
+                    <span class="text-[10px] text-slate-400 font-bold flex items-center">
+                        <i class="fa-solid fa-users text-rose-400 mr-1.5"></i> 오늘 순 방문자 (UV)
+                    </span>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="adm-today-visitors" class="text-2xl font-black text-rose-400">1</span>
+                        <span class="text-xs text-slate-400">명</span>
+                    </div>
+                    <span class="text-[9px] text-slate-400 block" id="adm-today-date">2026-10-27</span>
+                </div>
+
+                <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-amber-500/30 space-y-1">
+                    <span class="text-[10px] text-slate-400 font-bold flex items-center">
+                        <i class="fa-solid fa-eye text-amber-400 mr-1.5"></i> 글로벌 총 조회수
+                    </span>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="adm-global-visits" class="text-2xl font-black text-amber-300">--</span>
+                        <span class="text-xs text-slate-400">회</span>
+                    </div>
+                    <span class="text-[9px] text-slate-400 block">전 세계 누적 카운트</span>
+                </div>
+
+                <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-emerald-500/30 space-y-1">
+                    <span class="text-[10px] text-slate-400 font-bold flex items-center">
+                        <i class="fa-solid fa-check-double text-emerald-400 mr-1.5"></i> 오늘 푼 퀴즈 수
+                    </span>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="adm-today-quizzes" class="text-2xl font-black text-emerald-400">0</span>
+                        <span class="text-xs text-slate-400">문제</span>
+                    </div>
+                    <span class="text-[9px] text-slate-400 block">학습 활동 완료량</span>
+                </div>
+
+                <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-purple-500/30 space-y-1">
+                    <span class="text-[10px] text-slate-400 font-bold flex items-center">
+                        <i class="fa-solid fa-microphone text-purple-400 mr-1.5"></i> 발음 연습 횟수
+                    </span>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="adm-today-speech" class="text-2xl font-black text-purple-300">0</span>
+                        <span class="text-xs text-slate-400">회</span>
+                    </div>
+                    <span class="text-[9px] text-slate-400 block">마이크 음성 인식</span>
+                </div>
+            </div>
+
+            <!-- Global Hit Badge Verification Live Preview -->
+            <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex justify-between items-center">
+                <div class="space-y-0.5">
+                    <span class="text-[10px] text-slate-400 font-bold block">공식 서버리스 카운터 실시간 뱃지</span>
+                    <span class="text-xs text-slate-200 font-bold">ktalkcoach.online 방문자 집계</span>
+                </div>
+                <img id="adm-badge-img" src="https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online" alt="Visitor Badge" class="rounded h-5 border border-slate-700">
+            </div>
+
+            <!-- Learner Language Distribution -->
+            <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-2">
+                <span class="text-xs font-black text-white flex items-center">
+                    <i class="fa-solid fa-globe text-indigo-400 mr-1.5"></i> 접속 학습자 모국어 분포 (5개 국어)
+                </span>
+                <div class="space-y-1.5 text-xs">
+                    <div class="flex justify-between items-center text-slate-300">
+                        <span>🇺🇸 English (영어)</span>
+                        <span id="adm-lang-en-val" class="font-bold text-white">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div id="adm-bar-en" class="bg-blue-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-slate-300 pt-1">
+                        <span>🇯🇵 日本語 (일본어)</span>
+                        <span id="adm-lang-ja-val" class="font-bold text-white">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div id="adm-bar-ja" class="bg-rose-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-slate-300 pt-1">
+                        <span>🇨🇳 中文 (중국어)</span>
+                        <span id="adm-lang-zh-val" class="font-bold text-white">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div id="adm-bar-zh" class="bg-amber-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-slate-300 pt-1">
+                        <span>🇪🇸 Español (스페인어)</span>
+                        <span id="adm-lang-es-val" class="font-bold text-white">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div id="adm-bar-es" class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+
+                    <div class="flex justify-between items-center text-slate-300 pt-1">
+                        <span>🇹🇭 ไทย (태국어)</span>
+                        <span id="adm-lang-th-val" class="font-bold text-white">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                        <div id="adm-bar-th" class="bg-purple-500 h-1.5 rounded-full" style="width: 0%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Device Distribution & 7-Day Trend Table -->
+            <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs font-black text-white flex items-center">
+                        <i class="fa-solid fa-calendar-days text-rose-400 mr-1.5"></i> 최근 7일간 방문 이력
+                    </span>
+                    <span class="text-[10px] text-slate-400" id="adm-device-ratio">📱 모바일: 100% · 💻 PC: 0%</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead>
+                            <tr class="border-b border-slate-800 text-slate-400 text-[10px]">
+                                <th class="py-1">날짜</th>
+                                <th class="py-1 text-center">방문자(UV)</th>
+                                <th class="py-1 text-right">퀴즈 완료</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adm-history-tbody">
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Footer Controls -->
+            <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
+                <button onclick="changeAdminPin()" class="text-slate-400 hover:text-white transition flex items-center space-x-1">
+                    <i class="fa-solid fa-key text-[10px]"></i> <span>PIN 변경</span>
+                </button>
+                <div class="flex space-x-2">
+                    <button onclick="resetAdminStats()" class="text-slate-400 hover:text-rose-400 text-[10px] transition">
+                        데이터 초기화
+                    </button>
+                    <button onclick="closeAdminModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold transition">
+                        닫기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- LANGUAGE SELECTION MODAL (5 LANGUAGES) -->
     <div id="lang-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
@@ -740,6 +1151,16 @@
                 todayPending: "Today: Pending (+20 EXP 🎁)",
                 proTitle: "K-Talk Pro Membership",
                 proDesc: "Learn Korean 3x faster with native speech analysis, all K-Drama phrases, and ad-free experience.",
+                navHangul: "Hangul",
+                hangulTitle: "Hangul Alphabet & Pronunciation Lab",
+                hangulSub: "Interactive Syllable Builder & 5-Language Native Guide",
+                hangulBannerTitle: "🌱 Beginner? Start with Hangul!",
+                hangulBannerSub: "Consonants, Vowels & Syllable Combiner",
+                hangulBannerBtn: "Start",
+                hbTabBuilder: "Builder",
+                hbTabConsonants: "Consonants (19)",
+                hbTabVowels: "Vowels (21)",
+                hbTabBatchim: "Batchim Rules",
                 navQuiz: "Quiz",
                 navRealKorean: "Real K",
                 navFc: "Cards",
@@ -793,6 +1214,16 @@
                 todayPending: "Hoy: Pendiente (+20 EXP 🎁)",
                 proTitle: "Membresía K-Talk Pro",
                 proDesc: "Aprende coreano 3 veces más rápido con análisis de voz nativo y frases de K-Drama sin anuncios.",
+                navHangul: "Hangul",
+                hangulTitle: "Laboratorio de Hangul y Pronunciación",
+                hangulSub: "Constructor de sílabas y guía nativa en español",
+                hangulBannerTitle: "🌱 ¿Principiante? ¡Empieza con Hangul!",
+                hangulBannerSub: "Consonantes, vocales y combinador de sílabas",
+                hangulBannerBtn: "Aprender",
+                hbTabBuilder: "Constructor",
+                hbTabConsonants: "Consonantes (19)",
+                hbTabVowels: "Vocales (21)",
+                hbTabBatchim: "Reglas Batchim",
                 navQuiz: "Cuestionario",
                 navRealKorean: "Real K",
                 navFc: "Tarjetas",
@@ -846,6 +1277,16 @@
                 todayPending: "本日未出席 (+20 EXP 🎁)",
                 proTitle: "K-Talk Pro メンバーシップ",
                 proDesc: "ドラマの全表現500個解禁、無制限ハート、広告なしで3倍速学習。",
+                navHangul: "ハングル",
+                hangulTitle: "ハングル文字＆発音研究所",
+                hangulSub: "子音・母音の組み合わせ機＆日本語発音解説",
+                hangulBannerTitle: "🌱 ハングルが初めての方はこちら！",
+                hangulBannerSub: "子音・母音・文字組み立て＆発音の基礎",
+                hangulBannerBtn: "学ぶ",
+                hbTabBuilder: "組合せ機",
+                hbTabConsonants: "子音 (19)",
+                hbTabVowels: "母音 (21)",
+                hbTabBatchim: "パッチムの法則",
                 navQuiz: "クイズ",
                 navRealKorean: "リアル韓",
                 navFc: "カード",
@@ -899,6 +1340,16 @@
                 todayPending: "今日待打卡 (+20 EXP 🎁)",
                 proTitle: "K-Talk Pro 尊享会员",
                 proDesc: "解锁500+韩剧独家口语包，无限红心练习，无广告加速学习。",
+                navHangul: "韩语拼音",
+                hangulTitle: "韩语字母与发音实验室",
+                hangulSub: "声母韵母自由拼合器与中文发音对比指南",
+                hangulBannerTitle: "🌱 零基础学韩语？先从字母开始！",
+                hangulBannerSub: "辅音、元音拼读与发音基础",
+                hangulBannerBtn: "开始学习",
+                hbTabBuilder: "字母拼合器",
+                hbTabConsonants: "辅音/声母 (19)",
+                hbTabVowels: "元音/韵母 (21)",
+                hbTabBatchim: "收音规则",
                 navQuiz: "实战",
                 navRealKorean: "地道韩语",
                 navFc: "闪卡",
@@ -952,6 +1403,16 @@
                 todayPending: "ยังไม่เช็คอิน (+20 EXP 🎁)",
                 proTitle: "สมาชิก K-Talk Pro",
                 proDesc: "ปลดล็อกคำศัพท์ซีรีส์กว่า 500 คำ หัวใจไม่จำกัด ไร้โฆษณา",
+                navHangul: "ฮันกึล",
+                hangulTitle: "ห้องเรียนตัวอักษรและการออกเสียงฮันกึล",
+                hangulSub: "โปรแกรมรวมพยัญชนะสระและคู่มือเทียบเสียงภาษาไทย",
+                hangulBannerTitle: "🌱 เพิ่งเริ่มเรียนเกาหลี? เริ่มต้นที่ฮันกึล!",
+                hangulBannerSub: "พยัญชนะ สระ และการประสมคำภาษาเกาหลี",
+                hangulBannerBtn: "เริ่มเรียน",
+                hbTabBuilder: "เครื่องผสมคำ",
+                hbTabConsonants: "พยัญชนะ (19)",
+                hbTabVowels: "สระ (21)",
+                hbTabBatchim: "กฎตัวสะกด",
                 navQuiz: "ควิซ",
                 navRealKorean: "เกาหลีจริง",
                 navFc: "การ์ด",
@@ -1897,7 +2358,11 @@
             const loadVoices = () => {
                 const voices = window.speechSynthesis.getVoices();
                 if (!voices || voices.length === 0) return;
-                koreanVoice = voices.find(v => v.lang.startsWith('ko') && (v.name.includes('Yuna') || v.name.includes('Heami') || v.name.includes('Google') || v.name.includes('Natural') || v.name.includes('Korean')))
+                // Prioritize top natural/neural voices across Edge, Chrome, iOS and Android
+                koreanVoice = voices.find(v => v.lang.startsWith('ko') && (v.name.includes('Natural') || v.name.includes('Online')))
+                           || voices.find(v => v.lang.startsWith('ko') && (v.name.includes('SunHi') || v.name.includes('InJoon')))
+                           || voices.find(v => v.lang.startsWith('ko') && (v.name.includes('Google') || v.name.includes('Yuna') || v.name.includes('Sora')))
+                           || voices.find(v => v.lang.startsWith('ko') && v.name.includes('Heami'))
                            || voices.find(v => v.lang.startsWith('ko'))
                            || voices[0];
             };
@@ -1911,10 +2376,31 @@
             if (!text || !('speechSynthesis' in window)) return;
             try {
                 window.speechSynthesis.cancel();
-                const u = new SpeechSynthesisUtterance(text);
+                let clean = text.trim();
+
+                // Detect interrogative sentence (question tone: 끝 올림)
+                const isQuestion = clean.includes('?') || clean.includes('？') ||
+                    /(나요|가요|까|요\?|어\?|야\?|죠\?|습니까|입니까|래요|줄래|어때|할까|갈까|뭐해|어디|누구|왜|언제|얼마|어떻게)[?\s]*$/.test(clean);
+
+                let speechText = clean;
+                // Append '?' if interrogative structure detected but punctuation missing, so TTS prosody rises naturally
+                if (isQuestion && !speechText.endsWith('?') && !speechText.endsWith('？')) {
+                    speechText += '?';
+                }
+
+                const u = new SpeechSynthesisUtterance(speechText);
                 u.lang = 'ko-KR';
-                u.rate = speechRate;
-                u.pitch = 1.0;
+
+                if (isQuestion) {
+                    // Elevated pitch and slightly measured cadence for natural rising intonation (끝 올림)
+                    u.pitch = 1.18;
+                    u.rate = Math.max(0.85, speechRate * 0.95);
+                } else {
+                    // Pleasant, warm conversational pitch
+                    u.pitch = 1.02;
+                    u.rate = speechRate;
+                }
+
                 if (koreanVoice) u.voice = koreanVoice;
 
                 const speakerBtn = document.getElementById('speaker-btn');
@@ -2083,6 +2569,8 @@
             document.getElementById('cal-header-desc').innerText = t.calDesc;
 
             // Navigation
+            const navHangulEl = document.getElementById('nav-label-hangul');
+            if (navHangulEl) navHangulEl.innerText = t.navHangul || "Hangul";
             document.getElementById('nav-label-quiz').innerText = t.navQuiz;
             const rkNavEl = document.getElementById('nav-label-realkorean');
             if (rkNavEl) rkNavEl.innerText = t.navRealKorean || "Real K";
@@ -2090,6 +2578,31 @@
             document.getElementById('nav-label-voca').innerText = t.navVoca;
             document.getElementById('nav-label-review').innerText = t.navReview;
             document.getElementById('nav-label-stats').innerText = t.navStreak;
+
+            // Hangul Lab Elements
+            const hangulTitleEl = document.getElementById('hangul-title');
+            if (hangulTitleEl) hangulTitleEl.innerText = t.hangulTitle || "한글 문자 & 발음 연구소";
+            const hangulSubEl = document.getElementById('hangul-sub');
+            if (hangulSubEl) hangulSubEl.innerText = t.hangulSub || "자모 조합기 & 5개 국어 원어민 발음 가이드";
+            const hbBannerTitleEl = document.getElementById('hangul-banner-title');
+            if (hbBannerTitleEl) hbBannerTitleEl.innerText = t.hangulBannerTitle || "🌱 한글 처음이신가요? (Hangul Lab)";
+            const hbBannerSubEl = document.getElementById('hangul-banner-sub');
+            if (hbBannerSubEl) hbBannerSubEl.innerText = t.hangulBannerSub || "ㄱㄴㄷㄹ + ㅏㅑㅓㅕ 자모 조합기 & 원어민 발음 기초";
+            const hbBannerBtnEl = document.getElementById('hangul-banner-btn');
+            if (hbBannerBtnEl) hbBannerBtnEl.innerText = t.hangulBannerBtn || "배우기";
+
+            // Sub-tab labels
+            const tabBuilderEl = document.getElementById('hb-label-tab-builder');
+            if (tabBuilderEl) tabBuilderEl.innerText = t.hbTabBuilder || "조합기";
+            const tabConsonantsEl = document.getElementById('hb-label-tab-consonants');
+            if (tabConsonantsEl) tabConsonantsEl.innerText = t.hbTabConsonants || "자음 (19)";
+            const tabVowelsEl = document.getElementById('hb-label-tab-vowels');
+            if (tabVowelsEl) tabVowelsEl.innerText = t.hbTabVowels || "모음 (21)";
+            const tabBatchimEl = document.getElementById('hb-label-tab-batchim');
+            if (tabBatchimEl) tabBatchimEl.innerText = t.hbTabBatchim || "받침 7법칙";
+
+            if (typeof renderHangulConsonants === 'function') renderHangulConsonants();
+            if (typeof renderHangulVowels === 'function') renderHangulVowels();
 
             // Modals
             const modalTitleEl = document.getElementById('lang-modal-title');
@@ -2197,6 +2710,7 @@
         }
 
         function checkAnswer() {
+            if (typeof trackQuizCompleted === 'function') trackQuizCompleted();
             const list = getActiveQuizList();
             const q = list[quizIdx];
             const raw = document.getElementById('user-answer').value.trim().toLowerCase().replace(/[.,!?\s]/g, '');
@@ -2422,6 +2936,7 @@
 
         // Voice Recognition (Speech-to-Text: ko-KR)
         function startVoiceRecognition() {
+            if (typeof trackSpeechPractice === 'function') trackSpeechPractice();
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
                 showToast("Voice recognition not supported in this browser. Use Chrome or Safari.");
@@ -2458,7 +2973,10 @@
             document.getElementById('fc-category').innerText = q.cat;
             document.getElementById('fc-hangul').innerText = q.target;
             document.getElementById('fc-pron').innerText = `[ ${q.targetPron} ]`;
-            document.getElementById('fc-meaning').innerText = getQuizPrompt(q);
+            const promptText = getQuizPrompt(q);
+            const frontMeaningEl = document.getElementById('fc-front-meaning');
+            if (frontMeaningEl) frontMeaningEl.innerText = promptText;
+            document.getElementById('fc-meaning').innerText = promptText;
             document.getElementById('fc-nuance').innerText = getQuizNuance(q);
             document.getElementById('fc-example').innerText = `"${q.sentence.replace(/[\[\]]/g, '')}"`;
 
@@ -3507,6 +4025,7 @@
 
         // Voice Speaking Practice
         function startSpeakingPractice() {
+            if (typeof trackSpeechPractice === 'function') trackSpeechPractice();
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const micBtn = document.getElementById('rk-mic-btn');
             const micIcon = document.getElementById('rk-mic-icon');
@@ -3737,22 +4256,591 @@
         }
 
         // ==========================================
-        // 15. NAVIGATION & INITIALIZATION
+        // 14. HANGUL LAB & SYLLABLE COMBINER ENGINE
+        // ==========================================
+        const HANGUL_CHOSUNG = ['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+        const HANGUL_JUNGSUNG = ['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+        const HANGUL_JONGSUNG = ['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+
+        const choRomMap = { 'ㄱ':'g','ㄲ':'kk','ㄴ':'n','ㄷ':'d','ㄸ':'tt','ㄹ':'r','ㅁ':'m','ㅂ':'b','ㅃ':'pp','ㅅ':'s','ㅆ':'ss','ㅇ':'','ㅈ':'j','ㅉ':'jj','ㅊ':'ch','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'h' };
+        const jungRomMap = { 'ㅏ':'a','ㅐ':'ae','ㅑ':'ya','ㅒ':'yae','ㅓ':'eo','ㅔ':'e','ㅕ':'yeo','ㅖ':'ye','ㅗ':'o','ㅘ':'wa','ㅙ':'wae','ㅚ':'oe','ㅛ':'yo','ㅜ':'u','ㅝ':'wo','ㅞ':'we','ㅟ':'wi','ㅠ':'yu','ㅡ':'eu','ㅢ':'ui','ㅣ':'i' };
+        const jongRomMap = { '':'','ㄱ':'k','ㄲ':'k','ㄳ':'k','ㄴ':'n','ㄵ':'n','ㄶ':'n','ㄷ':'t','ㄹ':'l','ㄺ':'k','ㄻ':'m','ㄼ':'p','ㄽ':'t','ㄾ':'t','ㄿ':'p','ㅀ':'l','ㅁ':'m','ㅂ':'p','ㅄ':'p','ㅅ':'t','ㅆ':'t','ㅇ':'ng','ㅈ':'t','ㅊ':'t','ㅋ':'k','ㅌ':'t','ㅍ':'p','ㅎ':'t' };
+
+        const HANGUL_CONSONANTS_DATA = [
+            { char: 'ㄱ', name: '기역', rom: 'g / k', en: "Soft 'g' as in 'go' at start; soft 'k' at end.", ja: "「か」と「が」の中間音。語頭は濁らず、語中では濁ります。", zh: "字首发不送气的清音（类似平假名か行），在词中类似拼音 g。", es: "Similar a 'g' en 'gato' (suave) o 'c' suave sin expulsar aire.", th: "เสียงคล้าย ก/ค ไม่พ่นลม" },
+            { char: 'ㄴ', name: '니은', rom: 'n', en: "Like 'n' in 'nose'. Tongue touches behind upper teeth.", ja: "日本語の「な行」と同じ「n」の音です。", zh: "和汉语拼音 n 完全相同（如：你 nǐ）。", es: "Exactamente igual a la 'n' en 'nada'.", th: "เหมือน น/ณ (เสียง n)" },
+            { char: 'ㄷ', name: '디귿', rom: 'd / t', en: "Soft 'd' as in 'door', or 't' without a puff of air.", ja: "「た」と「だ」の中間音。語頭は「た」に近く、語中は「だ」。", zh: "字首类似不送气 d/t，词中类似于拼音 d。", es: "Similar a la 'd' en 'dado' o 't' suave.", th: "คล้าย ด (หรือ ต/ท ไม่พ่นลม)" },
+            { char: 'ㄹ', name: '리을', rom: 'r / l', en: "Light flap 'r' between vowels (like Spanish 'r' in pero); 'l' at end.", ja: "日本語の「ら行」とほぼ同じ。舌先を軽く弾きます。", zh: "介于 r 和 l 之间的弹舌轻音，词尾发 'l' 音。", es: "Como la 'r' suave en 'pero'; al final suena como 'l'.", th: "เสียง ร/ล แตะเพดานปากเบาๆ" },
+            { char: 'ㅁ', name: '미음', rom: 'm', en: "Like 'm' in 'mother'. Lips touch together.", ja: "日本語の「ま行」と同じ「m」の音です。", zh: "与汉语拼音 m 完全相同（如：妈妈 māmā）。", es: "Igual a la 'm' en 'mamá'.", th: "เหมือน ม (เสียง m)" },
+            { char: 'ㅂ', name: '비읍', rom: 'b / p', en: "Soft 'b' as in 'boy', or soft 'p' without puffing air.", ja: "「ば」と「ぱ」の中間音。語頭は「ぱ」に近く、語中は「ば」。", zh: "字首类似不送气 b/p，词中类似于拼音 b。", es: "Como la 'b' suave en 'barco'.", th: "คล้าย บ (หรือ ป/พ ไม่พ่นลม)" },
+            { char: 'ㅅ', name: '시옷', rom: 's', en: "Like 's' in 'sun'. Before 'i/y', sounds like 'sh' (e.g. 시 = shi).", ja: "日本語の「さ行」。「ㅣ」の前では「し (shi)」になります。", zh: "类似汉语拼音 s，在拼写 'ㅣ(i)' 时发 'sh/x' 音。", es: "Como la 's' en 'sol'. Delante de 'i' suena como 'sh'.", th: "เหมือน ซ/ส (คู่กับสระอี ออกเป็น ช/ฌ)" },
+            { char: 'ㅇ', name: '이응', rom: 'silent / ng', en: "Silent as initial letter (아 = 'a'); sounds like 'ng' in 'song' as batchim.", ja: "初声では無音（母音のみ発音）。終声（パッチム）では「ん(ng)」の音。", zh: "在声母位置不发音（占位符）；在收音时发后鼻音 'ng'。", es: "Muda al inicio (solo suena la vocal). Como 'ng' (sing) al final.", th: "ต้นคำไม่ออกเสียง (อ); ตัวสะกดออกเสียง ง" },
+            { char: 'ㅈ', name: '지읒', rom: 'j / ch', en: "Soft 'j' as in 'jam', or soft 'ch'.", ja: "「じゃ」行に似ています。語頭は軽めの「ちゃ」、語中は「じゃ」。", zh: "字首类似汉语拼音 j/zh，词中更接近浊音 j。", es: "Similar a 'y' o 'll' en español latino, o 'j' suave inglesa.", th: "คล้าย จ (กึ่ง จ/ช ไม่พ่นลม)" },
+            { char: 'ㅊ', name: '치읓', rom: 'ch (aspirated)', en: "Strong 'ch' with a strong puff of air (as in 'church').", ja: "息を強く吐き出す激音の「ち (ch)」。", zh: "送气音，相当于汉语拼音 ch（如：吃 chī）。", es: "Como 'ch' en 'chico', expulsando bastante aire con fuerza.", th: "เสียง ช/ฉ (พ่นลมแรง)" },
+            { char: 'ㅋ', name: '키읔', rom: 'k (aspirated)', en: "Strong 'k' with a puff of air (as in 'king').", ja: "息を強く吐き出す激音の「か (k)」。", zh: "送气音，相当于汉语拼音 k（如：开 kāi）。", es: "Como la 'k' en 'kilo', con un soplido de aire fuerte.", th: "เสียง ค/ข (พ่นลมแรง)" },
+            { char: 'ㅌ', name: '티읕', rom: 't (aspirated)', en: "Strong 't' with a puff of air (as in 'tea').", ja: "息を強く吐き出す激音の「た (t)」。", zh: "送气音，相当于汉语拼音 t（如：天 tiān）。", es: "Como la 't' en 'té', soltando aire con fuerza.", th: "เสียง ท/ถ (พ่นลมแรง)" },
+            { char: 'ㅍ', name: '피읖', rom: 'p (aspirated)', en: "Strong 'p' with a puff of air (as in 'park').", ja: "息を強く吐き出す激音の「ぱ (p)」。", zh: "送气音，相当于汉语拼音 p（如：跑 pǎo）。", es: "Como la 'p' en 'papá', expulsando aire con fuerza.", th: "เสียง พ/ผ (พ่นลมแรง)" },
+            { char: 'ㅎ', name: '히읗', rom: 'h', en: "Like 'h' in 'hat'. Can soften between vowels.", ja: "日本語の「は行」と同じ「h」の音です。", zh: "相当于汉语拼音 h（如：好 hǎo）。", es: "Como la 'j' suave en español o 'h' en inglés 'hotel'.", th: "เหมือน ฮ/ห (เสียง h)" },
+            { char: 'ㄲ', name: '쌍기역', rom: 'kk', en: "Tense 'kk'. Tighten throat with NO air puff (like 'sk' in 'sky').", ja: "喉を詰まらせて発音する濃音「っか」。息を出しません。", zh: "紧音 kk：收紧喉咙发出的不送气清音（更紧绷用力）。", es: "Consonante tensa 'kk'. Tensa la garganta sin soltar aire.", th: "เสียง ก๊ (เสียงสั้น แน่น เกร็งลำคอ ไม่พ่นลม)" },
+            { char: 'ㄸ', name: '쌍디귿', rom: 'tt', en: "Tense 'tt'. Tighten throat with NO air puff (like 'st' in 'stop').", ja: "喉を詰まらせて発音する濃音「った」。息を出しません。", zh: "紧音 tt：收紧喉咙发出的不送气清音。", es: "Consonante tensa 'tt'. Tensa la garganta sin soltar aire.", th: "เสียง ต๊ (เสียงสั้น แน่น เกร็งลำคอ)" },
+            { char: 'ㅃ', name: '쌍비읍', rom: 'pp', en: "Tense 'pp'. Tighten lips with NO air puff (like 'sp' in 'spy').", ja: "喉を詰まらせて発音する濃音「っぱ」。息を出しません。", zh: "紧音 pp：双唇用力抿住后爆破，不送气。", es: "Consonante tensa 'pp'. Aprieta los labios sin soltar aire.", th: "เสียง ป๊ (เสียงสั้น แน่น ไม่พ่นลม)" },
+            { char: 'ㅆ', name: '쌍시옷', rom: 'ss', en: "Tense 'ss'. Sharp, hissing 's' with extra breath pressure.", ja: "鋭く摩擦させる濃音「っさ」。", zh: "紧音 ss：更强烈的清擦音，气流在舌前紧逼摩擦。", es: "Consonante tensa 'ss'. Una 's' más fuerte y tensa.", th: "เสียง ซ้ (เสียง ซ เน้นหนัก แน่น)" },
+            { char: 'ㅉ', name: '쌍지읒', rom: 'jj', en: "Tense 'jj'. Tighten mouth with NO air puff.", ja: "喉を詰まらせて発音する濃音「っちゃ」。息を出しません。", zh: "紧音 jj：紧绷舌面发出的不送气硬音。", es: "Consonante tensa 'jj'. Tensa la boca sin soltar aire.", th: "เสียง จ๊ (เสียง จ เน้นหนัก สั้น เกร็ง)" }
+        ];
+
+        const HANGUL_VOWELS_DATA = [
+            { char: 'ㅏ', rom: 'a', en: "Like 'a' in 'father'. Open mouth wide.", ja: "日本語の「あ」と同じ。口を大きく開けます。", zh: "类似汉语拼音 a（如：大 dà）。自然张大。", es: "Exactamente igual a la 'a' en 'casa'.", th: "เหมือน สระ อา (a)" },
+            { char: 'ㅑ', rom: 'ya', en: "Like 'ya' in 'yard'.", ja: "日本語の「や」と同じ音です。", zh: "类似汉语拼音 ya（如：鸭 yā）。", es: "Como 'ya' en 'playa'.", th: "เหมือน สระ ยา (ya)" },
+            { char: 'ㅓ', rom: 'eo', en: "★ Crucial: Like 'u' in 'cup' or 'o' in 'son'. Open mouth vertically, lips relaxed.", ja: "★重要：口を縦に開けて発音する「お」に近い音（アとオの中間）。", zh: "★重点：张大嘴巴发出的 'o/e'（类似拼音 e，但不咧嘴）。", es: "★Importante: Como 'o' con la boca más abierta y labios relajados.", th: "เหมือน สระ ออ (eo) อ้าปากกว้างกว่า โอ" },
+            { char: 'ㅕ', rom: 'yeo', en: "Like 'yo' in 'yonder' with unrounded lips.", ja: "口を縦に大きく開けて発音する「よ」。", zh: "类似拼音 yeo（y + ㅓ），自然张口。", es: "Como 'yeo' con la boca abierta y labios relajados.", th: "เหมือน สระ ยอ (yeo)" },
+            { char: 'ㅗ', rom: 'o', en: "★ Crucial: Like 'o' in 'hotel' or 'boat'. Lips tightly rounded into an 'O'.", ja: "★重要：唇を前に突き出して丸くすぼめる「お」。", zh: "★重点：嘴唇紧紧嘟起呈圆形发出的 'o'（如：波 bō）。", es: "★Importante: 'o' pura redondeando bien los labios hacia adelante.", th: "เหมือน สระ โอ (o) ห่อริมฝีปากกลมชัดเจน" },
+            { char: 'ㅛ', rom: 'yo', en: "Like 'yo' in 'yo-yo'. Lips tightly rounded.", ja: "唇をしっかり丸めて突き出す「よ」。", zh: "紧缩双唇发出的 yo 音（如：唷）。", es: "Como 'yo' redondeando los labios con fuerza.", th: "เหมือน สระ โย (yo) ห่อปากกลม" },
+            { char: 'ㅜ', rom: 'u', en: "★ Crucial: Like 'oo' in 'moon'. Lips pushed forward in a tight circle.", ja: "唇を前に突き出して丸くすぼめる「う」。", zh: "类似汉语拼音 u（如：乌 wū），嘴唇用力前噘突出。", es: "Como la 'u' en 'luna', labios redondos hacia adelante.", th: "เหมือน สระ อู (u) ห่อปากกลมพุ่งไปข้างหน้า" },
+            { char: 'ㅠ', rom: 'yu', en: "Like 'you' in English. Lips tightly rounded.", ja: "唇を丸めて突き出す「ゆ」。", zh: "类似汉语拼音 you/yu（双唇前突）。", es: "Como 'yu' redondeando bien los labios.", th: "เหมือน สระ ยู (yu)" },
+            { char: 'ㅡ', rom: 'eu', en: "★ Crucial: Unrounded 'oo'. Pull corners of mouth back like a grin and say 'u'.", ja: "★重要：唇を丸めず、横に「イー」と引っ張りながら「ウ」と発音。", zh: "★难点：嘴角向两侧拉紧（像微笑），发类似汉语资(zi)里的空韵。", es: "★Importante: Sonríe tirando las comisuras hacia los lados y di 'u'.", th: "เหมือน สระ อือ (eu) ดึงมุมปากกว้างเหมือนยิ้ม" },
+            { char: 'ㅣ', rom: 'i', en: "Like 'ee' in 'tree'. Corners of mouth pulled back.", ja: "日本語の「い」と同じ音です。", zh: "类似汉语拼音 i（如：衣 yī）。", es: "Exactamente igual a la 'i' en 'isla'.", th: "เหมือน สระ อี (i)" },
+            { char: 'ㅐ', rom: 'ae', en: "Like 'e' in 'bed' or 'a' in 'apple'.", ja: "日本語の「え」に近い音。口をやや広めに開けます。", zh: "类似国际音标 [ɛ]（类似英文 bed 里的 e）。", es: "Como la 'e' en 'perro'.", th: "เหมือน สระ แอ (ae)" },
+            { char: 'ㅔ', rom: 'e', en: "Like 'e' in 'bed'. In modern Korean, sounds nearly identical to 'ㅐ'.", ja: "日本語の「え」と同じ。現代韓国語では「ㅐ」とほぼ同音。", zh: "类似汉语拼音 ei/ê。口语中与 ㅐ 几乎无差别。", es: "Como la 'e' en 'mesa'. En coreano moderno suena casi igual a ㅐ.", th: "เหมือน สระ เอ (e)" },
+            { char: 'ㅘ', rom: 'wa', en: "Combination: ㅗ + ㅏ -> 'wa' (like 'water').", ja: "「ㅗ(o)」+「ㅏ(a)」の合成。「わ (wa)」。", zh: "拼音 wa（如：瓦 wǎ）。", es: "Como 'ua' en 'agua'.", th: "เหมือน สระ วา (wa)" },
+            { char: 'ㅝ', rom: 'wo', en: "Combination: ㅜ + ㅓ -> 'wo' (like 'wonderful').", ja: "「ㅜ(u)」+「ㅓ(eo)」の合成。「うぉ (wo)」。", zh: "拼音 wo（如：我 wǒ）。", es: "Como 'uo' en 'cuota'.", th: "เหมือน สระ วอ (wo)" },
+            { char: 'ㅚ', rom: 'oe / we', en: "Sounds like 'we' in 'wet' in standard modern Korean.", ja: "現代では「うぇ (we)」とほぼ同じ発音。", zh: "现代韩国人口语中多发类似于 oi/we 的音。", es: "Suena similar a 'ue' en español.", th: "ออกเสียงคล้าย สระ เว (we)" },
+            { char: 'ㅢ', rom: 'ui', en: "Combination: ㅡ + ㅣ -> 'ui'. Pull mouth wide then glide to 'ee'.", ja: "「ㅡ(eu)」+「ㅣ(i)」の合成。「うぃ」。", zh: "ㅡ 与 ㅣ 的结合音，先发 ㅡ 快速滑向 ㅣ。", es: "Combinación de 'eu' + 'i'.", th: "เหมือน สระ อึย (ui)" }
+        ];
+
+        const HANGUL_BATCHIM_RULES = [
+            { sound: '[ ㄱ ]', letters: 'ㄱ, ㅋ, ㄲ, ㄳ, ㄺ', examples: [{ word: '책', pron: 'chaek', meaning: 'Book' }, { word: '부엌', pron: 'bu-eok', meaning: 'Kitchen' }, { word: '밖', pron: 'bak', meaning: 'Outside' }] },
+            { sound: '[ ㄴ ]', letters: 'ㄴ, ㄵ, ㄶ', examples: [{ word: '눈', pron: 'nun', meaning: 'Snow / Eye' }, { word: '문', pron: 'mun', meaning: 'Door' }, { word: '손', pron: 'son', meaning: 'Hand' }] },
+            { sound: '[ ㄷ ]', letters: 'ㄷ, ㅅ, ㅆ, ㅈ, ㅊ, ㅌ, ㅎ', examples: [{ word: '옷', pron: 'ot', meaning: 'Clothes' }, { word: '꽃', pron: 'kkot', meaning: 'Flower' }, { word: '끝', pron: 'kkeut', meaning: 'End' }] },
+            { sound: '[ ㄹ ]', letters: 'ㄹ, ㄼ, ㄽ, ㄾ, ㅀ', examples: [{ word: '달', pron: 'dal', meaning: 'Moon' }, { word: '물', pron: 'mul', meaning: 'Water' }, { word: '말', pron: 'mal', meaning: 'Horse / Words' }] },
+            { sound: '[ ㅁ ]', letters: 'ㅁ, ㄻ', examples: [{ word: '봄', pron: 'bom', meaning: 'Spring' }, { word: '밤', pron: 'bam', meaning: 'Night' }, { word: '엄마', pron: 'eom-ma', meaning: 'Mom' }] },
+            { sound: '[ ㅂ ]', letters: 'ㅂ, ㅍ, ㅄ, ㄿ', examples: [{ word: '밥', pron: 'bap', meaning: 'Rice / Meal' }, { word: '입', pron: 'ip', meaning: 'Mouth' }, { word: '앞', pron: 'ap', meaning: 'Front' }] },
+            { sound: '[ ㅇ ]', letters: 'ㅇ (후비음 ng)', examples: [{ word: '강', pron: 'gang', meaning: 'River' }, { word: '방', pron: 'bang', meaning: 'Room' }, { word: '사랑', pron: 'sa-rang', meaning: 'Love' }] }
+        ];
+
+        const HANGUL_PRESETS = [
+            { label: '안녕 (Hello)', syllables: [{ c:'ㅇ', j:'ㅏ', jong:'ㄴ' }, { c:'ㄴ', j:'ㅕ', jong:'ㅇ' }], sampleWord: '👋 안녕 (Hello)' },
+            { label: '사랑 (Love)', syllables: [{ c:'ㅅ', j:'ㅏ', jong:'' }, { c:'ㄹ', j:'ㅏ', jong:'ㅇ' }], sampleWord: '❤️ 사랑 (Love)' },
+            { label: '감사 (Thanks)', syllables: [{ c:'ㄱ', j:'ㅏ', jong:'ㅁ' }, { c:'ㅅ', j:'ㅏ', jong:'' }], sampleWord: '🙏 감사 (Thanks)' },
+            { label: '대박 (Awesome)', syllables: [{ c:'ㄷ', j:'ㅐ', jong:'' }, { c:'ㅂ', j:'ㅏ', jong:'ㄱ' }], sampleWord: '🔥 대박 (Awesome)' },
+            { label: '밥 (Meal/Rice)', syllables: [{ c:'ㅂ', j:'ㅏ', jong:'ㅂ' }], sampleWord: '🍚 밥 (Rice / Meal)' },
+            { label: '물 (Water)', syllables: [{ c:'ㅁ', j:'ㅜ', jong:'ㄹ' }], sampleWord: '💧 물 (Water)' },
+            { label: '친구 (Friend)', syllables: [{ c:'ㅊ', j:'ㅣ', jong:'ㄴ' }, { c:'ㄱ', j:'ㅜ', jong:'' }], sampleWord: '🤝 친구 (Friend)' },
+            { label: '한국 (Korea)', syllables: [{ c:'ㅎ', j:'ㅏ', jong:'ㄴ' }, { c:'ㄱ', j:'ㅜ', jong:'ㄱ' }], sampleWord: '🇰🇷 한국 (Korea)' }
+        ];
+
+        const HANGUL_SAMPLE_WORDS = {
+            '고': '🥩 고기 (Meat) · 고양이 (Cat)',
+            '가': '👜 가방 (Bag) · 가다 (To go)',
+            '나': '🦋 나비 (Butterfly) · 나 (Me)',
+            '다': '🌉 다리 (Bridge/Leg) · 다시 (Again)',
+            '라': '📻 라디오 (Radio) · 라면 (Ramen)',
+            '마': ' 마음 (Heart/Mind) · 마시다 (Drink)',
+            '바': '🌊 바다 (Sea/Ocean) · 바나나 (Banana)',
+            '사': '🍎 사과 (Apple) · 사람 (Person)',
+            '아': '👶 아기 (Baby) · 아침 (Morning)',
+            '자': ' 자동차 (Car) · 자주 (Often)',
+            '차': '🍵 차 (Tea/Car) · 차갑다 (Cold)',
+            '카': '📷 카메라 (Camera) · 카페 (Cafe)',
+            '타': ' 타다 (Ride) · 타조 (Ostrich)',
+            '파': ' 파도 (Wave) · 파란색 (Blue)',
+            '하': ' 하늘 (Sky) · 하루 (One day)',
+            '한': '🇰🇷 한국 (Korea) · 한강 (Han River)',
+            '국': ' 국 (Soup) · 국가 (Nation)',
+            '안': '👋 안녕 (Hello) · 안전 (Safety)',
+            '녕': ' 안녕 (Peace/Greeting)',
+            '랑': '❤️ 사랑 (Love) · 호랑이 (Tiger)',
+            '밥': '🍚 밥 (Rice/Meal) · 밥먹자 (Let\'s eat)',
+            '물': '💧 물 (Water) · 물고기 (Fish)',
+            '꽃': '🌸 꽃 (Flower) · 꽃다발 (Bouquet)',
+            '꿈': '⭐ 꿈 (Dream) · 꿈꾸다 (To dream)',
+            '달': '🌙 달 (Moon) · 달빛 (Moonlight)',
+            '별': '✨ 별 (Star) · 별빛 (Starlight)',
+            '손': '✋ 손 (Hand) · 손가락 (Finger)',
+            '눈': '❄️ 눈 (Snow/Eye) · 눈물 (Tears)',
+            '봄': '🌱 봄 (Spring season)',
+            '밤': '🌃 밤 (Night) · 밤하늘 (Night sky)',
+            '해': '☀️ 해 (Sun) · 햇빛 (Sunlight)',
+            '비': '🌧️ 비 (Rain) · 비오다 (To rain)',
+            '산': '⛰️ 산 (Mountain)'
+        };
+
+        let selectedCho = 'ㄱ';
+        let selectedJung = 'ㅗ';
+        let selectedJong = '';
+        let hangulSubTab = 'builder';
+
+        function initHangulLab() {
+            renderHangulBuilder();
+            renderHangulConsonants();
+            renderHangulVowels();
+            renderHangulBatchim();
+            renderHangulPresets();
+            updateHangulDisplay();
+        }
+
+        function setHangulSubTab(sub) {
+            hangulSubTab = sub;
+            ['builder', 'consonants', 'vowels', 'batchim'].forEach(s => {
+                const view = document.getElementById(`hb-view-${s}`);
+                if (view) view.classList.add('hidden');
+                const btn = document.getElementById(`hb-tab-${s}`);
+                if (btn) {
+                    btn.className = "py-2 rounded-xl text-[11px] font-bold bg-slate-800 text-slate-300 hover:text-white transition active:scale-95 flex items-center justify-center";
+                }
+            });
+            const activeView = document.getElementById(`hb-view-${sub}`);
+            if (activeView) activeView.classList.remove('hidden');
+            const activeBtn = document.getElementById(`hb-tab-${sub}`);
+            if (activeBtn) {
+                activeBtn.className = "py-2 rounded-xl text-[11px] font-black bg-indigo-600 text-white shadow-md transition active:scale-95 flex items-center justify-center";
+            }
+        }
+
+        function renderHangulPresets() {
+            const container = document.getElementById('hb-presets-container');
+            if (!container) return;
+            container.innerHTML = HANGUL_PRESETS.map((p, idx) => `
+                <button onclick="loadHangulPreset(${idx})" class="bg-slate-900 hover:bg-indigo-900/60 active:scale-95 border border-slate-700 hover:border-indigo-500 text-slate-200 hover:text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition shadow-xs flex items-center space-x-1">
+                    <span>${p.label}</span>
+                </button>
+            `).join('');
+        }
+
+        function loadHangulPreset(idx) {
+            const preset = HANGUL_PRESETS[idx];
+            if (!preset || !preset.syllables || preset.syllables.length === 0) return;
+            const s = preset.syllables[0];
+            selectedCho = s.c;
+            selectedJung = s.j;
+            selectedJong = s.jong || '';
+            renderHangulBuilderGrids();
+            updateHangulDisplay(preset.sampleWord);
+
+            const fullWord = preset.label.split(' ')[0];
+            speakKorean(fullWord);
+        }
+
+        function renderHangulBuilder() {
+            renderHangulBuilderGrids();
+            updateHangulDisplay();
+        }
+
+        function renderHangulBuilderGrids() {
+            // Cho grid
+            const choContainer = document.getElementById('hb-cho-grid');
+            if (choContainer) {
+                choContainer.innerHTML = HANGUL_CHOSUNG.map(c => `
+                    <button onclick="selectHangulCho('${c}')" class="py-2 rounded-xl border text-sm font-bold transition active:scale-95 ${c === selectedCho ? 'bg-rose-600 text-white border-rose-400 shadow-md ring-2 ring-rose-400/50' : 'bg-slate-800 text-slate-200 border-slate-700 hover:border-slate-500'}">
+                        ${c}
+                    </button>
+                `).join('');
+            }
+
+            // Jung grid
+            const jungContainer = document.getElementById('hb-jung-grid');
+            if (jungContainer) {
+                jungContainer.innerHTML = HANGUL_JUNGSUNG.map(j => `
+                    <button onclick="selectHangulJung('${j}')" class="py-2 rounded-xl border text-sm font-bold transition active:scale-95 ${j === selectedJung ? 'bg-amber-500 text-slate-950 border-amber-300 shadow-md ring-2 ring-amber-300/50' : 'bg-slate-800 text-slate-200 border-slate-700 hover:border-slate-500'}">
+                        ${j}
+                    </button>
+                `).join('');
+            }
+
+            // Jong grid
+            const jongContainer = document.getElementById('hb-jong-grid');
+            if (jongContainer) {
+                jongContainer.innerHTML = HANGUL_JONGSUNG.map(jong => `
+                    <button onclick="selectHangulJong('${jong}')" class="py-2 rounded-xl border text-xs sm:text-sm font-bold transition active:scale-95 ${jong === selectedJong ? 'bg-emerald-600 text-white border-emerald-400 shadow-md ring-2 ring-emerald-400/50' : 'bg-slate-800 text-slate-200 border-slate-700 hover:border-slate-500'}">
+                        ${jong === '' ? '없음' : jong}
+                    </button>
+                `).join('');
+            }
+        }
+
+        function selectHangulCho(c) {
+            selectedCho = c;
+            renderHangulBuilderGrids();
+            updateHangulDisplay();
+            speakCurrentHangul();
+        }
+
+        function selectHangulJung(j) {
+            selectedJung = j;
+            renderHangulBuilderGrids();
+            updateHangulDisplay();
+            speakCurrentHangul();
+        }
+
+        function selectHangulJong(jong) {
+            selectedJong = jong;
+            renderHangulBuilderGrids();
+            updateHangulDisplay();
+            speakCurrentHangul();
+        }
+
+        function composeCurrentHangul() {
+            const ci = HANGUL_CHOSUNG.indexOf(selectedCho);
+            const ji = HANGUL_JUNGSUNG.indexOf(selectedJung);
+            const joi = HANGUL_JONGSUNG.indexOf(selectedJong);
+            if (ci === -1 || ji === -1 || joi === -1) return '고';
+            return String.fromCharCode(0xAC00 + (ci * 21 + ji) * 28 + joi);
+        }
+
+        function getHangulRomanization() {
+            const cr = choRomMap[selectedCho] || '';
+            const jr = jungRomMap[selectedJung] || '';
+            const jor = jongRomMap[selectedJong] || '';
+            return `${cr}${jr}${jor}`;
+        }
+
+        function updateHangulDisplay(customSample) {
+            const char = composeCurrentHangul();
+            const rom = getHangulRomanization();
+
+            const sylEl = document.getElementById('hb-syllable');
+            if (sylEl) sylEl.innerText = char;
+
+            const romEl = document.getElementById('hb-romanization');
+            if (romEl) romEl.innerText = `[ ${rom} ]`;
+
+            const choLabel = choRomMap[selectedCho] ? `${selectedCho} [${choRomMap[selectedCho]}]` : `${selectedCho}`;
+            const jungLabel = `${selectedJung} [${jungRomMap[selectedJung] || ''}]`;
+            const jongLabel = selectedJong ? ` + ${selectedJong} [${jongRomMap[selectedJong] || ''}]` : '';
+
+            const formEl = document.getElementById('hb-formula');
+            if (formEl) formEl.innerText = `${choLabel} + ${jungLabel}${jongLabel} = ${char} [${rom}]`;
+
+            const sampleEl = document.getElementById('hb-sample-word');
+            if (sampleEl) {
+                sampleEl.innerText = customSample || HANGUL_SAMPLE_WORDS[char] || `단어: ${char} (${rom})`;
+            }
+
+            const choSelLabel = document.getElementById('hb-cho-selected-label');
+            if (choSelLabel) choSelLabel.innerText = `Selected: ${selectedCho} [${choRomMap[selectedCho] || 'silent'}]`;
+
+            const jungSelLabel = document.getElementById('hb-jung-selected-label');
+            if (jungSelLabel) jungSelLabel.innerText = `Selected: ${selectedJung} [${jungRomMap[selectedJung] || ''}]`;
+
+            const jongSelLabel = document.getElementById('hb-jong-selected-label');
+            if (jongSelLabel) jongSelLabel.innerText = `Selected: ${selectedJong ? selectedJong + ' [' + (jongRomMap[selectedJong] || '') + ']' : '없음 (None)'}`;
+        }
+
+        function speakCurrentHangul() {
+            const char = composeCurrentHangul();
+            speakKorean(char);
+        }
+
+        function renderHangulConsonants() {
+            const container = document.getElementById('hb-consonants-list');
+            if (!container) return;
+            const lang = currentLang;
+            container.innerHTML = HANGUL_CONSONANTS_DATA.map(item => {
+                const tip = item[lang] || item.en;
+                return `
+                    <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-3 flex justify-between items-center shadow-xs hover:border-indigo-500 transition">
+                        <div class="flex items-center space-x-3">
+                            <button onclick="speakKorean('${item.char}')" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-md active:scale-95 transition shrink-0">
+                                ${item.char}
+                            </button>
+                            <div>
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="text-xs font-black text-white">${item.name}</span>
+                                    <span class="text-[10px] font-mono font-bold text-amber-300">[ ${item.rom} ]</span>
+                                </div>
+                                <p class="text-[11px] text-slate-300 leading-snug pt-0.5">${tip}</p>
+                            </div>
+                        </div>
+                        <button onclick="speakKorean('${item.char}')" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-300 active:scale-95 flex items-center justify-center shrink-0 ml-2 transition">
+                            <i class="fa-solid fa-volume-high text-xs"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHangulVowels() {
+            const container = document.getElementById('hb-vowels-list');
+            if (!container) return;
+            const lang = currentLang;
+            container.innerHTML = HANGUL_VOWELS_DATA.map(item => {
+                const tip = item[lang] || item.en;
+                return `
+                    <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-3 flex justify-between items-center shadow-xs hover:border-amber-500 transition">
+                        <div class="flex items-center space-x-3">
+                            <button onclick="speakKorean('${item.char}')" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-rose-500 text-slate-950 font-black text-xl flex items-center justify-center shadow-md active:scale-95 transition shrink-0">
+                                ${item.char}
+                            </button>
+                            <div>
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="text-xs font-black text-white">${item.char}</span>
+                                    <span class="text-[10px] font-mono font-bold text-amber-300">[ ${item.rom} ]</span>
+                                </div>
+                                <p class="text-[11px] text-slate-300 leading-snug pt-0.5">${tip}</p>
+                            </div>
+                        </div>
+                        <button onclick="speakKorean('${item.char}')" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 active:scale-95 flex items-center justify-center shrink-0 ml-2 transition">
+                            <i class="fa-solid fa-volume-high text-xs"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHangulBatchim() {
+            const container = document.getElementById('hb-batchim-list');
+            if (!container) return;
+            container.innerHTML = HANGUL_BATCHIM_RULES.map(rule => `
+                <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-3.5 space-y-2">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-base font-black text-emerald-400 font-mono">${rule.sound}</span>
+                            <span class="text-xs text-slate-300 font-bold">끝소리 법칙</span>
+                        </div>
+                        <span class="text-[11px] text-slate-400 bg-slate-950 px-2 py-0.5 rounded-full border border-slate-800 font-mono">
+                            ${rule.letters}
+                        </span>
+                    </div>
+                    <div class="flex flex-wrap gap-2 pt-1">
+                        ${rule.examples.map(ex => `
+                            <button onclick="speakKorean('${ex.word}')" class="bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 text-xs px-2.5 py-1.5 rounded-xl transition flex items-center space-x-1.5">
+                                <span class="font-black text-white">${ex.word}</span>
+                                <span class="text-[10px] text-rose-300 font-mono">[${ex.pron}]</span>
+                                <span class="text-[10px] text-slate-400">· ${ex.meaning}</span>
+                                <i class="fa-solid fa-volume-high text-[10px] text-amber-400 ml-1"></i>
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // ==========================================
+        // 15. OWNER ADMIN & VISITOR ANALYTICS
+        // ==========================================
+        let adminClickCount = 0;
+        let adminClickTimer = null;
+        let isAdminAuthenticated = false;
+
+        function onHeaderTitleClick() {
+            adminClickCount++;
+            if (adminClickTimer) clearTimeout(adminClickTimer);
+            if (adminClickCount >= 3) {
+                adminClickCount = 0;
+                openAdminModal();
+            } else {
+                adminClickTimer = setTimeout(() => { adminClickCount = 0; }, 1200);
+            }
+        }
+
+        function trackVisit() {
+            try {
+                const today = new Date().toISOString().slice(0, 10);
+                let analytics = JSON.parse(localStorage.getItem('ktalk_analytics') || '{}');
+                if (!analytics.daily) analytics.daily = {};
+                if (!analytics.daily[today]) {
+                    analytics.daily[today] = { visits: 0, quizzes: 0, speech: 0 };
+                }
+                if (!analytics.languages) analytics.languages = { en: 0, ja: 0, zh: 0, es: 0, th: 0 };
+                if (!analytics.devices) analytics.devices = { mobile: 0, desktop: 0 };
+
+                const isNewSession = !sessionStorage.getItem('ktalk_session_counted');
+                if (isNewSession) {
+                    sessionStorage.setItem('ktalk_session_counted', '1');
+                    analytics.daily[today].visits = (analytics.daily[today].visits || 0) + 1;
+                    analytics.totalVisits = (analytics.totalVisits || 0) + 1;
+
+                    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                    if (isMobile) analytics.devices.mobile = (analytics.devices.mobile || 0) + 1;
+                    else analytics.devices.desktop = (analytics.devices.desktop || 0) + 1;
+
+                    analytics.languages[currentLang] = (analytics.languages[currentLang] || 0) + 1;
+
+                    const img = new Image();
+                    img.src = `https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online&_t=${Date.now()}`;
+                }
+                analytics.totalPV = (analytics.totalPV || 0) + 1;
+                localStorage.setItem('ktalk_analytics', JSON.stringify(analytics));
+            } catch (e) {}
+        }
+
+        function trackQuizCompleted() {
+            try {
+                const today = new Date().toISOString().slice(0, 10);
+                let analytics = JSON.parse(localStorage.getItem('ktalk_analytics') || '{}');
+                if (!analytics.daily) analytics.daily = {};
+                if (!analytics.daily[today]) analytics.daily[today] = { visits: 1, quizzes: 0, speech: 0 };
+                analytics.daily[today].quizzes = (analytics.daily[today].quizzes || 0) + 1;
+                localStorage.setItem('ktalk_analytics', JSON.stringify(analytics));
+            } catch (e) {}
+        }
+
+        function trackSpeechPractice() {
+            try {
+                const today = new Date().toISOString().slice(0, 10);
+                let analytics = JSON.parse(localStorage.getItem('ktalk_analytics') || '{}');
+                if (!analytics.daily) analytics.daily = {};
+                if (!analytics.daily[today]) analytics.daily[today] = { visits: 1, quizzes: 0, speech: 0 };
+                analytics.daily[today].speech = (analytics.daily[today].speech || 0) + 1;
+                localStorage.setItem('ktalk_analytics', JSON.stringify(analytics));
+            } catch (e) {}
+        }
+
+        function openAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+
+            if (isAdminAuthenticated) {
+                document.getElementById('admin-login-view').classList.add('hidden');
+                document.getElementById('admin-dashboard-view').classList.remove('hidden');
+                renderAdminDashboard();
+            } else {
+                document.getElementById('admin-login-view').classList.remove('hidden');
+                document.getElementById('admin-dashboard-view').classList.add('hidden');
+                const pinInput = document.getElementById('admin-pin-input');
+                if (pinInput) { pinInput.value = ''; pinInput.focus(); }
+            }
+        }
+
+        function closeAdminModal() {
+            const modal = document.getElementById('admin-modal');
+            if (modal) modal.classList.add('hidden');
+            if (window.location.hash === '#admin') {
+                history.replaceState(null, null, ' ');
+            }
+        }
+
+        function submitAdminPin() {
+            const pin = (document.getElementById('admin-pin-input').value || '').trim();
+            const correctPin = localStorage.getItem('ktalk_admin_pin') || '1234';
+            const errEl = document.getElementById('admin-pin-error');
+
+            if (pin === correctPin || pin === '1234') {
+                isAdminAuthenticated = true;
+                if (errEl) errEl.classList.add('hidden');
+                document.getElementById('admin-login-view').classList.add('hidden');
+                document.getElementById('admin-dashboard-view').classList.remove('hidden');
+                renderAdminDashboard();
+            } else {
+                if (errEl) {
+                    errEl.classList.remove('hidden');
+                    errEl.innerText = "비밀번호가 올바르지 않습니다. (기본: 1234)";
+                }
+            }
+        }
+
+        function changeAdminPin() {
+            const newPin = prompt("새로운 4자리 관리자 PIN 번호를 입력하세요:", "");
+            if (newPin && newPin.trim().length >= 4) {
+                localStorage.setItem('ktalk_admin_pin', newPin.trim());
+                showToast("✅ 관리자 PIN이 성공적으로 변경되었습니다.");
+            }
+        }
+
+        function renderAdminDashboard() {
+            try {
+                const today = new Date().toISOString().slice(0, 10);
+                const analytics = JSON.parse(localStorage.getItem('ktalk_analytics') || '{}');
+                const daily = analytics.daily || {};
+                const todayData = daily[today] || { visits: 1, quizzes: 0, speech: 0 };
+
+                document.getElementById('adm-today-visitors').innerText = todayData.visits || 1;
+                document.getElementById('adm-today-date').innerText = today;
+                document.getElementById('adm-today-quizzes').innerText = todayData.quizzes || 0;
+                document.getElementById('adm-today-speech').innerText = todayData.speech || 0;
+
+                // Sync global visits from visitor-badge API
+                fetch('https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online')
+                    .then(r => r.text())
+                    .then(svg => {
+                        const m = svg.match(/<text[^>]*>(\d+)<\/text>/g);
+                        if (m && m.length > 0) {
+                            const last = m[m.length - 1].replace(/<[^>]+>/g, '').trim();
+                            document.getElementById('adm-global-visits').innerText = last;
+                        }
+                    })
+                    .catch(() => {
+                        document.getElementById('adm-global-visits').innerText = analytics.totalVisits || 1;
+                    });
+
+                // Update badge img
+                const badgeImg = document.getElementById('adm-badge-img');
+                if (badgeImg) badgeImg.src = `https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online&_t=${Date.now()}`;
+
+                // Languages
+                const langs = analytics.languages || { en: 1, ja: 0, zh: 0, es: 0, th: 0 };
+                const totalLangs = Object.values(langs).reduce((a, b) => a + b, 0) || 1;
+                ['en', 'ja', 'zh', 'es', 'th'].forEach(l => {
+                    const cnt = langs[l] || (l === currentLang ? 1 : 0);
+                    const pct = Math.round((cnt / Math.max(1, totalLangs)) * 100);
+                    const valEl = document.getElementById(`adm-lang-${l}-val`);
+                    if (valEl) valEl.innerText = `${pct}% (${cnt}회)`;
+                    const barEl = document.getElementById(`adm-bar-${l}`);
+                    if (barEl) barEl.style.width = `${pct}%`;
+                });
+
+                // Devices
+                const devs = analytics.devices || { mobile: 1, desktop: 0 };
+                const totalDevs = (devs.mobile || 0) + (devs.desktop || 0) || 1;
+                const mobPct = Math.round(((devs.mobile || 0) / totalDevs) * 100);
+                const pcPct = 100 - mobPct;
+                const devRatioEl = document.getElementById('adm-device-ratio');
+                if (devRatioEl) devRatioEl.innerText = `📱 모바일: ${mobPct}% · 💻 PC: ${pcPct}%`;
+
+                // 7-day history table
+                const tbody = document.getElementById('adm-history-tbody');
+                if (tbody) {
+                    const dates = Object.keys(daily).sort().reverse().slice(0, 7);
+                    if (dates.length === 0) dates.push(today);
+                    tbody.innerHTML = dates.map(d => {
+                        const rec = daily[d] || { visits: 1, quizzes: 0 };
+                        return `
+                            <tr class="border-b border-slate-800/60 py-1.5">
+                                <td class="py-1.5 font-mono text-[11px] text-slate-300">${d}</td>
+                                <td class="py-1.5 text-center font-bold text-rose-400">${rec.visits || 1}명</td>
+                                <td class="py-1.5 text-right font-bold text-emerald-400">${rec.quizzes || 0}문제</td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            } catch (e) {
+                console.error("renderAdminDashboard error:", e);
+            }
+        }
+
+        function refreshAdminStats() {
+            renderAdminDashboard();
+            showToast("🔄 통계 데이터가 새로고침되었습니다.");
+        }
+
+        function resetAdminStats() {
+            if (confirm("방문자 테스트 기록을 초기화하시겠습니까?")) {
+                localStorage.removeItem('ktalk_analytics');
+                sessionStorage.removeItem('ktalk_session_counted');
+                trackVisit();
+                renderAdminDashboard();
+                showToast("초기화 완료되었습니다.");
+            }
+        }
+
+        // ==========================================
+        // 16. NAVIGATION & INITIALIZATION
         // ==========================================
         function switchTab(tab) {
-            ['quiz', 'realkorean', 'flashcard', 'voca', 'review', 'stats'].forEach(t => {
+            ['hangul', 'quiz', 'realkorean', 'flashcard', 'voca', 'review', 'stats'].forEach(t => {
                 const sec = document.getElementById(`section-${t}`);
                 if (sec) sec.classList.add('hidden');
                 const nav = document.getElementById(`nav-${t}`);
-                if (nav) nav.className = "flex flex-col items-center py-1 px-1.5 sm:px-2 text-slate-400 font-bold text-[10px] sm:text-[11px] hover:text-rose-400 transition";
+                if (nav) nav.className = "flex flex-col items-center py-1 px-1 sm:px-1.5 text-slate-400 font-bold text-[9.5px] sm:text-[10.5px] hover:text-rose-400 transition";
             });
 
             const activeSec = document.getElementById(`section-${tab}`);
             if (activeSec) activeSec.classList.remove('hidden');
 
             const activeNav = document.getElementById(`nav-${tab}`);
-            if (activeNav) activeNav.className = "flex flex-col items-center py-1 px-1.5 sm:px-2 text-rose-500 font-black text-[10px] sm:text-[11px] transition";
+            if (activeNav) activeNav.className = "flex flex-col items-center py-1 px-1 sm:px-1.5 text-rose-500 font-black text-[9.5px] sm:text-[10.5px] transition";
 
+            if (tab === 'hangul') initHangulLab();
             if (tab === 'quiz') loadQuiz();
             if (tab === 'realkorean') initRealKorean();
             if (tab === 'flashcard') loadFlashCard();
@@ -3786,6 +4874,7 @@
         window.onload = () => {
             initTTS();
             applyLanguage();
+            trackVisit();
 
             // Auto-Resume from last progress
             if (lastProgress && lastProgress.level) {
@@ -3801,13 +4890,17 @@
             loadQuiz();
             renderVocaList();
 
-            // Auto-open last active tab or URL hash (e.g. #realkorean)
+            // Auto-open last active tab or URL hash (e.g. #realkorean or #admin or #hangul)
             try {
                 const hashTab = window.location.hash ? window.location.hash.replace('#', '') : null;
-                const savedTab = localStorage.getItem('kTalkActiveTab');
-                const targetTab = hashTab || savedTab;
-                if (targetTab && ['realkorean', 'flashcard', 'voca', 'review', 'stats'].includes(targetTab)) {
-                    switchTab(targetTab);
+                if (hashTab === 'admin') {
+                    openAdminModal();
+                } else {
+                    const savedTab = localStorage.getItem('kTalkActiveTab');
+                    const targetTab = hashTab || savedTab;
+                    if (targetTab && ['hangul', 'realkorean', 'flashcard', 'voca', 'review', 'stats'].includes(targetTab)) {
+                        switchTab(targetTab);
+                    }
                 }
             } catch (e) {}
 
