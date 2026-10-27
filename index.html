@@ -4779,6 +4779,9 @@
 
                     const img = new Image();
                     img.src = `https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online&_t=${Date.now()}`;
+
+                    const dailyImg = new Image();
+                    dailyImg.src = `https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online.${today}&_t=${Date.now()}`;
                 }
                 analytics.totalPV = (analytics.totalPV || 0) + 1;
                 localStorage.setItem('ktalk_analytics', JSON.stringify(analytics));
@@ -4910,6 +4913,20 @@
                 document.getElementById('adm-today-date').innerText = today;
                 document.getElementById('adm-today-quizzes').innerText = todayData.quizzes || 0;
                 document.getElementById('adm-today-speech').innerText = todayData.speech || 0;
+
+                // Sync today's real global visitors across all devices (PC, Phone, Tablet)
+                fetch(`https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online.${today}&_t=${Date.now()}`)
+                    .then(r => r.text())
+                    .then(svg => {
+                        const m = svg.match(/<text[^>]*>(\d+)<\/text>/g);
+                        if (m && m.length > 0) {
+                            const last = m[m.length - 1].replace(/<[^>]+>/g, '').trim();
+                            const globalToday = parseInt(last, 10);
+                            const displayToday = Math.max(globalToday, todayData.visits || 1);
+                            document.getElementById('adm-today-visitors').innerText = displayToday;
+                        }
+                    })
+                    .catch(() => {});
 
                 // Sync global visits from visitor-badge API
                 fetch('https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online')
