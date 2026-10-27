@@ -1,10 +1,12 @@
 // Service Worker for K-Talk Coach PWA
-const CACHE_NAME = 'k-talk-v20';
+const CACHE_NAME = 'k-talk-v21';
 const ASSETS = [
   './',
   './index.html',
   './real-korean-data.js',
   './coach.js',
+  './localization.js',
+  './real-korean-locales.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'

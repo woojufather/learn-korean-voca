@@ -123,13 +123,13 @@
                             <span>실시간 자모 결합 (Real-time Composition)</span>
                         </div>
                         <div class="py-1">
-                            <span id="hb-syllable" class="text-7xl font-black text-white tracking-tight drop-shadow-lg">고</span>
+                            <span id="hb-syllable" lang="ko" data-no-localize class="text-7xl font-black text-white tracking-tight drop-shadow-lg">고</span>
                         </div>
                         <div>
                             <span id="hb-romanization" class="text-xl font-mono font-black text-amber-300 tracking-wider">[ go ]</span>
                         </div>
                         <div class="flex items-center justify-center flex-wrap gap-2 pt-1">
-                            <span id="hb-formula" class="text-xs text-slate-200 font-bold bg-slate-900/90 px-3.5 py-1.5 rounded-xl border border-slate-700 shadow-inner">
+                            <span id="hb-formula" lang="ko" data-no-localize class="text-xs text-slate-200 font-bold bg-slate-900/90 px-3.5 py-1.5 rounded-xl border border-slate-700 shadow-inner">
                                 ㄱ [g] + ㅗ [o] = 고 [go]
                             </span>
                             <span id="hb-sample-word" class="text-xs text-rose-300 font-bold bg-rose-950/80 px-3.5 py-1.5 rounded-xl border border-rose-800/80">
@@ -381,7 +381,7 @@
                     <p id="quiz-prompt" class="text-xl font-black text-white leading-snug tracking-tight"></p>
                     
                     <!-- Korean Sentence with Target Blank -->
-                    <div id="quiz-sentence-box" class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700 font-sans text-lg font-bold text-slate-200 leading-relaxed shadow-inner">
+                    <div id="quiz-sentence-box" lang="ko" data-no-localize class="bg-slate-900/90 p-4 rounded-2xl border border-slate-700 font-sans text-lg font-bold text-slate-200 leading-relaxed shadow-inner">
                         <!-- Filled dynamically -->
                     </div>
 
@@ -453,8 +453,8 @@
                             <span class="text-xs text-slate-400 font-bold"><i class="fa-solid fa-hand-pointer mr-1"></i><span id="fc-tap-flip">Tap to flip</span></span>
                         </div>
                         <div class="text-center space-y-2">
-                            <p id="fc-hangul" class="text-4xl font-black text-white tracking-tight"></p>
-                            <p id="fc-pron" class="text-sm text-rose-400 font-mono font-bold"></p>
+                            <p id="fc-hangul" lang="ko" data-no-localize class="text-4xl font-black text-white tracking-tight"></p>
+                            <p id="fc-pron" lang="ko" data-no-localize class="text-sm text-rose-400 font-mono font-bold"></p>
                             <div class="pt-1">
                                 <span id="fc-front-meaning" class="inline-block text-xs sm:text-sm font-extrabold text-amber-300 bg-slate-900/90 px-3.5 py-1.5 rounded-xl border border-amber-500/30 shadow-xs max-w-xs"></span>
                             </div>
@@ -473,7 +473,7 @@
                         <div class="text-center space-y-2 py-2">
                             <p id="fc-meaning" class="text-2xl font-black text-amber-300 leading-snug"></p>
                             <p id="fc-nuance" class="text-xs text-slate-300 leading-relaxed px-2"></p>
-                            <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 text-xs text-rose-300 font-semibold" id="fc-example"></div>
+                            <div class="bg-slate-800 p-2.5 rounded-xl border border-slate-700 text-xs text-rose-300 font-semibold" id="fc-example" lang="ko" data-no-localize></div>
                         </div>
                         <div class="w-full flex space-x-2">
                             <button onclick="event.stopPropagation(); toggleBookmarkCurrent()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 py-2.5 rounded-xl text-xs font-bold border border-slate-700 transition">
@@ -690,10 +690,10 @@
 
                         <!-- Core Expression Korean (Big text) -->
                         <div class="py-1">
-                            <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug drop-shadow-sm" id="rk-hero-target">
+                            <h2 class="text-2xl sm:text-3xl font-black text-white tracking-tight leading-snug drop-shadow-sm" id="rk-hero-target" lang="ko" data-no-localize>
                                 괜찮아요
                             </h2>
-                            <p class="text-xs sm:text-sm text-amber-300/90 font-mono mt-1 font-semibold" id="rk-hero-pron">
+                            <p class="text-xs sm:text-sm text-amber-300/90 font-mono mt-1 font-semibold" id="rk-hero-pron" lang="ko" data-no-localize>
                                 [ Gwen-chan-ah-yo ]
                             </p>
                             <p class="text-xs sm:text-sm text-slate-300 font-medium mt-1" id="rk-hero-en">
@@ -1090,11 +1090,13 @@
     <!-- JAVASCRIPT LOGIC                                                          -->
     <!-- ========================================================================= -->
     <script src="coach.js"></script>
+    <script src="localization.js"></script>
+    <script src="real-korean-locales.js"></script>
     <script>
         // ==========================================
         // 1. MULTILINGUAL DICTIONARY (EN, ES, JA, ZH, TH)
         // ==========================================
-        let currentLang = localStorage.getItem('kTalkLang') || 'en'; // 'en', 'es', 'ja', 'zh', 'th'
+        let currentLang = ['en', 'ja', 'zh', 'es', 'th'].includes(localStorage.getItem('kTalkLang')) ? localStorage.getItem('kTalkLang') : 'en'; // 'en', 'es', 'ja', 'zh', 'th'
 
         const langMeta = {
             en: { flag: "🇺🇸", label: "EN", name: "English" },
@@ -2458,6 +2460,7 @@
         }
 
         function selectLanguage(langKey) {
+            if (!KTalkLocale.locales.includes(langKey)) return;
             currentLang = langKey;
             localStorage.setItem('kTalkLang', currentLang);
             closeLangModal();
@@ -2570,6 +2573,16 @@
             if (modalDescEl) modalDescEl.innerText = t.langModalDesc;
 
             updateResumeBanner();
+            renderReviewList();
+            renderHangulBatchim();
+            renderHangulPresets();
+            updateHangulDisplay(currentHangulSample);
+            if (!document.getElementById('section-realkorean').classList.contains('hidden')) {
+                renderRealKoreanCategories();
+                if (rkMode === 'explore') renderRealKoreanExplorer();
+                else loadRealKoreanCard();
+            }
+            KTalkLocale.localize();
         }
 
         // ==========================================
@@ -3111,7 +3124,7 @@
         }
 
         function clearReviewList() {
-            if (confirm("Clear all review items?")) {
+            if (confirm(KTalkLocale.translate("Clear all review items?"))) {
                 reviewList = [];
                 isReviewMode = false;
                 saveReview();
@@ -3259,7 +3272,7 @@
         function renderAttendanceCalendar() {
             const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
             const monthEl = document.getElementById('calendar-month-year');
-            if (monthEl) monthEl.innerText = `${monthNames[calendarMonth]} ${calendarYear}`;
+            if (monthEl) monthEl.innerText = new Intl.DateTimeFormat(currentLang === 'zh' ? 'zh-Hans' : currentLang, { year: 'numeric', month: 'long', calendar: 'gregory' }).format(new Date(calendarYear, calendarMonth, 1));
 
             const todayStr = getTodayString();
             const todayBadge = document.getElementById('attendance-today-badge');
@@ -3409,92 +3422,7 @@
                 return;
             }
 
-            const ua = navigator.userAgent || '';
-            const isKakao = /KAKAOTALK/i.test(ua);
-            const isAndroid = /android/i.test(ua);
-            const isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-            const guideModal = document.getElementById('pwa-guide-modal');
-            const guideTitle = document.getElementById('pwa-guide-title');
-            const guideContent = document.getElementById('pwa-guide-content');
-            const guideIcon = document.getElementById('pwa-guide-icon');
-            const guideBtnContainer = document.getElementById('pwa-guide-btn-container');
-
-            if (isKakao) {
-                if (guideIcon) guideIcon.innerHTML = '<i class="fa-solid fa-comment"></i>';
-                guideTitle.innerText = "카카오톡에서 열림 (설치 안내)";
-                guideContent.innerHTML = `
-                    <div class="space-y-2 text-left text-xs">
-                        <p class="text-amber-300 font-bold">⚠️ 카카오톡 내부에서는 보안 정책상 앱 바로 설치가 제한됩니다.</p>
-                        <div class="bg-slate-800 p-3.5 rounded-2xl space-y-2 text-slate-200">
-                            <p class="leading-relaxed"><b>방법 1 (가장 쉬움):</b><br>아래 <span class="text-rose-400 font-black">'Chrome 브라우저로 열기'</span>를 누르면 크롬에서 바로 앱 설치가 가능합니다!</p>
-                            <p class="pt-2 border-t border-slate-700 leading-relaxed"><b>방법 2 (수동):</b><br>화면 우측 상단/하단의 <span class="text-rose-400 font-bold">점 세 개 (⋮)</span> ➔ <span class="text-emerald-400 font-bold">'다른 브라우저로 열기'</span>를 선택해 주세요.</p>
-                        </div>
-                    </div>
-                `;
-                if (guideBtnContainer) {
-                    guideBtnContainer.innerHTML = `
-                        <button onclick="openInExternalBrowser()" class="w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white font-black py-3 rounded-2xl text-xs shadow-md transition active:scale-95 flex items-center justify-center space-x-1.5">
-                            <i class="fa-brands fa-chrome text-sm"></i>
-                            <span>Chrome 브라우저로 열어서 설치하기</span>
-                        </button>
-                        <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-slate-300 font-bold py-2.5 rounded-2xl text-xs mt-1">닫기</button>
-                    `;
-                }
-            } else if (isAndroid) {
-                if (guideIcon) guideIcon.innerHTML = '<i class="fa-brands fa-android"></i>';
-                guideTitle.innerText = "안드로이드 홈 화면에 앱 설치";
-                guideContent.innerHTML = `
-                    <div class="space-y-2 text-left text-xs">
-                        <div class="bg-slate-800 p-3.5 rounded-2xl space-y-2 text-slate-200">
-                            <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">1</span> <span>브라우저 우측 상단(또는 하단)의 <b>메뉴 버튼 ( <i class="fa-solid fa-ellipsis-vertical"></i> )</b>을 누릅니다.</span></p>
-                            <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">2</span> <span>메뉴에서 <b>'앱 설치'</b> 또는 <b>'홈 화면에 추가'</b>를 선택합니다.</span></p>
-                            <p class="flex items-start"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">3</span> <span>스마트폰 바탕화면에 진짜 어플처럼 아이콘이 쏙 들어갑니다!</span></p>
-                        </div>
-                    </div>
-                `;
-                if (guideBtnContainer) {
-                    guideBtnContainer.innerHTML = `
-                        <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">확인</button>
-                    `;
-                }
-            } else if (isIOS) {
-                if (guideIcon) guideIcon.innerHTML = '<i class="fa-brands fa-apple"></i>';
-                guideTitle.innerText = "아이폰 / 아이패드 앱 설치 (Safari)";
-                guideContent.innerHTML = `
-                    <div class="space-y-2 text-left text-xs bg-slate-800 p-3.5 rounded-2xl text-slate-200">
-                        <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">1</span> <span>사파리(Safari) 하단 중앙의 <b>공유 버튼 ( <i class="fa-solid fa-arrow-up-from-bracket"></i> )</b>을 누릅니다.</span></p>
-                        <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">2</span> <span>메뉴를 아래로 내려 <b>'홈 화면에 추가'</b>를 선택합니다.</span></p>
-                        <p class="flex items-start"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">3</span> <span>우측 상단 <b>'추가'</b>를 누르면 홈 화면에 앱이 설치됩니다!</span></p>
-                    </div>
-                `;
-                if (guideBtnContainer) {
-                    guideBtnContainer.innerHTML = `
-                        <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">확인</button>
-                    `;
-                }
-            } else {
-                // Desktop PC (Windows / Mac / Linux)
-                if (guideIcon) guideIcon.innerHTML = '<i class="fa-solid fa-desktop"></i>';
-                guideTitle.innerText = "💻 PC / 노트북 단독 앱 설치 안내";
-                guideContent.innerHTML = `
-                    <div class="space-y-2 text-left text-xs">
-                        <div class="bg-slate-800 p-3.5 rounded-2xl space-y-2.5 text-slate-200">
-                            <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">1</span> <span>브라우저(Edge/Chrome) 상단 <b>주소창 오른쪽</b>을 보세요.</span></p>
-                            <p class="flex items-start"><span class="w-5 h-5 bg-rose-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">2</span> <span>주소창 안에 있는 <b>앱 설치 아이콘 ( <i class="fa-solid fa-download text-amber-400"></i> 또는 <i class="fa-solid fa-desktop text-amber-400"></i> )</b>을 누릅니다.</span></p>
-                            <p class="flex items-start"><span class="w-5 h-5 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-[10px] shrink-0 mr-2 mt-0.5">3</span> <span><b>'설치'</b>를 클릭하시면 PC 바탕화면과 작업표시줄에 단독 앱으로 설치되어 편리하게 사용하실 수 있습니다!</span></p>
-                            <p class="text-[11px] text-slate-400 pt-1.5 border-t border-slate-700">💡 <b>브라우저 메뉴(···)</b> ➔ <b>'앱'</b> ➔ <b>'K-Talk Coach 설치'</b>를 누르셔도 바로 설치됩니다.</p>
-                        </div>
-                    </div>
-                `;
-                if (guideBtnContainer) {
-                    guideBtnContainer.innerHTML = `
-                        <button onclick="document.getElementById('pwa-guide-modal').classList.add('hidden')" class="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl text-xs">확인</button>
-                    `;
-                }
-            }
-
-            guideModal.classList.remove('hidden');
+            KTalkLocale.showInstallGuide();
         }
 
         function openInExternalBrowser() {
@@ -3705,6 +3633,7 @@
 
             const cur = rkCurrentList[rkCurrentIdx];
             rkAnswered = false;
+            const localized = KTalkConversations.get(cur);
 
             // Save auto-resume index to localStorage
             try {
@@ -3746,7 +3675,7 @@
             if (heroPron) heroPron.innerText = targetPron.startsWith('[') ? targetPron : `[ ${targetPron} ]`;
 
             const heroEn = document.getElementById('rk-hero-en');
-            if (heroEn) heroEn.innerText = `"${targetEn}"`;
+            if (heroEn) heroEn.innerText = `“${localized.meaning}”`;
 
             // Populate 3-Tier Politeness Cards (Casual, Polite, Formal)
             const politenessContainer = document.getElementById('rk-politeness-cards');
@@ -3755,9 +3684,9 @@
                 const haeyocheText = (cur.politeness && cur.politeness.haeyoche) ? cur.politeness.haeyoche.text : (cur.haeyoche || '-');
                 const hasipsiocheText = (cur.politeness && cur.politeness.hasipsioche) ? cur.politeness.hasipsioche.text : (cur.hasipsioche || '-');
 
-                const banmalStatus = (cur.politeness && cur.politeness.banmal) ? cur.politeness.banmal.status : "친구·동생 (Casual)";
-                const haeyocheStatus = (cur.politeness && cur.politeness.haeyoche) ? cur.politeness.haeyoche.status : "가장 자연스러움 ✨";
-                const hasipsiocheStatus = (cur.politeness && cur.politeness.hasipsioche) ? cur.politeness.hasipsioche.status : "격식·비즈니스 (Formal)";
+                const banmalStatus = KTalkLocale.translate("친구·동생 (Casual)");
+                const haeyocheStatus = KTalkLocale.translate("가장 자연스러움 ✨");
+                const hasipsiocheStatus = KTalkLocale.translate("격식·비즈니스 (Formal)");
 
                 politenessContainer.innerHTML = `
                     <!-- Casual (Banmal) -->
@@ -3825,7 +3754,7 @@
                 if (cur.image && cur.image.svg) {
                     imgBox.innerHTML = cur.image.svg;
                 } else {
-                    imgBox.innerHTML = getSceneSvg(cur.category || 'Real Korean', cur.situation || cur.scene_title_ko || '실전 회화');
+                    imgBox.innerHTML = getSceneSvg(cur.category || 'Real Korean', localized.context);
                 }
             }
             const attrEl = document.getElementById('rk-image-attribution');
@@ -3833,23 +3762,24 @@
 
             // Populate Today's Mission & Context
             const sceneTag = document.getElementById('rk-scene-tag');
-            if (sceneTag) sceneTag.innerText = cur.scene_title_en || cur.category || "Situation";
+            if (sceneTag) sceneTag.innerText = KTalkLocale.translate(cur.category || "Situation");
 
             const descKo = document.getElementById('rk-situation-desc-ko');
-            if (descKo) descKo.innerText = cur.situation_ko || cur.situation || cur.quiz.question;
+            if (descKo) descKo.innerText = localized.context;
 
             const descEn = document.getElementById('rk-situation-desc-en');
-            if (descEn) descEn.innerText = cur.situation_en || cur.quiz.question_en || cur.english;
+            if (descEn) { descEn.textContent = ''; descEn.classList.add('hidden'); }
 
             const promptEl = document.getElementById('rk-question-prompt');
-            if (promptEl) promptEl.innerText = cur.quiz.question_ko || cur.quiz.question || "이 상황에서 가장 자연스러운 표현을 골라보세요:";
+            if (promptEl) promptEl.innerText = KTalkLocale.translate("이 상황에서 가장 자연스러운 표현을 골라보세요:");
 
             // Populate 3 Choices
             const optionsContainer = document.getElementById('rk-quiz-options');
             let optsHtml = '';
             cur.quiz.options.forEach((opt, idx) => {
                 const optPron = opt.pron ? `<span class="text-[11px] text-amber-300/90 block font-mono font-medium">${opt.pron}</span>` : '';
-                const optEn = opt.en ? `<span class="text-[11px] text-slate-400 block">${opt.en}</span>` : '';
+                const optionMeaning = KTalkConversations.optionMeaning(cur, idx);
+                const optEn = optionMeaning ? `<span class="text-[11px] text-slate-400 block">${optionMeaning}</span>` : '';
                 optsHtml += `
                     <button onclick="selectRealKoreanOption(${idx})" id="rk-opt-${idx}" class="w-full text-left p-3.5 sm:p-4 rounded-2xl bg-slate-950/70 hover:bg-slate-700/70 border border-slate-700/80 text-white font-bold transition flex items-start justify-between group active:scale-98 shadow-sm">
                         <div class="flex items-start space-x-3 flex-1 pr-2">
@@ -3959,11 +3889,11 @@
                 feedbackBanner.innerHTML = `<i class="fa-solid fa-circle-xmark mr-2 text-base"></i> ❌ Not quite! Review the natural nuance below.`;
             }
 
-            feedbackText.innerText = chosen.feedback;
+            feedbackText.innerText = KTalkConversations.feedback(cur, optIdx);
 
             const nuanceEl = document.getElementById('rk-detail-nuance');
             if (nuanceEl) {
-                nuanceEl.innerText = cur.usage_nuance || "상황에 맞는 표준 존댓말을 사용하는 것이 한국어 소통의 핵심입니다.";
+                nuanceEl.innerText = KTalkConversations.get(cur).tip;
             }
 
             feedbackBox.classList.remove('hidden');
@@ -4131,7 +4061,8 @@
                     (item.haeyoche && item.haeyoche.toLowerCase().includes(searchKw)) ||
                     (item.hasipsioche && item.hasipsioche.toLowerCase().includes(searchKw)) ||
                     (item.english && item.english.toLowerCase().includes(searchKw)) ||
-                    (item.usage_nuance && item.usage_nuance.toLowerCase().includes(searchKw))
+                    (item.usage_nuance && item.usage_nuance.toLowerCase().includes(searchKw)) ||
+                    Object.values(KTalkConversations.get(item)).some(value => value.toLowerCase().includes(searchKw))
                 );
             }
 
@@ -4148,14 +4079,15 @@
 
             let html = '';
             list.forEach(item => {
+                const localized = KTalkConversations.get(item);
                 html += `
                     <div class="bg-slate-800 rounded-3xl p-4 border border-slate-700 shadow-md space-y-3">
                         <div class="flex justify-between items-start">
                             <span class="text-[10px] font-black bg-rose-950 text-rose-300 border border-rose-800 px-2 py-0.5 rounded-lg">
-                                #${item.id} ${item.category}
+                                #${item.id} ${KTalkLocale.translate(item.category)}
                             </span>
                             <span class="text-[11px] text-slate-400 font-mono italic">
-                                ${item.english}
+                                ${localized.meaning}
                             </span>
                         </div>
 
@@ -4164,8 +4096,7 @@
                             <div class="text-[11px] font-black text-amber-400 flex items-center">
                                 <i class="fa-solid fa-location-dot mr-1"></i> Situation Context
                             </div>
-                            <p class="text-xs font-bold text-slate-200">${item.situation}</p>
-                            <p class="text-[10px] text-slate-400">${item.situation_en}</p>
+                            <p class="text-xs font-bold text-slate-200">${localized.context}</p>
                         </div>
 
                         <!-- 3 Politeness Levels -->
@@ -4198,7 +4129,7 @@
 
                         <!-- Nuance Note -->
                         <div class="text-[11px] text-slate-400 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800/80">
-                            <span class="text-rose-300 font-bold">💡 Real Nuance Tip:</span> ${item.usage_nuance}
+                            <span class="text-rose-300 font-bold">💡 Real Nuance Tip:</span> ${localized.tip}
                         </div>
 
                         <!-- Jump to Deck button -->
@@ -4329,6 +4260,7 @@
         let selectedJung = 'ㅗ';
         let selectedJong = '';
         let hangulSubTab = 'builder';
+        let currentHangulSample = null;
 
         function initHangulLab() {
             renderHangulBuilder();
@@ -4362,7 +4294,7 @@
             if (!container) return;
             container.innerHTML = HANGUL_PRESETS.map((p, idx) => `
                 <button onclick="loadHangulPreset(${idx})" class="bg-slate-900 hover:bg-indigo-900/60 active:scale-95 border border-slate-700 hover:border-indigo-500 text-slate-200 hover:text-white text-[11px] font-bold px-3 py-1.5 rounded-xl transition shadow-xs flex items-center space-x-1">
-                    <span>${p.label}</span>
+                    <span>${KTalkLocale.translate(p.label)}</span>
                 </button>
             `).join('');
         }
@@ -4412,7 +4344,7 @@
             if (jongContainer) {
                 jongContainer.innerHTML = HANGUL_JONGSUNG.map(jong => `
                     <button onclick="selectHangulJong('${jong}')" class="py-2 rounded-xl border text-xs sm:text-sm font-bold transition active:scale-95 ${jong === selectedJong ? 'bg-emerald-600 text-white border-emerald-400 shadow-md ring-2 ring-emerald-400/50' : 'bg-slate-800 text-slate-200 border-slate-700 hover:border-slate-500'}">
-                        ${jong === '' ? '없음' : jong}
+                        ${jong === '' ? KTalkLocale.translate('없음') : jong}
                     </button>
                 `).join('');
             }
@@ -4463,6 +4395,7 @@
         }
 
         function updateHangulDisplay(customSample) {
+            currentHangulSample = customSample || null;
             const char = composeCurrentHangul();
             const rom = getHangulRomanization();
 
@@ -4481,7 +4414,7 @@
 
             const sampleEl = document.getElementById('hb-sample-word');
             if (sampleEl) {
-                sampleEl.innerText = customSample || HANGUL_SAMPLE_WORDS[char] || `단어: ${char} (${rom})`;
+                sampleEl.innerText = KTalkLocale.translate(customSample || HANGUL_SAMPLE_WORDS[char]) || `${KTalkLocale.translate('단어:')} ${char} (${rom})`;
             }
 
             const choSelLabel = document.getElementById('hb-cho-selected-label');
@@ -4489,7 +4422,7 @@
                 choSelLabel.innerHTML = `
                     <button onclick="event.stopPropagation(); speakKorean('${selectedCho}')" class="text-rose-300 hover:text-white bg-slate-800/90 hover:bg-slate-700 px-2 py-0.5 rounded-lg border border-slate-700 transition active:scale-95 inline-flex items-center space-x-1" title="초성 소리 듣기">
                         <i class="fa-solid fa-volume-high text-[9px] text-rose-400"></i>
-                        <span>${selectedCho} [${choRomMap[selectedCho] || 'silent'}] 소리</span>
+                        <span>${selectedCho} [${choRomMap[selectedCho] || KTalkLocale.translate('silent')}] ${KTalkLocale.translate('소리')}</span>
                     </button>
                 `;
             }
@@ -4500,7 +4433,7 @@
                 jungSelLabel.innerHTML = `
                     <button onclick="event.stopPropagation(); speakKorean('${selectedJung}')" class="text-amber-300 hover:text-white bg-slate-800/90 hover:bg-slate-700 px-2 py-0.5 rounded-lg border border-slate-700 transition active:scale-95 inline-flex items-center space-x-1" title="모음 소리 듣기">
                         <i class="fa-solid fa-volume-high text-[9px] text-amber-400"></i>
-                        <span>${selectedJung} [${jungRomMap[selectedJung] || ''}] (${jungSpeak}) 소리</span>
+                        <span>${selectedJung} [${jungRomMap[selectedJung] || ''}] (${jungSpeak}) ${KTalkLocale.translate('소리')}</span>
                     </button>
                 `;
             }
@@ -4511,11 +4444,11 @@
                     jongSelLabel.innerHTML = `
                         <button onclick="event.stopPropagation(); speakKorean('${selectedJong}')" class="text-emerald-300 hover:text-white bg-slate-800/90 hover:bg-slate-700 px-2 py-0.5 rounded-lg border border-slate-700 transition active:scale-95 inline-flex items-center space-x-1" title="받침 소리 듣기">
                             <i class="fa-solid fa-volume-high text-[9px] text-emerald-400"></i>
-                            <span>${selectedJong} [${jongRomMap[selectedJong] || ''}] 소리</span>
+                            <span>${selectedJong} [${jongRomMap[selectedJong] || ''}] ${KTalkLocale.translate('소리')}</span>
                         </button>
                     `;
                 } else {
-                    jongSelLabel.innerText = 'Selected: 없음 (None)';
+                    jongSelLabel.innerText = KTalkLocale.translate('Selected: 없음 (None)');
                 }
             }
         }
@@ -4603,7 +4536,7 @@
                             <button onclick="speakKorean('${ex.word}')" class="bg-slate-800 hover:bg-slate-700 active:scale-95 border border-slate-700 text-xs px-2.5 py-1.5 rounded-xl transition flex items-center space-x-1.5">
                                 <span class="font-black text-white">${ex.word}</span>
                                 <span class="learning-roman text-[10px] text-rose-300 font-mono">[${ex.pron}]</span>
-                                <span class="text-[10px] text-slate-400">· ${ex.meaning}</span>
+                                <span class="text-[10px] text-slate-400">· ${KTalkLocale.translate(ex.meaning)}</span>
                                 <i class="fa-solid fa-volume-high text-[10px] text-amber-400 ml-1"></i>
                             </button>
                         `).join('')}
@@ -4896,7 +4829,7 @@
         }
 
         function resetAdminStats() {
-            if (confirm("방문자 테스트 기록을 초기화하시겠습니까?")) {
+            if (confirm(KTalkLocale.translate("방문자 테스트 기록을 초기화하시겠습니까?"))) {
                 localStorage.removeItem('ktalk_analytics');
                 sessionStorage.removeItem('ktalk_session_counted');
                 trackVisit();
@@ -4937,11 +4870,12 @@
                 localStorage.setItem('kTalkActiveTab', tab);
                 history.replaceState(null, null, `#${tab}`);
             } catch (e) {}
+            KTalkLocale.localize();
         }
 
         function showToast(msg) {
             const toast = document.getElementById('toast');
-            document.getElementById('toast-msg').innerText = msg;
+            document.getElementById('toast-msg').innerText = KTalkLocale.translate(msg);
             toast.classList.remove('opacity-0', 'pointer-events-none');
             setTimeout(() => {
                 toast.classList.add('opacity-0', 'pointer-events-none');
@@ -4954,6 +4888,7 @@
         }
 
         window.onload = () => {
+            KTalkLocale.init();
             initTTS();
             applyLanguage();
             trackVisit();
