@@ -54,6 +54,9 @@ test('anonymous submission persists, is private, and is idempotent',async t=>{
     assert.equal(inbox.data.items[0].message,input.message);
     assert.equal(inbox.data.items[0].fingerprint,undefined);
     assert.match(inbox.response.headers.get('Cache-Control'),/no-store/);
+    assert.equal((await request('/admin/feedback',{method:'POST',data:{status:'all',offset:0}})).status,401);
+    const postInbox=await request('/admin/feedback',{method:'POST',token:await login(),data:{status:'all',offset:0}});
+    assert.equal(postInbox.status,200);assert.equal(postInbox.data.items[0].id,saved.data.id);
     const conflict=await request('/feedback',{method:'POST',data:{...input,message:'A completely different feedback message.'}});assert.equal(conflict.status,409);
 });
 test('validates content, email, categories, context and honeypot',async t=>{

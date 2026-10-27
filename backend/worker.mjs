@@ -131,10 +131,11 @@ export default {
                 await env.DB.prepare('DELETE FROM admin_sessions WHERE token_hash=?').bind(tokenHash).run();
                 return json({ ok: true });
             }
-            if (url.pathname === '/admin/feedback' && request.method === 'GET') {
-                const status = url.searchParams.get('status') || 'all';
+            if (url.pathname === '/admin/feedback' && ['GET','POST'].includes(request.method)) {
+                const query = request.method === 'POST' ? await body(request) : Object.fromEntries(url.searchParams);
+                const status = query.status || 'all';
                 if (status !== 'all' && !STATUSES.has(status)) failure('invalid_request', 400);
-                const offset = Number(url.searchParams.get('offset') || 0);
+                const offset = Number(query.offset || 0);
                 if (!Number.isSafeInteger(offset) || offset < 0 || offset > 100000) failure('invalid_request', 400);
                 const where = status === 'all' ? '' : 'WHERE status=?';
                 const args = status === 'all' ? [] : [status];

@@ -5,6 +5,7 @@ The static app submits anonymous feedback to a Cloudflare Worker backed by D1. T
 - `POST /feedback`: category, message, optional email, language, optional screen context, and a UUID `request_id`. Retries with the same content and request ID return the same receipt.
 - `POST /admin/login`: private administrator password; returns a four-hour revocable session.
 - `GET /admin/feedback?status=all&offset=0`: 25 records per page, with totals and new-feedback counts.
+- `POST /admin/feedback` with `{ "status": "all", "offset": 0 }`: the same query; the app uses POST to bypass GET caching even in older installed service workers.
 - `PATCH /admin/feedback/:id`: `new`, `reviewing`, or `resolved`.
 - `POST /admin/logout`: revokes the session.
 

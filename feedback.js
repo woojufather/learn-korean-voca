@@ -234,7 +234,8 @@
         const status = document.getElementById('feedback-admin-result');
         status.textContent = t().loading;
         try {
-            const result = await api(`/admin/feedback?status=${filter}&offset=${offset}`,{token:session.token});
+            // POST also bypasses older installed service workers that cache all GETs.
+            const result = await api('/admin/feedback',{method:'POST',data:{status:filter,offset},token:session.token});
             if (token !== adminGeneration) return;
             if (offset > 0 && !result.items.length) { offset = Math.max(0,offset-25); await loadInbox(); return; }
             lastList = result; displayInbox(result); status.textContent = '';
