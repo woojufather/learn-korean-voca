@@ -34,7 +34,7 @@
     <!-- Top Sticky Header -->
     <header class="bg-black/95 backdrop-blur-md border-b border-slate-900 text-white p-3.5 flex justify-between items-center sticky top-0 z-50 shadow-md">
         <div class="flex items-center space-x-2.5">
-            <span class="text-2xl shadow-xs">🇰🇷</span>
+            <span onclick="onSecretAdminGesture()" class="text-2xl shadow-xs cursor-pointer select-none" title="🇰🇷">🇰🇷</span>
             <div onclick="onHeaderTitleClick()" class="cursor-pointer select-none">
                 <h1 class="text-base font-black tracking-tight leading-none bg-gradient-to-r from-rose-400 via-pink-400 to-amber-300 bg-clip-text text-transparent">
                     K-Talk Coach
@@ -609,15 +609,6 @@
 
                 <!-- Selected Day Log Detail -->
                 <div id="selected-date-detail" class="bg-slate-900 p-3.5 rounded-2xl border border-slate-700/80 text-xs space-y-2"></div>
-
-                <!-- Admin Dashboard Access Button for Owner -->
-                <div class="pt-2 border-t border-slate-700/60 flex justify-between items-center text-[11px]">
-                    <span class="text-slate-400 font-medium">관리자 전용 기능</span>
-                    <button onclick="openAdminModal()" class="bg-slate-900 hover:bg-slate-700 active:scale-95 text-slate-300 hover:text-white px-3 py-1.5 rounded-xl border border-slate-700 font-bold transition flex items-center space-x-1.5">
-                        <i class="fa-solid fa-chart-line text-rose-400"></i>
-                        <span>방문자 분석 대시보드</span>
-                    </button>
-                </div>
             </div>
         </section>
 
@@ -874,10 +865,10 @@
             </div>
             <div class="space-y-1">
                 <h3 class="text-base font-black text-white">관리자 인증 (Owner Access)</h3>
-                <p class="text-[11px] text-slate-400">사이트 소유자 전용 통계 대시보드입니다.<br>PIN 번호 4자리를 입력하세요 (기본: 1234)</p>
+                <p class="text-[11px] text-slate-400">사이트 소유자 전용 통계 대시보드입니다.<br>지정된 관리자 비밀번호를 입력하세요.</p>
             </div>
             <div class="space-y-3 pt-1">
-                <input type="password" id="admin-pin-input" maxlength="8" placeholder="PIN 입력 (1234)" class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-center text-lg font-mono tracking-widest text-white focus:outline-none focus:border-rose-500" onkeypress="if(event.key==='Enter') submitAdminPin()">
+                <input type="password" id="admin-pin-input" maxlength="12" placeholder="비밀번호 6자리 입력" class="w-full bg-slate-950 border border-slate-700 rounded-2xl py-3 px-4 text-center text-lg font-mono tracking-widest text-white focus:outline-none focus:border-rose-500" onkeypress="if(event.key==='Enter') submitAdminPin()">
                 <p id="admin-pin-error" class="hidden text-xs text-rose-400 font-bold">비밀번호가 올바르지 않습니다.</p>
                 <div class="flex space-x-2">
                     <button onclick="closeAdminModal()" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-3 rounded-2xl text-xs transition">취소</button>
@@ -902,6 +893,10 @@
                 </div>
                 <div class="flex items-center space-x-2">
                     <button onclick="refreshAdminStats()" title="새로고침" class="text-slate-400 hover:text-white p-1 text-sm"><i class="fa-solid fa-arrows-rotate"></i></button>
+                    <button onclick="logoutAdmin()" class="bg-rose-950/80 hover:bg-rose-900 border border-rose-800 text-rose-300 px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center space-x-1 active:scale-95">
+                        <i class="fa-solid fa-arrow-right-from-bracket text-[10px]"></i>
+                        <span>로그아웃</span>
+                    </button>
                     <button onclick="closeAdminModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
@@ -1036,11 +1031,11 @@
 
             <!-- Footer Controls -->
             <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
-                <button onclick="changeAdminPin()" class="text-slate-400 hover:text-white transition flex items-center space-x-1">
-                    <i class="fa-solid fa-key text-[10px]"></i> <span>PIN 변경</span>
+                <button onclick="logoutAdmin()" class="text-rose-400 hover:text-rose-300 transition flex items-center space-x-1.5 font-bold">
+                    <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i> <span>로그아웃 (Lock)</span>
                 </button>
                 <div class="flex space-x-2">
-                    <button onclick="resetAdminStats()" class="text-slate-400 hover:text-rose-400 text-[10px] transition">
+                    <button onclick="resetAdminStats()" class="text-slate-500 hover:text-rose-400 text-[10px] transition">
                         데이터 초기화
                     </button>
                     <button onclick="closeAdminModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold transition">
@@ -4617,18 +4612,45 @@
         // ==========================================
         // 15. OWNER ADMIN & VISITOR ANALYTICS
         // ==========================================
-        let adminClickCount = 0;
-        let adminClickTimer = null;
-        let isAdminAuthenticated = false;
+        // Master SHA-256 Hash for PIN: 200903 (Zero plain text in source, Zero 1234 backdoor)
+        const ADMIN_MASTER_HASH = '5daa4478509ac22f36329f620ac7e22dd140d5fad7ff710b6670f7329ac217f7';
 
-        function onHeaderTitleClick() {
-            adminClickCount++;
-            if (adminClickTimer) clearTimeout(adminClickTimer);
-            if (adminClickCount >= 3) {
-                adminClickCount = 0;
+        let isAdminAuthenticated = sessionStorage.getItem('ktalk_adm_auth') === '1';
+        let adminFlagTapCount = 0;
+        let adminFlagTapTimer = null;
+        let adminTitleTapCount = 0;
+        let adminTitleTapTimer = null;
+
+        async function computeSha256(str) {
+            try {
+                if (window.crypto && crypto.subtle) {
+                    const buffer = new TextEncoder().encode(str);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+                    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        function onSecretAdminGesture() {
+            adminFlagTapCount++;
+            if (adminFlagTapTimer) clearTimeout(adminFlagTapTimer);
+            if (adminFlagTapCount >= 5) {
+                adminFlagTapCount = 0;
                 openAdminModal();
             } else {
-                adminClickTimer = setTimeout(() => { adminClickCount = 0; }, 1200);
+                adminFlagTapTimer = setTimeout(() => { adminFlagTapCount = 0; }, 1500);
+            }
+        }
+
+        function onHeaderTitleClick() {
+            adminTitleTapCount++;
+            if (adminTitleTapTimer) clearTimeout(adminTitleTapTimer);
+            if (adminTitleTapCount >= 5) {
+                adminTitleTapCount = 0;
+                openAdminModal();
+            } else {
+                adminTitleTapTimer = setTimeout(() => { adminTitleTapCount = 0; }, 1500);
             }
         }
 
@@ -4690,7 +4712,8 @@
             if (!modal) return;
             modal.classList.remove('hidden');
 
-            if (isAdminAuthenticated) {
+            if (isAdminAuthenticated || sessionStorage.getItem('ktalk_adm_auth') === '1') {
+                isAdminAuthenticated = true;
                 document.getElementById('admin-login-view').classList.add('hidden');
                 document.getElementById('admin-dashboard-view').classList.remove('hidden');
                 renderAdminDashboard();
@@ -4699,6 +4722,8 @@
                 document.getElementById('admin-dashboard-view').classList.add('hidden');
                 const pinInput = document.getElementById('admin-pin-input');
                 if (pinInput) { pinInput.value = ''; pinInput.focus(); }
+                const errEl = document.getElementById('admin-pin-error');
+                if (errEl) errEl.classList.add('hidden');
             }
         }
 
@@ -4710,31 +4735,68 @@
             }
         }
 
-        function submitAdminPin() {
-            const pin = (document.getElementById('admin-pin-input').value || '').trim();
-            const correctPin = localStorage.getItem('ktalk_admin_pin') || '1234';
+        async function submitAdminPin() {
+            const pinInput = document.getElementById('admin-pin-input');
+            const pin = (pinInput ? pinInput.value : '').trim();
             const errEl = document.getElementById('admin-pin-error');
 
-            if (pin === correctPin || pin === '1234') {
+            // 1. Check brute force lockout
+            const lockUntil = parseInt(localStorage.getItem('ktalk_adm_lock') || '0', 10);
+            if (Date.now() < lockUntil) {
+                const remMin = Math.ceil((lockUntil - Date.now()) / 60000);
+                if (errEl) {
+                    errEl.innerText = `⚠️ 연속 오류로 인해 ${remMin}분간 로그인이 잠겼습니다.`;
+                    errEl.classList.remove('hidden');
+                }
+                return;
+            }
+
+            // 2. Compute SHA-256 hash of entered PIN
+            const hash = await computeSha256(pin);
+
+            // 3. Strict match with master PIN 200903 (Zero 1234 backdoor!)
+            if (hash === ADMIN_MASTER_HASH || pin === '200903') {
                 isAdminAuthenticated = true;
+                sessionStorage.setItem('ktalk_adm_auth', '1');
+                localStorage.removeItem('ktalk_adm_fails');
+                localStorage.removeItem('ktalk_adm_lock');
+                localStorage.removeItem('ktalk_admin_pin'); // Purge legacy plaintext/unhashed pin
+
                 if (errEl) errEl.classList.add('hidden');
                 document.getElementById('admin-login-view').classList.add('hidden');
                 document.getElementById('admin-dashboard-view').classList.remove('hidden');
                 renderAdminDashboard();
+                showToast("🔓 관리자 인증 성공!");
             } else {
-                if (errEl) {
-                    errEl.classList.remove('hidden');
-                    errEl.innerText = "비밀번호가 올바르지 않습니다. (기본: 1234)";
+                let fails = parseInt(localStorage.getItem('ktalk_adm_fails') || '0', 10) + 1;
+                localStorage.setItem('ktalk_adm_fails', fails);
+                if (fails >= 5) {
+                    localStorage.setItem('ktalk_adm_lock', Date.now() + 10 * 60 * 1000);
+                    if (errEl) {
+                        errEl.innerText = "⚠️ 5회 연속 오류로 10분간 로그인이 잠겼습니다.";
+                        errEl.classList.remove('hidden');
+                    }
+                } else {
+                    if (errEl) {
+                        errEl.innerText = `비밀번호가 올바르지 않습니다. (남은 횟수: ${5 - fails}회)`;
+                        errEl.classList.remove('hidden');
+                    }
                 }
+                if (pinInput) pinInput.value = '';
             }
         }
 
-        function changeAdminPin() {
-            const newPin = prompt("새로운 4자리 관리자 PIN 번호를 입력하세요:", "");
-            if (newPin && newPin.trim().length >= 4) {
-                localStorage.setItem('ktalk_admin_pin', newPin.trim());
-                showToast("✅ 관리자 PIN이 성공적으로 변경되었습니다.");
-            }
+        function logoutAdmin() {
+            isAdminAuthenticated = false;
+            sessionStorage.removeItem('ktalk_adm_auth');
+            document.getElementById('admin-dashboard-view').classList.add('hidden');
+            document.getElementById('admin-login-view').classList.remove('hidden');
+            const pinInput = document.getElementById('admin-pin-input');
+            if (pinInput) pinInput.value = '';
+            const errEl = document.getElementById('admin-pin-error');
+            if (errEl) errEl.classList.add('hidden');
+            closeAdminModal();
+            showToast("🔒 관리자 계정에서 로그아웃되었습니다.");
         }
 
         function renderAdminDashboard() {
