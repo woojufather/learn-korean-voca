@@ -2348,18 +2348,41 @@
         // ==========================================
         // 4. KOREAN TTS & AUDIO SYNTHESIZER
         // ==========================================
+        const HANGUL_VOWEL_SPEAK_MAP = {
+            'ㅏ': '아', 'ㅐ': '애', 'ㅑ': '야', 'ㅒ': '얘',
+            'ㅓ': '어', 'ㅔ': '에', 'ㅕ': '여', 'ㅖ': '예',
+            'ㅗ': '오', 'ㅘ': '와', 'ㅙ': '왜', 'ㅚ': '외',
+            'ㅛ': '요', 'ㅜ': '우', 'ㅝ': '워', 'ㅞ': '웨',
+            'ㅟ': '위', 'ㅠ': '유', 'ㅡ': '으', 'ㅢ': '의',
+            'ㅣ': '이'
+        };
+
+        const HANGUL_CONSONANT_SPEAK_MAP = {
+            'ㄱ': '기역', 'ㄲ': '쌍기역', 'ㄴ': '니은', 'ㄷ': '디귿', 'ㄸ': '쌍디귿',
+            'ㄹ': '리을', 'ㅁ': '미음', 'ㅂ': '비읍', 'ㅃ': '쌍비읍', 'ㅅ': '시옷',
+            'ㅆ': '쌍시옷', 'ㅇ': '이응', 'ㅈ': '지읒', 'ㅉ': '쌍지읒', 'ㅊ': '치읓',
+            'ㅋ': '키읔', 'ㅌ': '티읕', 'ㅍ': '피읖', 'ㅎ': '히읗',
+            'ㄳ': '기역시옷', 'ㄵ': '니은지읒', 'ㄶ': '니은히읗', 'ㄺ': '리을기역',
+            'ㄻ': '리을미음', 'ㄼ': '리을비읍', 'ㄽ': '리을시옷', 'ㄾ': '리을티읕',
+            'ㄿ': '리을피읖', 'ㅀ': '리을히읗', 'ㅄ': '비읍시옷'
+        };
+
+        function getBestKoreanVoice() {
+            if (!('speechSynthesis' in window)) return null;
+            const voices = window.speechSynthesis.getVoices();
+            if (!voices || voices.length === 0) return koreanVoice;
+            return voices.find(v => v.lang.startsWith('ko') && (v.name.includes('Natural') || v.name.includes('Online')))
+                || voices.find(v => v.lang.startsWith('ko') && (v.name.includes('SunHi') || v.name.includes('InJoon')))
+                || voices.find(v => v.lang.startsWith('ko') && (v.name.includes('Google') || v.name.includes('Yuna') || v.name.includes('Sora')))
+                || voices.find(v => v.lang.startsWith('ko') && v.name.includes('Heami'))
+                || voices.find(v => v.lang.startsWith('ko'))
+                || null;
+        }
+
         function initTTS() {
             if (!('speechSynthesis' in window)) return;
             const loadVoices = () => {
-                const voices = window.speechSynthesis.getVoices();
-                if (!voices || voices.length === 0) return;
-                // Prioritize top natural/neural voices across Edge, Chrome, iOS and Android
-                koreanVoice = voices.find(v => v.lang.startsWith('ko') && (v.name.includes('Natural') || v.name.includes('Online')))
-                           || voices.find(v => v.lang.startsWith('ko') && (v.name.includes('SunHi') || v.name.includes('InJoon')))
-                           || voices.find(v => v.lang.startsWith('ko') && (v.name.includes('Google') || v.name.includes('Yuna') || v.name.includes('Sora')))
-                           || voices.find(v => v.lang.startsWith('ko') && v.name.includes('Heami'))
-                           || voices.find(v => v.lang.startsWith('ko'))
-                           || voices[0];
+                koreanVoice = getBestKoreanVoice();
             };
             loadVoices();
             if (window.speechSynthesis.onvoiceschanged !== undefined) {
@@ -2367,44 +2390,84 @@
             }
         }
 
+        let ttsDebounceTimer = null;
+
         function speakKorean(text) {
             if (!text || !('speechSynthesis' in window)) return;
             try {
-                window.speechSynthesis.cancel();
-                let clean = text.trim();
+                if (ttsDebounceTimer) {
+                    clearTimeout(ttsDebounceTimer);
+                    ttsDebounceTimer = null;
+                }
 
-                // Detect interrogative sentence (question tone: 끝 올림)
-                const isQuestion = clean.includes('?') || clean.includes('？') ||
+                // Stop any running speech safely
+                if (window.speechSynthesis.speaking || window.speechSynthesis.pending) {
+                    window.speechSynthesis.cancel();
+                }
+
+                let clean = text.trim();
+                if (!clean) return;
+
+                // 1. Convert isolated Hangul Jamo vowels and consonants to pronounceable syllabic forms
+                if (HANGUL_VOWEL_SPEAK_MAP[clean]) {
+                    clean = HANGUL_VOWEL_SPEAK_MAP[clean];
+                } else if (HANGUL_CONSONANT_SPEAK_MAP[clean]) {
+                    clean = HANGUL_CONSONANT_SPEAK_MAP[clean];
+                }
+
+                // 2. High-rising question prosody detection (끝 올림)
+                const isQuestion = /[?？]/.test(clean) ||
                     /(나요|가요|까|요\?|어\?|야\?|죠\?|습니까|입니까|래요|줄래|어때|할까|갈까|뭐해|어디|누구|왜|언제|얼마|어떻게)[?\s]*$/.test(clean);
 
                 let speechText = clean;
-                // Append '?' if interrogative structure detected but punctuation missing, so TTS prosody rises naturally
-                if (isQuestion && !speechText.endsWith('?') && !speechText.endsWith('？')) {
-                    speechText += '?';
-                }
-
-                const u = new SpeechSynthesisUtterance(speechText);
-                u.lang = 'ko-KR';
+                const isSingleSyllable = clean.length === 1 && !/[.!?]/.test(clean);
 
                 if (isQuestion) {
-                    // Elevated pitch and slightly measured cadence for natural rising intonation (끝 올림)
-                    u.pitch = 1.18;
-                    u.rate = Math.max(0.85, speechRate * 0.95);
-                } else {
-                    // Pleasant, warm conversational pitch
-                    u.pitch = 1.02;
-                    u.rate = speechRate;
+                    // Replace question punctuation with '~?' to trigger native neural TTS rising boundary contour
+                    if (/[?？]/.test(speechText)) {
+                        speechText = speechText.replace(/([가-힣0-9a-zA-Z]+)\s*[?？]+/g, (m, p1) => p1 + '~?');
+                    } else {
+                        speechText = speechText.replace(/([가-힣0-9a-zA-Z]+)[.\s]*$/, (m, p1) => p1 + '~?');
+                    }
+                } else if (isSingleSyllable) {
+                    // Single syllable sustain (e.g. '고.') so formant filter fully synthesizes the syllable without clipping
+                    speechText = clean + '.';
                 }
 
-                if (koreanVoice) u.voice = koreanVoice;
+                // 3. 40ms micro-delay prevents audio hardware buffer crackling/clipping across mobile & desktop browsers
+                ttsDebounceTimer = setTimeout(() => {
+                    try {
+                        const u = new SpeechSynthesisUtterance(speechText);
+                        u.lang = 'ko-KR';
 
-                const speakerBtn = document.getElementById('speaker-btn');
-                if (speakerBtn) speakerBtn.classList.add('animate-pulse', 'ring-2', 'ring-rose-400');
+                        if (isQuestion) {
+                            // Elevated pitch and natural conversational cadence for rising intonation
+                            u.pitch = 1.15;
+                            u.rate = Math.max(0.85, speechRate * 0.92);
+                        } else if (isSingleSyllable) {
+                            // Warm resonant syllable
+                            u.pitch = 1.02;
+                            u.rate = Math.max(0.85, speechRate * 0.90);
+                        } else {
+                            // Standard warm conversational pitch
+                            u.pitch = 1.02;
+                            u.rate = speechRate;
+                        }
 
-                u.onend = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
-                u.onerror = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
+                        const currentVoice = getBestKoreanVoice() || koreanVoice;
+                        if (currentVoice) u.voice = currentVoice;
 
-                window.speechSynthesis.speak(u);
+                        const speakerBtn = document.getElementById('speaker-btn');
+                        if (speakerBtn) speakerBtn.classList.add('animate-pulse', 'ring-2', 'ring-rose-400');
+
+                        u.onend = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
+                        u.onerror = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
+
+                        window.speechSynthesis.speak(u);
+                    } catch (err) {
+                        console.error("Utterance speak error:", err);
+                    }
+                }, 40);
             } catch (e) {
                 console.error("TTS error:", e);
             }
@@ -4452,25 +4515,33 @@
             }
         }
 
+        let builderAudioTimer = null;
+        function debouncedSpeakBuilderHangul() {
+            if (builderAudioTimer) clearTimeout(builderAudioTimer);
+            builderAudioTimer = setTimeout(() => {
+                speakCurrentHangul();
+            }, 80);
+        }
+
         function selectHangulCho(c) {
             selectedCho = c;
             renderHangulBuilderGrids();
             updateHangulDisplay();
-            speakCurrentHangul();
+            debouncedSpeakBuilderHangul();
         }
 
         function selectHangulJung(j) {
             selectedJung = j;
             renderHangulBuilderGrids();
             updateHangulDisplay();
-            speakCurrentHangul();
+            debouncedSpeakBuilderHangul();
         }
 
         function selectHangulJong(jong) {
             selectedJong = jong;
             renderHangulBuilderGrids();
             updateHangulDisplay();
-            speakCurrentHangul();
+            debouncedSpeakBuilderHangul();
         }
 
         function composeCurrentHangul() {
@@ -4511,13 +4582,39 @@
             }
 
             const choSelLabel = document.getElementById('hb-cho-selected-label');
-            if (choSelLabel) choSelLabel.innerText = `Selected: ${selectedCho} [${choRomMap[selectedCho] || 'silent'}]`;
+            if (choSelLabel) {
+                choSelLabel.innerHTML = `
+                    <button onclick="event.stopPropagation(); speakKorean('${selectedCho}')" class="text-rose-300 hover:text-white bg-slate-800/90 hover:bg-slate-700 px-2 py-0.5 rounded-lg border border-slate-700 transition active:scale-95 inline-flex items-center space-x-1" title="초성 소리 듣기">
+                        <i class="fa-solid fa-volume-high text-[9px] text-rose-400"></i>
+                        <span>${selectedCho} [${choRomMap[selectedCho] || 'silent'}] 소리</span>
+                    </button>
+                `;
+            }
 
             const jungSelLabel = document.getElementById('hb-jung-selected-label');
-            if (jungSelLabel) jungSelLabel.innerText = `Selected: ${selectedJung} [${jungRomMap[selectedJung] || ''}]`;
+            if (jungSelLabel) {
+                const jungSpeak = HANGUL_VOWEL_SPEAK_MAP[selectedJung] || selectedJung;
+                jungSelLabel.innerHTML = `
+                    <button onclick="event.stopPropagation(); speakKorean('${selectedJung}')" class="text-amber-300 hover:text-white bg-slate-800/90 hover:bg-slate-700 px-2 py-0.5 rounded-lg border border-slate-700 transition active:scale-95 inline-flex items-center space-x-1" title="모음 소리 듣기">
+                        <i class="fa-solid fa-volume-high text-[9px] text-amber-400"></i>
+                        <span>${selectedJung} [${jungRomMap[selectedJung] || ''}] (${jungSpeak}) 소리</span>
+                    </button>
+                `;
+            }
 
             const jongSelLabel = document.getElementById('hb-jong-selected-label');
-            if (jongSelLabel) jongSelLabel.innerText = `Selected: ${selectedJong ? selectedJong + ' [' + (jongRomMap[selectedJong] || '') + ']' : '없음 (None)'}`;
+            if (jongSelLabel) {
+                if (selectedJong) {
+                    jongSelLabel.innerHTML = `
+                        <button onclick="event.stopPropagation(); speakKorean('${selectedJong}')" class="text-emerald-300 hover:text-white bg-slate-800/90 hover:bg-slate-700 px-2 py-0.5 rounded-lg border border-slate-700 transition active:scale-95 inline-flex items-center space-x-1" title="받침 소리 듣기">
+                            <i class="fa-solid fa-volume-high text-[9px] text-emerald-400"></i>
+                            <span>${selectedJong} [${jongRomMap[selectedJong] || ''}] 소리</span>
+                        </button>
+                    `;
+                } else {
+                    jongSelLabel.innerText = 'Selected: 없음 (None)';
+                }
+            }
         }
 
         function speakCurrentHangul() {
@@ -4531,10 +4628,11 @@
             const lang = currentLang;
             container.innerHTML = HANGUL_CONSONANTS_DATA.map(item => {
                 const tip = item[lang] || item.en;
+                const speakTarget = item.name || item.char;
                 return `
                     <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-3 flex justify-between items-center shadow-xs hover:border-indigo-500 transition">
                         <div class="flex items-center space-x-3">
-                            <button onclick="speakKorean('${item.char}')" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-md active:scale-95 transition shrink-0">
+                            <button onclick="speakKorean('${speakTarget}')" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-md active:scale-95 transition shrink-0" title="발음 듣기: ${speakTarget}">
                                 ${item.char}
                             </button>
                             <div>
@@ -4545,7 +4643,7 @@
                                 <p class="text-[11px] text-slate-300 leading-snug pt-0.5">${tip}</p>
                             </div>
                         </div>
-                        <button onclick="speakKorean('${item.char}')" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-300 active:scale-95 flex items-center justify-center shrink-0 ml-2 transition">
+                        <button onclick="speakKorean('${speakTarget}')" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-rose-300 active:scale-95 flex items-center justify-center shrink-0 ml-2 transition" title="발음 듣기">
                             <i class="fa-solid fa-volume-high text-xs"></i>
                         </button>
                     </div>
@@ -4559,21 +4657,23 @@
             const lang = currentLang;
             container.innerHTML = HANGUL_VOWELS_DATA.map(item => {
                 const tip = item[lang] || item.en;
+                const speakTarget = HANGUL_VOWEL_SPEAK_MAP[item.char] || item.char;
                 return `
                     <div class="bg-slate-900/90 border border-slate-700/80 rounded-2xl p-3 flex justify-between items-center shadow-xs hover:border-amber-500 transition">
                         <div class="flex items-center space-x-3">
-                            <button onclick="speakKorean('${item.char}')" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-rose-500 text-slate-950 font-black text-xl flex items-center justify-center shadow-md active:scale-95 transition shrink-0">
+                            <button onclick="speakKorean('${speakTarget}')" class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-rose-500 text-slate-950 font-black text-xl flex items-center justify-center shadow-md active:scale-95 transition shrink-0" title="발음 듣기: ${speakTarget}">
                                 ${item.char}
                             </button>
                             <div>
                                 <div class="flex items-center space-x-1.5">
                                     <span class="text-xs font-black text-white">${item.char}</span>
                                     <span class="text-[10px] font-mono font-bold text-amber-300">[ ${item.rom} ]</span>
+                                    <span class="text-[10px] text-slate-400 font-bold">(${speakTarget})</span>
                                 </div>
                                 <p class="text-[11px] text-slate-300 leading-snug pt-0.5">${tip}</p>
                             </div>
                         </div>
-                        <button onclick="speakKorean('${item.char}')" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 active:scale-95 flex items-center justify-center shrink-0 ml-2 transition">
+                        <button onclick="speakKorean('${speakTarget}')" class="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 active:scale-95 flex items-center justify-center shrink-0 ml-2 transition" title="발음 듣기">
                             <i class="fa-solid fa-volume-high text-xs"></i>
                         </button>
                     </div>
