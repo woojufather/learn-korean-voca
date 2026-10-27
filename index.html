@@ -2419,16 +2419,49 @@
                 const isQuestion = /[?？]/.test(clean) ||
                     /(나요|가요|까|요\?|어\?|야\?|죠\?|습니까|입니까|래요|줄래|어때|할까|갈까|뭐해|어디|누구|왜|언제|얼마|어떻게)[?\s]*$/.test(clean);
 
-                let speechText = clean;
+                const cleanTextWithoutPunct = clean.replace(/[?.!~\s]+$/, '');
                 const isSingleSyllable = clean.length === 1 && !/[.!?]/.test(clean);
 
+                // For interrogative questions (>= 3 syllables), split sentence body and the final interrogative syllable
+                // Playing the final syllable at pitch 1.40 produces an authentic, natural high-rising intonation (끝 올림)
+                if (isQuestion && cleanTextWithoutPunct.length >= 3) {
+                    const lastChar = cleanTextWithoutPunct.slice(-1);
+                    const bodyText = cleanTextWithoutPunct.slice(0, -1);
+                    const endingText = lastChar + '?';
+
+                    ttsDebounceTimer = setTimeout(() => {
+                        try {
+                            const currentVoice = getBestKoreanVoice() || koreanVoice;
+                            const speakerBtn = document.getElementById('speaker-btn');
+                            if (speakerBtn) speakerBtn.classList.add('animate-pulse', 'ring-2', 'ring-rose-400');
+
+                            const u1 = new SpeechSynthesisUtterance(bodyText);
+                            u1.lang = 'ko-KR';
+                            u1.pitch = 1.0;
+                            u1.rate = Math.max(0.85, speechRate * 0.98);
+                            if (currentVoice) u1.voice = currentVoice;
+
+                            const u2 = new SpeechSynthesisUtterance(endingText);
+                            u2.lang = 'ko-KR';
+                            u2.pitch = 1.40; // Elevated pitch creates true audible rising question inflection (끝 올림)
+                            u2.rate = Math.max(0.80, speechRate * 0.88);
+                            if (currentVoice) u2.voice = currentVoice;
+
+                            u2.onend = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
+                            u2.onerror = () => { if (speakerBtn) speakerBtn.classList.remove('animate-pulse', 'ring-2', 'ring-rose-400'); };
+
+                            window.speechSynthesis.speak(u1);
+                            window.speechSynthesis.speak(u2);
+                        } catch (err) {
+                            console.error("Utterance error:", err);
+                        }
+                    }, 40);
+                    return;
+                }
+
+                let speechText = clean;
                 if (isQuestion) {
-                    // Replace question punctuation with '~?' to trigger native neural TTS rising boundary contour
-                    if (/[?？]/.test(speechText)) {
-                        speechText = speechText.replace(/([가-힣0-9a-zA-Z]+)\s*[?？]+/g, (m, p1) => p1 + '~?');
-                    } else {
-                        speechText = speechText.replace(/([가-힣0-9a-zA-Z]+)[.\s]*$/, (m, p1) => p1 + '~?');
-                    }
+                    speechText = cleanTextWithoutPunct + '?';
                 } else if (isSingleSyllable) {
                     // Single syllable sustain (e.g. '고.') so formant filter fully synthesizes the syllable without clipping
                     speechText = clean + '.';
@@ -2441,15 +2474,12 @@
                         u.lang = 'ko-KR';
 
                         if (isQuestion) {
-                            // Elevated pitch and natural conversational cadence for rising intonation
-                            u.pitch = 1.15;
-                            u.rate = Math.max(0.85, speechRate * 0.92);
+                            u.pitch = 1.35;
+                            u.rate = Math.max(0.85, speechRate * 0.90);
                         } else if (isSingleSyllable) {
-                            // Warm resonant syllable
                             u.pitch = 1.02;
                             u.rate = Math.max(0.85, speechRate * 0.90);
                         } else {
-                            // Standard warm conversational pitch
                             u.pitch = 1.02;
                             u.rate = speechRate;
                         }
