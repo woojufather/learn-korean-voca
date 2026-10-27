@@ -1,0 +1,14 @@
+{
+  "name": "ktalkcoach-feedback",
+  "main": "worker.mjs",
+  "compatibility_date": "2026-10-27",
+  "account_id": "13455e228ba8c0b29c3fe4f9e17143e9",
+  "workers_dev": true,
+  "observability": { "enabled": false },
+  "vars": { "ALLOWED_ORIGIN": "https://ktalkcoach.online" },
+  "d1_databases": [{
+    "binding": "DB",
+    "database_name": "ktalkcoach-feedback",
+    "database_id": "321b674f-1719-4122-a878-c5424a400378"
+  }]
+}

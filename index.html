@@ -1092,6 +1092,8 @@
     <script src="coach.js"></script>
     <script src="localization.js"></script>
     <script src="real-korean-locales.js"></script>
+    <script src="feedback-config.js"></script>
+    <script src="feedback.js"></script>
     <script>
         // ==========================================
         // 1. MULTILINGUAL DICTIONARY (EN, ES, JA, ZH, TH)
@@ -2483,6 +2485,7 @@
         function applyLanguage() {
             document.documentElement.lang = currentLang === "zh" ? "zh-Hans" : currentLang;
             KTalkCoach.render();
+            KTalkFeedback.localize();
             const t = i18n[currentLang] || i18n.en;
             document.getElementById('lang-flag').innerText = t.flag;
             document.getElementById('lang-label').innerText = t.langLabel;
@@ -4548,25 +4551,12 @@
         // ==========================================
         // 15. OWNER ADMIN & VISITOR ANALYTICS
         // ==========================================
-        // Master SHA-256 Hash for PIN: 200903 (Zero plain text in source, Zero 1234 backdoor)
-        const ADMIN_MASTER_HASH = '5daa4478509ac22f36329f620ac7e22dd140d5fad7ff710b6670f7329ac217f7';
 
-        let isAdminAuthenticated = sessionStorage.getItem('ktalk_adm_auth') === '1';
+        let isAdminAuthenticated = KTalkFeedback.hasSession();
         let adminFlagTapCount = 0;
         let adminFlagTapTimer = null;
         let adminTitleTapCount = 0;
         let adminTitleTapTimer = null;
-
-        async function computeSha256(str) {
-            try {
-                if (window.crypto && crypto.subtle) {
-                    const buffer = new TextEncoder().encode(str);
-                    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-                    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-                }
-            } catch (e) {}
-            return null;
-        }
 
         function onSecretAdminGesture() {
             adminFlagTapCount++;
@@ -4651,7 +4641,7 @@
             if (!modal) return;
             modal.classList.remove('hidden');
 
-            if (isAdminAuthenticated || sessionStorage.getItem('ktalk_adm_auth') === '1') {
+            if (KTalkFeedback.hasSession()) {
                 isAdminAuthenticated = true;
                 document.getElementById('admin-login-view').classList.add('hidden');
                 document.getElementById('admin-dashboard-view').classList.remove('hidden');
@@ -4675,57 +4665,29 @@
         }
 
         async function submitAdminPin() {
-            const pinInput = document.getElementById('admin-pin-input');
-            const pin = (pinInput ? pinInput.value : '').trim();
-            const errEl = document.getElementById('admin-pin-error');
-
-            // 1. Check brute force lockout
-            const lockUntil = parseInt(localStorage.getItem('ktalk_adm_lock') || '0', 10);
-            if (Date.now() < lockUntil) {
-                const remMin = Math.ceil((lockUntil - Date.now()) / 60000);
-                if (errEl) {
-                    errEl.innerText = `⚠️ 연속 오류로 인해 ${remMin}분간 로그인이 잠겼습니다.`;
-                    errEl.classList.remove('hidden');
-                }
-                return;
-            }
-
-            // 2. Compute SHA-256 hash of entered PIN
-            const hash = await computeSha256(pin);
-
-            // 3. Strict match with master PIN 200903 (Zero 1234 backdoor!)
-            if (hash === ADMIN_MASTER_HASH || pin === '200903') {
+            const input = document.getElementById('admin-pin-input');
+            const error = document.getElementById('admin-pin-error');
+            if (!input.value) return;
+            const buttons = document.querySelectorAll('#admin-login-view button');
+            buttons.forEach(button => { button.disabled = true; });
+            error.classList.add('hidden');
+            try {
+                await KTalkFeedback.signIn(input.value);
+                input.value = '';
                 isAdminAuthenticated = true;
-                sessionStorage.setItem('ktalk_adm_auth', '1');
-                localStorage.removeItem('ktalk_adm_fails');
-                localStorage.removeItem('ktalk_adm_lock');
-                localStorage.removeItem('ktalk_admin_pin'); // Purge legacy plaintext/unhashed pin
-
-                if (errEl) errEl.classList.add('hidden');
                 document.getElementById('admin-login-view').classList.add('hidden');
                 document.getElementById('admin-dashboard-view').classList.remove('hidden');
                 renderAdminDashboard();
-                showToast("🔓 관리자 인증 성공!");
-            } else {
-                let fails = parseInt(localStorage.getItem('ktalk_adm_fails') || '0', 10) + 1;
-                localStorage.setItem('ktalk_adm_fails', fails);
-                if (fails >= 5) {
-                    localStorage.setItem('ktalk_adm_lock', Date.now() + 10 * 60 * 1000);
-                    if (errEl) {
-                        errEl.innerText = "⚠️ 5회 연속 오류로 10분간 로그인이 잠겼습니다.";
-                        errEl.classList.remove('hidden');
-                    }
-                } else {
-                    if (errEl) {
-                        errEl.innerText = `비밀번호가 올바르지 않습니다. (남은 횟수: ${5 - fails}회)`;
-                        errEl.classList.remove('hidden');
-                    }
-                }
-                if (pinInput) pinInput.value = '';
-            }
+                showToast('🔓 관리자 인증 성공!');
+            } catch (failure) {
+                input.value = '';
+                error.textContent = KTalkFeedback.messageFor(failure, true);
+                error.classList.remove('hidden');
+            } finally { buttons.forEach(button => { button.disabled = false; }); }
         }
 
         function logoutAdmin() {
+            KTalkFeedback.logout();
             isAdminAuthenticated = false;
             sessionStorage.removeItem('ktalk_adm_auth');
             document.getElementById('admin-dashboard-view').classList.add('hidden');
@@ -4739,6 +4701,7 @@
         }
 
         function renderAdminDashboard() {
+            KTalkFeedback.loadInbox();
             try {
                 const today = new Date().toISOString().slice(0, 10);
                 const analytics = JSON.parse(localStorage.getItem('ktalk_analytics') || '{}');
@@ -4888,7 +4851,9 @@
         }
 
         window.onload = () => {
+            KTalkFeedback.init();
             KTalkLocale.init();
+            sessionStorage.removeItem("ktalk_adm_auth");
             initTTS();
             applyLanguage();
             trackVisit();
