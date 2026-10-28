@@ -57,6 +57,7 @@
         adminGeneration++;
         lastList = null;
         document.getElementById('feedback-admin-list')?.replaceChildren();
+        window.KTalkAnalytics?.clearDashboard();
     }
     async function api(path, { method = 'GET', data, token } = {}) {
         if (!endpoint()) throw Object.assign(new Error('unavailable'), { code:'unavailable' });
@@ -169,6 +170,7 @@
         const result = await api('/admin/login', {method:'POST',data:{password}});
         session = result;
         sessionStorage.setItem('kTalkFeedbackSession', JSON.stringify(session));
+        try { await window.KTalkAnalytics?.excludeOwner(); } catch { /* Dashboard retries before querying statistics. */ }
         return true;
     }
     async function logout() {
@@ -284,5 +286,10 @@
         document.getElementById('admin-login-view').insertBefore(authNote,document.getElementById('admin-pin-input').parentElement);
         localize();
     }
-    window.KTalkFeedback={init,localize,open,hasSession,signIn,logout,loadInbox,messageFor,translations};
+    async function adminRequest(path,options={}) {
+        if(!hasSession()) {requireLogin();throw Object.assign(new Error('unauthorized'),{status:401});}
+        try{return await api(path,{...options,token:session.token});}
+        catch(error){if(error.status===401)requireLogin();throw error;}
+    }
+    window.KTalkFeedback={init,localize,open,hasSession,signIn,logout,loadInbox,messageFor,translations,adminRequest};
 })();

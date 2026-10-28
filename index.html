@@ -903,133 +903,7 @@
                 </div>
             </div>
 
-            <!-- 4 Key KPI Cards -->
-            <div class="grid grid-cols-2 gap-2.5">
-                <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-rose-500/30 space-y-1">
-                    <span class="text-[10px] text-slate-400 font-bold flex items-center">
-                        <i class="fa-solid fa-users text-rose-400 mr-1.5"></i> 오늘 순 방문자 (UV)
-                    </span>
-                    <div class="flex items-baseline space-x-1">
-                        <span id="adm-today-visitors" class="text-2xl font-black text-rose-400">1</span>
-                        <span class="text-xs text-slate-400">명</span>
-                    </div>
-                    <span class="text-[9px] text-slate-400 block" id="adm-today-date">2026-10-27</span>
-                </div>
-
-                <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-amber-500/30 space-y-1">
-                    <span class="text-[10px] text-slate-400 font-bold flex items-center">
-                        <i class="fa-solid fa-eye text-amber-400 mr-1.5"></i> 글로벌 총 조회수
-                    </span>
-                    <div class="flex items-baseline space-x-1">
-                        <span id="adm-global-visits" class="text-2xl font-black text-amber-300">--</span>
-                        <span class="text-xs text-slate-400">회</span>
-                    </div>
-                    <span class="text-[9px] text-slate-400 block">전 세계 누적 카운트</span>
-                </div>
-
-                <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-emerald-500/30 space-y-1">
-                    <span class="text-[10px] text-slate-400 font-bold flex items-center">
-                        <i class="fa-solid fa-check-double text-emerald-400 mr-1.5"></i> 오늘 푼 퀴즈 수
-                    </span>
-                    <div class="flex items-baseline space-x-1">
-                        <span id="adm-today-quizzes" class="text-2xl font-black text-emerald-400">0</span>
-                        <span class="text-xs text-slate-400">문제</span>
-                    </div>
-                    <span class="text-[9px] text-slate-400 block">학습 활동 완료량</span>
-                </div>
-
-                <div class="bg-slate-950/80 p-3.5 rounded-2xl border border-purple-500/30 space-y-1">
-                    <span class="text-[10px] text-slate-400 font-bold flex items-center">
-                        <i class="fa-solid fa-microphone text-purple-400 mr-1.5"></i> 발음 연습 횟수
-                    </span>
-                    <div class="flex items-baseline space-x-1">
-                        <span id="adm-today-speech" class="text-2xl font-black text-purple-300">0</span>
-                        <span class="text-xs text-slate-400">회</span>
-                    </div>
-                    <span class="text-[9px] text-slate-400 block">마이크 음성 인식</span>
-                </div>
-            </div>
-
-            <!-- Global Hit Badge Verification Live Preview -->
-            <div class="bg-slate-950 p-3 rounded-2xl border border-slate-800 flex justify-between items-center">
-                <div class="space-y-0.5">
-                    <span class="text-[10px] text-slate-400 font-bold block">공식 서버리스 카운터 실시간 뱃지</span>
-                    <span class="text-xs text-slate-200 font-bold">ktalkcoach.online 방문자 집계</span>
-                </div>
-                <img id="adm-badge-img" src="https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online" alt="Visitor Badge" class="rounded h-5 border border-slate-700">
-            </div>
-
-            <!-- Learner Language Distribution -->
-            <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-2">
-                <span class="text-xs font-black text-white flex items-center">
-                    <i class="fa-solid fa-globe text-indigo-400 mr-1.5"></i> 접속 학습자 모국어 분포 (5개 국어)
-                </span>
-                <div class="space-y-1.5 text-xs">
-                    <div class="flex justify-between items-center text-slate-300">
-                        <span>🇺🇸 English (영어)</span>
-                        <span id="adm-lang-en-val" class="font-bold text-white">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                        <div id="adm-bar-en" class="bg-blue-500 h-1.5 rounded-full" style="width: 0%"></div>
-                    </div>
-
-                    <div class="flex justify-between items-center text-slate-300 pt-1">
-                        <span>🇯🇵 日本語 (일본어)</span>
-                        <span id="adm-lang-ja-val" class="font-bold text-white">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                        <div id="adm-bar-ja" class="bg-rose-500 h-1.5 rounded-full" style="width: 0%"></div>
-                    </div>
-
-                    <div class="flex justify-between items-center text-slate-300 pt-1">
-                        <span>🇨🇳 中文 (중국어)</span>
-                        <span id="adm-lang-zh-val" class="font-bold text-white">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                        <div id="adm-bar-zh" class="bg-amber-500 h-1.5 rounded-full" style="width: 0%"></div>
-                    </div>
-
-                    <div class="flex justify-between items-center text-slate-300 pt-1">
-                        <span>🇪🇸 Español (스페인어)</span>
-                        <span id="adm-lang-es-val" class="font-bold text-white">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                        <div id="adm-bar-es" class="bg-emerald-500 h-1.5 rounded-full" style="width: 0%"></div>
-                    </div>
-
-                    <div class="flex justify-between items-center text-slate-300 pt-1">
-                        <span>🇹🇭 ไทย (태국어)</span>
-                        <span id="adm-lang-th-val" class="font-bold text-white">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                        <div id="adm-bar-th" class="bg-purple-500 h-1.5 rounded-full" style="width: 0%"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Device Distribution & 7-Day Trend Table -->
-            <div class="bg-slate-950 p-3.5 rounded-2xl border border-slate-800 space-y-2">
-                <div class="flex justify-between items-center">
-                    <span class="text-xs font-black text-white flex items-center">
-                        <i class="fa-solid fa-calendar-days text-rose-400 mr-1.5"></i> 최근 7일간 방문 이력
-                    </span>
-                    <span class="text-[10px] text-slate-400" id="adm-device-ratio">📱 모바일: 100% · 💻 PC: 0%</span>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs text-slate-300">
-                        <thead>
-                            <tr class="border-b border-slate-800 text-slate-400 text-[10px]">
-                                <th class="py-1">날짜</th>
-                                <th class="py-1 text-center">방문자(UV)</th>
-                                <th class="py-1 text-right">퀴즈 완료</th>
-                            </tr>
-                        </thead>
-                        <tbody id="adm-history-tbody">
-                            <!-- Populated dynamically -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <section id="analytics-admin-panel" data-no-localize class="space-y-3"></section>
 
             <!-- Footer Controls -->
             <div class="pt-2 border-t border-slate-800 flex justify-between items-center text-xs">
@@ -1037,9 +911,7 @@
                     <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i> <span>로그아웃 (Lock)</span>
                 </button>
                 <div class="flex space-x-2">
-                    <button onclick="resetAdminStats()" class="text-slate-500 hover:text-rose-400 text-[10px] transition">
-                        데이터 초기화
-                    </button>
+
                     <button onclick="closeAdminModal()" class="bg-slate-800 hover:bg-slate-700 text-white px-4 py-2 rounded-xl font-bold transition">
                         닫기
                     </button>
@@ -1094,6 +966,7 @@
     <script src="real-korean-locales.js"></script>
     <script src="feedback-config.js"></script>
     <script src="feedback.js"></script>
+    <script src="analytics.js"></script>
     <script>
         // ==========================================
         // 1. MULTILINGUAL DICTIONARY (EN, ES, JA, ZH, TH)
@@ -2465,6 +2338,7 @@
             if (!KTalkLocale.locales.includes(langKey)) return;
             currentLang = langKey;
             localStorage.setItem('kTalkLang', currentLang);
+            KTalkAnalytics.event('language_change');
             closeLangModal();
             applyLanguage();
             loadQuiz();
@@ -2486,6 +2360,7 @@
             document.documentElement.lang = currentLang === "zh" ? "zh-Hans" : currentLang;
             KTalkCoach.render();
             KTalkFeedback.localize();
+            KTalkAnalytics.localize();
             const t = i18n[currentLang] || i18n.en;
             document.getElementById('lang-flag').innerText = t.flag;
             document.getElementById('lang-label').innerText = t.langLabel;
@@ -2597,11 +2472,14 @@
             return allQuizzes[currentLevel] || allQuizzes[1];
         }
 
+        let quizAnalyticsReported = false;
+        let lastAnalyticsQuiz = null;
         function loadQuiz() {
             const list = getActiveQuizList();
             if (quizIdx >= list.length) quizIdx = 0;
             if (quizIdx < 0) quizIdx = list.length - 1;
             const q = list[quizIdx];
+            if (q !== lastAnalyticsQuiz) { quizAnalyticsReported = false; lastAnalyticsQuiz = q; }
             hintStep = 0;
 
             const t = i18n[currentLang] || i18n.en;
@@ -2686,10 +2564,10 @@
         }
 
         function checkAnswer() {
-            if (typeof trackQuizCompleted === 'function') trackQuizCompleted();
             const list = getActiveQuizList();
             const q = list[quizIdx];
             const raw = document.getElementById('user-answer').value.trim().toLowerCase().replace(/[.,!?\s]/g, '');
+            if (raw && !quizAnalyticsReported) { quizAnalyticsReported = true; trackQuizCompleted(); }
             const targetClean = q.target.toLowerCase().replace(/[.,!?\s]/g, '');
             const targetPronClean = q.targetPron.toLowerCase().replace(/[-.,!?\s]/g, '');
             const box = document.getElementById('result-box');
@@ -2913,7 +2791,6 @@
         // Voice Recognition (Speech-to-Text: ko-KR)
         function startVoiceRecognition() {
             KTalkCoach.stop();
-            if (typeof trackSpeechPractice === 'function') trackSpeechPractice();
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!SpeechRecognition) {
                 showToast("Voice recognition not supported in this browser. Use Chrome or Safari.");
@@ -2934,6 +2811,7 @@
             recognition.onend = function() {
                 btn.classList.remove('animate-pulse', 'bg-rose-600', 'text-white');
             };
+            recognition.onstart = trackSpeechPractice;
             recognition.start();
         }
 
@@ -3843,6 +3721,7 @@
         function selectRealKoreanOption(optIdx) {
             if (rkAnswered) return;
             rkAnswered = true;
+            trackQuizCompleted();
 
             const cur = rkCurrentList[rkCurrentIdx];
             const chosen = cur.quiz.options[optIdx];
@@ -3920,7 +3799,6 @@
         // Voice Speaking Practice
         function startSpeakingPractice() {
             KTalkCoach.stop();
-            if (typeof trackSpeechPractice === 'function') trackSpeechPractice();
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             const micBtn = document.getElementById('rk-mic-btn');
             const micIcon = document.getElementById('rk-mic-icon');
@@ -3990,7 +3868,8 @@
                     micBtn.className = "w-full bg-gradient-to-r from-rose-600 to-pink-600 hover:from-rose-500 hover:to-pink-500 text-white py-3 rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center space-x-2 transition active:scale-98 shadow-md";
                 };
 
-                recognition.start();
+                recognition.onstart = trackSpeechPractice;
+            recognition.start();
             } catch (err) {
                 console.error("Speech Recognition start error:", err);
                 showToast("Could not start microphone. Listen to the audio and repeat aloud!");
@@ -4581,61 +4460,9 @@
             }
         }
 
-        function trackVisit() {
-            try {
-                const today = new Date().toISOString().slice(0, 10);
-                let analytics = JSON.parse(localStorage.getItem('ktalk_analytics') || '{}');
-                if (!analytics.daily) analytics.daily = {};
-                if (!analytics.daily[today]) {
-                    analytics.daily[today] = { visits: 0, quizzes: 0, speech: 0 };
-                }
-                if (!analytics.languages) analytics.languages = { en: 0, ja: 0, zh: 0, es: 0, th: 0 };
-                if (!analytics.devices) analytics.devices = { mobile: 0, desktop: 0 };
-
-                const isNewSession = !sessionStorage.getItem('ktalk_session_counted');
-                if (isNewSession) {
-                    sessionStorage.setItem('ktalk_session_counted', '1');
-                    analytics.daily[today].visits = (analytics.daily[today].visits || 0) + 1;
-                    analytics.totalVisits = (analytics.totalVisits || 0) + 1;
-
-                    const isMobile = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                    if (isMobile) analytics.devices.mobile = (analytics.devices.mobile || 0) + 1;
-                    else analytics.devices.desktop = (analytics.devices.desktop || 0) + 1;
-
-                    analytics.languages[currentLang] = (analytics.languages[currentLang] || 0) + 1;
-
-                    const img = new Image();
-                    img.src = `https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online&_t=${Date.now()}`;
-
-                    const dailyImg = new Image();
-                    dailyImg.src = `https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online.${today}&_t=${Date.now()}`;
-                }
-                analytics.totalPV = (analytics.totalPV || 0) + 1;
-                localStorage.setItem('ktalk_analytics', JSON.stringify(analytics));
-            } catch (e) {}
-        }
-
-        function trackQuizCompleted() {
-            try {
-                const today = new Date().toISOString().slice(0, 10);
-                let analytics = JSON.parse(localStorage.getItem('ktalk_analytics') || '{}');
-                if (!analytics.daily) analytics.daily = {};
-                if (!analytics.daily[today]) analytics.daily[today] = { visits: 1, quizzes: 0, speech: 0 };
-                analytics.daily[today].quizzes = (analytics.daily[today].quizzes || 0) + 1;
-                localStorage.setItem('ktalk_analytics', JSON.stringify(analytics));
-            } catch (e) {}
-        }
-
-        function trackSpeechPractice() {
-            try {
-                const today = new Date().toISOString().slice(0, 10);
-                let analytics = JSON.parse(localStorage.getItem('ktalk_analytics') || '{}');
-                if (!analytics.daily) analytics.daily = {};
-                if (!analytics.daily[today]) analytics.daily[today] = { visits: 1, quizzes: 0, speech: 0 };
-                analytics.daily[today].speech = (analytics.daily[today].speech || 0) + 1;
-                localStorage.setItem('ktalk_analytics', JSON.stringify(analytics));
-            } catch (e) {}
-        }
+        function trackVisit() { KTalkAnalytics.init(); KTalkAnalytics.trackVisit(); }
+        function trackQuizCompleted() { KTalkAnalytics.event('quiz_answer'); }
+        function trackSpeechPractice() { KTalkAnalytics.event('speech_practice'); }
 
         function openAdminModal() {
             const modal = document.getElementById('admin-modal');
@@ -4703,104 +4530,9 @@
 
         function renderAdminDashboard() {
             KTalkFeedback.loadInbox();
-            try {
-                const today = new Date().toISOString().slice(0, 10);
-                const analytics = JSON.parse(localStorage.getItem('ktalk_analytics') || '{}');
-                const daily = analytics.daily || {};
-                const todayData = daily[today] || { visits: 1, quizzes: 0, speech: 0 };
-
-                document.getElementById('adm-today-visitors').innerText = todayData.visits || 1;
-                document.getElementById('adm-today-date').innerText = today;
-                document.getElementById('adm-today-quizzes').innerText = todayData.quizzes || 0;
-                document.getElementById('adm-today-speech').innerText = todayData.speech || 0;
-
-                // Sync today's real global visitors across all devices (PC, Phone, Tablet)
-                fetch(`https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online.${today}&_t=${Date.now()}`)
-                    .then(r => r.text())
-                    .then(svg => {
-                        const m = svg.match(/<text[^>]*>(\d+)<\/text>/g);
-                        if (m && m.length > 0) {
-                            const last = m[m.length - 1].replace(/<[^>]+>/g, '').trim();
-                            const globalToday = parseInt(last, 10);
-                            const displayToday = Math.max(globalToday, todayData.visits || 1);
-                            document.getElementById('adm-today-visitors').innerText = displayToday;
-                        }
-                    })
-                    .catch(() => {});
-
-                // Sync global visits from visitor-badge API
-                fetch('https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online')
-                    .then(r => r.text())
-                    .then(svg => {
-                        const m = svg.match(/<text[^>]*>(\d+)<\/text>/g);
-                        if (m && m.length > 0) {
-                            const last = m[m.length - 1].replace(/<[^>]+>/g, '').trim();
-                            document.getElementById('adm-global-visits').innerText = last;
-                        }
-                    })
-                    .catch(() => {
-                        document.getElementById('adm-global-visits').innerText = analytics.totalVisits || 1;
-                    });
-
-                // Update badge img
-                const badgeImg = document.getElementById('adm-badge-img');
-                if (badgeImg) badgeImg.src = `https://visitor-badge.laobi.icu/badge?page_id=ktalkcoach.online&_t=${Date.now()}`;
-
-                // Languages
-                const langs = analytics.languages || { en: 1, ja: 0, zh: 0, es: 0, th: 0 };
-                const totalLangs = Object.values(langs).reduce((a, b) => a + b, 0) || 1;
-                ['en', 'ja', 'zh', 'es', 'th'].forEach(l => {
-                    const cnt = langs[l] || (l === currentLang ? 1 : 0);
-                    const pct = Math.round((cnt / Math.max(1, totalLangs)) * 100);
-                    const valEl = document.getElementById(`adm-lang-${l}-val`);
-                    if (valEl) valEl.innerText = `${pct}% (${cnt}회)`;
-                    const barEl = document.getElementById(`adm-bar-${l}`);
-                    if (barEl) barEl.style.width = `${pct}%`;
-                });
-
-                // Devices
-                const devs = analytics.devices || { mobile: 1, desktop: 0 };
-                const totalDevs = (devs.mobile || 0) + (devs.desktop || 0) || 1;
-                const mobPct = Math.round(((devs.mobile || 0) / totalDevs) * 100);
-                const pcPct = 100 - mobPct;
-                const devRatioEl = document.getElementById('adm-device-ratio');
-                if (devRatioEl) devRatioEl.innerText = `📱 모바일: ${mobPct}% · 💻 PC: ${pcPct}%`;
-
-                // 7-day history table
-                const tbody = document.getElementById('adm-history-tbody');
-                if (tbody) {
-                    const dates = Object.keys(daily).sort().reverse().slice(0, 7);
-                    if (dates.length === 0) dates.push(today);
-                    tbody.innerHTML = dates.map(d => {
-                        const rec = daily[d] || { visits: 1, quizzes: 0 };
-                        return `
-                            <tr class="border-b border-slate-800/60 py-1.5">
-                                <td class="py-1.5 font-mono text-[11px] text-slate-300">${d}</td>
-                                <td class="py-1.5 text-center font-bold text-rose-400">${rec.visits || 1}명</td>
-                                <td class="py-1.5 text-right font-bold text-emerald-400">${rec.quizzes || 0}문제</td>
-                            </tr>
-                        `;
-                    }).join('');
-                }
-            } catch (e) {
-                console.error("renderAdminDashboard error:", e);
-            }
+            KTalkAnalytics.loadDashboard();
         }
-
-        function refreshAdminStats() {
-            renderAdminDashboard();
-            showToast("🔄 통계 데이터가 새로고침되었습니다.");
-        }
-
-        function resetAdminStats() {
-            if (confirm(KTalkLocale.translate("방문자 테스트 기록을 초기화하시겠습니까?"))) {
-                localStorage.removeItem('ktalk_analytics');
-                sessionStorage.removeItem('ktalk_session_counted');
-                trackVisit();
-                renderAdminDashboard();
-                showToast("초기화 완료되었습니다.");
-            }
-        }
+        function refreshAdminStats() { renderAdminDashboard(); }
 
         // ==========================================
         // 16. NAVIGATION & INITIALIZATION

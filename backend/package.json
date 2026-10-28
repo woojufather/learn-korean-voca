@@ -2,6 +2,6 @@
   "name": "ktalkcoach-feedback",
   "private": true,
   "type": "module",
-  "scripts": { "dev": "wrangler dev", "deploy": "wrangler deploy", "test": "node --test worker.test.mjs cache.test.mjs" },
+  "scripts": { "dev": "wrangler dev", "deploy": "wrangler deploy", "test": "node --test worker.test.mjs cache.test.mjs analytics.test.mjs" },
   "devDependencies": { "wrangler": "4.153.0" }
 }

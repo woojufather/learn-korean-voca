@@ -1,3 +1,4 @@
+import {recordEvent,excludeVisitor,snapshot} from './analytics.mjs';
 const CATEGORIES = new Set(['translation', 'audio', 'bug', 'idea']);
 const LANGUAGES = new Set(['en', 'ja', 'zh', 'es', 'th']);
 const STATUSES = new Set(['new', 'reviewing', 'resolved']);
@@ -87,6 +88,12 @@ export default {
             if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers });
             if (!env.DB || !env.ADMIN_PASSWORD_HASH || !env.RATE_SECRET) return json({ error: 'unavailable' }, 503);
             const url = new URL(request.url);
+            if(url.pathname==='/analytics/events' && request.method==='POST') {
+                const input=await body(request);
+                await rateLimit(request,env,'analytics',120,60);
+                await recordEvent(input,env,request);
+                return json({ok:true},202);
+            }
             if (url.pathname === '/feedback' && request.method === 'POST') {
                 const input = await body(request);
                 const message = typeof input.message === 'string' ? input.message.trim() : '';
@@ -127,6 +134,11 @@ export default {
                 return json({ token, expires_at: expires });
             }
             const tokenHash = await authenticate(request, env);
+            if(url.pathname==='/admin/analytics' && request.method==='POST') return json(await snapshot(env));
+            if(url.pathname==='/admin/analytics/exclude' && request.method==='POST') {
+                await excludeVisitor(await body(request),env);
+                return json({ok:true});
+            }
             if (url.pathname === '/admin/logout' && request.method === 'POST') {
                 await env.DB.prepare('DELETE FROM admin_sessions WHERE token_hash=?').bind(tokenHash).run();
                 return json({ ok: true });
