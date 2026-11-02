@@ -4,6 +4,7 @@ export function database() {
     const sqlite = new DatabaseSync(':memory:');
     sqlite.exec(readFileSync(new URL('./schema.sql', import.meta.url),'utf8'));
     sqlite.exec(readFileSync(new URL('./analytics.sql', import.meta.url),'utf8'));
+    sqlite.exec(readFileSync(new URL('./analytics-pages.sql', import.meta.url),'utf8'));
     return {
         sqlite,
         async batch(statements) {

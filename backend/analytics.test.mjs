@@ -85,3 +85,53 @@ test('a returning browser on another day is one total visitor and one visitor pe
     assert.equal(stats.history.find(row=>row.day===today).visitors,1);
     assert.equal(stats.history.find(row=>row.day===yesterday).visitors,1);
 });
+
+test('page attribution, learning starts and completions are shared, deduplicated and owner-filtered',async t=>{
+    const {call,token,event,DB}=await setup(t);
+    const learner=crypto.randomUUID(),owner=crypto.randomUUID();
+    const page='/learn/ordering-korean-cafe/';
+    await call('/analytics/events',event(learner,{page_path:page}));
+    const start=event(learner,{type:'learning_start',page_path:page});
+    await call('/analytics/events',start);await call('/analytics/events',start);
+    const complete=event(learner,{type:'quiz_complete',page_path:page});
+    await call('/analytics/events',complete);await call('/analytics/events',complete);
+    await call('/analytics/events',event(learner,{page_path:'/#quiz'}));
+    await call('/analytics/events',event(owner,{page_path:page}));
+    await call('/admin/analytics/exclude',{visitor_id:owner},token);
+    const stats=(await call('/admin/analytics',{},token)).data;
+    const row=stats.pages.find(r=>r.page_path===page);
+    assert.deepEqual(row,{page_path:page,visitors:1,pageviews:1,learning_starts:1,quiz_completions:1});
+    assert.equal(stats.today_learning_starts,1);assert.equal(stats.today_quiz_completions,1);
+    assert.equal(stats.today_visitors,1);assert.equal(stats.total_pageviews,2);
+    assert.equal(stats.page_period.to,stats.today);assert(Number.isFinite(stats.detail_started_at));
+    assert.equal(DB.sqlite.prepare('SELECT count(*) AS n FROM feedback').get().n,0);
+    // Same event id cannot be reassigned to another page on retry.
+    assert.equal((await call('/analytics/events',{...complete,page_path:'/#quiz'})).status,409);
+});
+
+test('only fixed page identifiers are accepted; older clients remain compatible without invented attribution',async t=>{
+    const {call,token,event}=await setup(t);const id=crypto.randomUUID();
+    for(const page_path of ['/learn/not-real/','/#admin','https://evil.test/','/contact/?email=private@example.com','/learn/ordering-korean-cafe/?name=secret',null,123]){
+        assert.equal((await call('/analytics/events',event(id,{page_path}))).status,400);
+    }
+    assert.equal((await call('/analytics/events',event(id))).status,202);
+    const stats=(await call('/admin/analytics',{},token)).data;
+    assert.equal(stats.pages[0].page_path,'/legacy/');
+    assert.equal(stats.pages[0].pageviews,1);
+    assert.equal(stats.today_quiz_completions,0);
+});
+
+test('page migration preserves existing totals, feedback schema and legacy events',async t=>{
+    const {DatabaseSync}=await import('node:sqlite');
+    const {readFileSync}=await import('node:fs');
+    const db=new DatabaseSync(':memory:');t.after(()=>db.close());
+    db.exec(readFileSync(new URL('./schema.sql',import.meta.url),'utf8'));
+    db.exec(readFileSync(new URL('./analytics.sql',import.meta.url),'utf8'));
+    db.prepare('INSERT INTO analytics_events(event_key,visitor_key,day,type,language,device,received_at) VALUES (?,?,?,?,?,?,?)').run('old-event','old-visitor',dayInSeoul(),'page_view','en','desktop',Date.now());
+    const before=db.prepare('SELECT value FROM analytics_meta WHERE key=?').get('started_at').value;
+    db.exec(readFileSync(new URL('./analytics-pages.sql',import.meta.url),'utf8'));
+    assert.equal(db.prepare('SELECT count(*) AS n FROM analytics_events').get().n,1);
+    assert.equal(db.prepare('SELECT page_path FROM analytics_visible_events').get().page_path,'/legacy/');
+    assert.equal(db.prepare('SELECT value FROM analytics_meta WHERE key=?').get('started_at').value,before);
+    assert.equal(db.prepare('SELECT count(*) AS n FROM feedback').get().n,0);
+});

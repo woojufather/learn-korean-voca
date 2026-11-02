@@ -23,6 +23,16 @@ Deploy the Worker before publishing the static app. Its address is configured in
 
 ## Site-wide analytics
 
+### Page and funnel extension (November 2026)
+
+For an existing database, apply `analytics-pages.sql` **once**, after `analytics.sql` and before deploying the new Worker. It adds a page column and detail collection timestamp; it does not reset existing statistics or feedback. Do not re-run its `ALTER TABLE` statement. Fresh test databases apply both files in that order.
+
+The new `learning_start` and `quiz_complete` event types, together with `page_view`, support per-page learning measurement. `page_path` accepts only known site pages and app tabs; arbitrary URLs, query strings and administrator routes are rejected. Older clients without `page_path` remain accepted and are labelled `/legacy/`, never attributed to a made-up homepage. Earlier answers are not backfilled as completions.
+
+The admin snapshot adds today's learning starts and completions, detail start time, and page-level browser/view/start/completion counts for the last seven Korea-time calendar days. Unique browsers across pages are not additive. An app completion is one submitted question, regardless of correctness. A guide completion is submission of all three self-check questions. Checking again does not add another completion. A learning start is the first interaction in a learning page view, not just landing on the page. Reloading or navigating away and back creates another view. These are client-reported behavioral events validated and aggregated on the server, not a proof of attendance or a fraud-resistant ad measurement system.
+
+The new Privacy page lets a browser opt out of first-party collection with `kTalkAnalyticsOptOut`. DNT/GPC and owner exclusion still apply. This control is separate from advertising consent and does not act as a certified CMP.
+
 Apply `analytics.sql` before deploying a Worker that imports `analytics.mjs`. This adds separate analytics tables and does not change feedback or administrator credentials. `analytics_meta.started_at` is initialized once; historical badge counts and browser-local counters are not imported.
 
 `POST /analytics/events` accepts a random browser UUID, event UUID, type, chosen learning language and broad device category. The browser UUID is stored only as an HMAC. No Korean answers, feedback content, full user agent or raw IP is stored in the analytics tables. The same event UUID cannot increment a count twice. SQLite triggers update browser/day records atomically with event insertion. Days use Asia/Seoul (UTC+09:00), derived from server receipt time.

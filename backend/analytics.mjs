@@ -1,7 +1,10 @@
 export const dayInSeoul = (time=Date.now()) => new Date(time+9*60*60*1000).toISOString().slice(0,10);
 const languages = new Set(['en','ja','zh','es','th']);
 const devices = new Set(['desktop','mobile','tablet']);
-const types = new Set(['page_view','visit','language_change','quiz_answer','speech_practice']);
+const types = new Set(['page_view','visit','language_change','quiz_answer','speech_practice','learning_start','quiz_complete']);
+const pages = new Set(['/', ...['hangul','quiz','realkorean','flashcard','voca','review','stats'].map(tab=>'/#'+tab),
+    '/learn/','/about/','/contact/','/privacy/','/terms/',
+    ...['hangul-syllable-blocks','korean-vowels-eo-o-eu-u','batchim-final-consonants','korean-greetings-politeness','ordering-korean-cafe','ordering-korean-restaurant','korean-numbers-prices','asking-directions-korean','korean-questions-intonation','korean-when-you-dont-understand'].map(slug=>'/learn/'+slug+'/')]);
 const uuid = value => typeof value==='string' && /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(value);
 function invalid() { throw Object.assign(new Error('invalid_request'),{status:400}); }
 export async function visitorKey(env,id) {
@@ -13,22 +16,24 @@ export async function visitorKey(env,id) {
 }
 export async function recordEvent(input,env,request) {
     if(!uuid(input.visitor_id)||!uuid(input.event_id)||!types.has(input.type)||!languages.has(input.language)||!devices.has(input.device)) invalid();
+    if(input.page_path!==undefined&&!pages.has(input.page_path)) invalid();
+    const page=input.page_path??'/legacy/';
     if(/bot|crawler|spider|headless|lighthouse|preview|slurp/i.test(request.headers.get('User-Agent')||'')) return;
     const visitor=await visitorKey(env,input.visitor_id);
     if(await env.DB.prepare('SELECT 1 FROM analytics_excluded WHERE visitor_key=?').bind(visitor).first()) return;
     const bytes=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(visitor+':'+input.event_id.toLowerCase()));
     const event=Array.from(new Uint8Array(bytes),b=>b.toString(16).padStart(2,'0')).join('');
-    const existing=await env.DB.prepare('SELECT type,language,device FROM analytics_events WHERE event_key=?').bind(event).first();
+    const existing=await env.DB.prepare('SELECT type,language,device,page_path FROM analytics_events WHERE event_key=?').bind(event).first();
     if(existing) {
-        if(existing.type!==input.type||existing.language!==input.language||existing.device!==input.device) throw Object.assign(new Error('request_conflict'),{status:409});
+        if(existing.type!==input.type||existing.language!==input.language||existing.device!==input.device||existing.page_path!==page) throw Object.assign(new Error('request_conflict'),{status:409});
         return;
     }
     const now=Date.now();
     // The trigger updates visitors and daily language/device attribution atomically.
     // A duplicate INSERT does not fire it, so retrying an old event cannot revert the language.
     await env.DB.prepare(`INSERT OR IGNORE INTO analytics_events
-        (event_key,visitor_key,day,type,language,device,received_at) VALUES (?,?,?,?,?,?,?)`)
-        .bind(event,visitor,dayInSeoul(now),input.type,input.language,input.device,now).run();
+        (event_key,visitor_key,day,type,language,device,received_at,page_path) VALUES (?,?,?,?,?,?,?,?)`)
+        .bind(event,visitor,dayInSeoul(now),input.type,input.language,input.device,now,page).run();
 }
 export async function excludeVisitor(input,env) {
     const key=await visitorKey(env,input.visitor_id);
@@ -51,7 +56,16 @@ export async function snapshot(env,now=Date.now()) {
             sum(CASE WHEN type='page_view' THEN 1 ELSE 0 END) pageviews,
             sum(CASE WHEN type='quiz_answer' THEN 1 ELSE 0 END) quizzes,
             sum(CASE WHEN type='speech_practice' THEN 1 ELSE 0 END) speech
-            FROM analytics_visible_events WHERE day>=? AND day<=? GROUP BY day`).bind(days[6],today)
+            FROM analytics_visible_events WHERE day>=? AND day<=? GROUP BY day`).bind(days[6],today),
+        env.DB.prepare("SELECT value FROM analytics_meta WHERE key='detail_started_at'"),
+        env.DB.prepare(`SELECT page_path,
+            count(DISTINCT CASE WHEN type='page_view' THEN visitor_key END) visitors,
+            sum(CASE WHEN type='page_view' THEN 1 ELSE 0 END) pageviews,
+            sum(CASE WHEN type='learning_start' THEN 1 ELSE 0 END) learning_starts,
+            sum(CASE WHEN type='quiz_complete' THEN 1 ELSE 0 END) quiz_completions
+            FROM analytics_visible_events WHERE day>=? AND day<=?
+            AND type IN ('page_view','learning_start','quiz_complete')
+            GROUP BY page_path ORDER BY pageviews DESC,page_path`).bind(days[6],today)
     ]);
     const started=Number(data[0].results[0]?.value);
     if(!Number.isFinite(started)) throw Error('analytics_not_initialized');
@@ -63,6 +77,9 @@ export async function snapshot(env,now=Date.now()) {
         total_visitors:data[1].results[0].count,total_pageviews:data[2].results[0].count,
         today_visitors:data[3].results[0].count,today_pageviews:todayEvents.page_view||0,
         today_quizzes:todayEvents.quiz_answer||0,today_speech:todayEvents.speech_practice||0,
+        today_learning_starts:todayEvents.learning_start||0,today_quiz_completions:todayEvents.quiz_complete||0,
+        detail_started_at:Number(data[9].results[0]?.value)||null,
+        pages:data[10].results, page_period:{from:days[6],to:today},
         languages:Object.fromEntries([...languages].map(lang=>[lang,data[5].results.find(row=>row.language===lang)?.count||0])),
         devices:Object.fromEntries([...devices].map(device=>[device,data[6].results.find(row=>row.device===device)?.count||0])),
         history:days.map(day=>({day,collecting:day>=dayInSeoul(started),
