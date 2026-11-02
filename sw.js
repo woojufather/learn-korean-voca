@@ -1,5 +1,5 @@
 // Service Worker for K-Talk Coach PWA
-const CACHE_NAME = 'k-talk-v27';
+const CACHE_NAME = 'k-talk-v28';
 const ASSETS = [
   './',
   './index.html',
@@ -9,7 +9,9 @@ const ASSETS = [
   './real-korean-locales.js',
   './feedback-config.js',
   './feedback.js',
-  './analytics.js?v=27',
+  './analytics.js?v=28',
+  './google-analytics.js?v=28',
+  './google-analytics.css?v=28',
   './site-navigation.js',
   './manifest.json',
   './icon-192.png',

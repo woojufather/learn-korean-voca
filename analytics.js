@@ -69,10 +69,11 @@
         return /iPad|Tablet/i.test(ua)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1)?'tablet':/Mobi|Android|iPhone/i.test(ua)?'mobile':'desktop';
     }
     function event(type){
-        if(!window.KTALK_FEEDBACK_API||!allowed()||isOwner()||location.hash==='#admin'||!getVisitor())return;
         if(!activePage)activePage=pageId();
         if(type==='learning_start')learningStarted=true;
         if(type==='quiz_answer'||type==='quiz_complete'||type==='speech_practice')startLearning();
+        window.KTalkGA4?.event(type,activePage);
+        if(!window.KTALK_FEEDBACK_API||!allowed()||isOwner()||location.hash==='#admin'||!getVisitor())return;
         lastDay=day();
         if(queue.length>=100)queue.shift();
         queue.push({at:Date.now(),attempts:0,data:{visitor_id:visitor,event_id:crypto.randomUUID(),type,language:currentLang,device:device(),page_path:activePage}});
@@ -108,7 +109,7 @@
     function discard(){queue=[];clearTimeout(retryTimer);}
     async function excludeOwner(){
         try{localStorage.setItem('kTalkAnalyticsOwner','1');}catch{ /* No identity means no collection. */ }
-        discard();
+        discard();window.KTalkGA4?.suspend();
         const id=getVisitor();
         if(!id||!KTalkFeedback.hasSession())return;
         if(!ownerRequest)ownerRequest=KTalkFeedback.adminRequest('/admin/analytics/exclude',{method:'POST',data:{visitor_id:id}}).finally(()=>{ownerRequest=null;});
